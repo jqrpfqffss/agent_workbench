@@ -1,0 +1,90 @@
+{
+  "id": "cli_hardware_smoke",
+  "mode": "debug",
+  "goal": "Verify the USART3 PB10/PB11 CLI handshake, prompt, command execution, and diagnostics on real hardware.",
+  "scope": {
+    "include": [
+      "Core/App/cli",
+      "Core/App/Tasks/CliTask.c",
+      "Core/Src/usart.c",
+      "agent_workbench"
+    ],
+    "exclude": [
+      "Drivers",
+      "Middlewares"
+    ]
+  },
+  "acceptance": {
+    "blackbox": [
+      {
+        "name": "cli_ready_banner_seen",
+        "type": "cli_ready"
+      },
+      {
+        "name": "cli_prompt_seen",
+        "type": "cli_prompt_seen"
+      },
+      {
+        "name": "cli_has_no_timeout",
+        "type": "cli_no_timeout"
+      },
+      {
+        "name": "cli_ping_pong",
+        "type": "cli_contains",
+        "needle": "pong"
+      },
+      {
+        "name": "cli_version_reports_fw",
+        "type": "cli_contains",
+        "needle": "version fw="
+      },
+      {
+        "name": "cli_state_reports_state",
+        "type": "cli_contains",
+        "needle": "state temp="
+      },
+      {
+        "name": "cli_alerts_reports_count",
+        "type": "cli_contains",
+        "needle": "alerts count="
+      },
+      {
+        "name": "cli_selftest_reports_status",
+        "type": "cli_contains",
+        "needle": "selftest status="
+      },
+      {
+        "name": "cli_stats_reports_last_cmd",
+        "type": "cli_contains",
+        "needle": "last_cmd="
+      }
+    ],
+    "unit": [
+      "CLI handshake emits cli ready and cli> after reset",
+      "ping/help/version/state/alerts/selftest/stats are parseable"
+    ]
+  },
+  "observability": {
+    "notes": [
+      "the USART3 PB10/PB11 USB-TTL link must be dedicated during this smoke test",
+      "workbench should emit cli_diag.json on any timeout or handshake failure"
+    ]
+  },
+  "verify": {
+    "sequence": [
+      "doctor",
+      "build",
+      "flash",
+      "debug"
+    ],
+    "cli_commands": [
+      "ping",
+      "help",
+      "version",
+      "state",
+      "alerts",
+      "selftest",
+      "stats"
+    ]
+  }
+}

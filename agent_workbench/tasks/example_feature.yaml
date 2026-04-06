@@ -1,0 +1,38 @@
+id: add_echo_cli
+mode: feature
+goal: Add a board CLI command that echoes the provided text payload on one line.
+scope:
+  include:
+    - Core/Src/cli.c
+    - Core/Src/app_cli_commands.c
+    - Core/Inc
+    - CMakeLists.txt
+  exclude:
+    - Drivers
+acceptance:
+  blackbox:
+    - name: feature_session_manifest_exists
+      type: file_exists
+      path: session_manifest.json
+    - name: echo_cli_contains_payload
+      type: cli_contains
+      needle: "hello workbench"
+    - name: help_cli_contains_echo
+      type: cli_contains
+      needle: "echo"
+  unit:
+    - echo output is returned in one line
+    - command handler rejects an empty payload with a usage hint
+observability:
+  notes:
+    - update local UART help rows when the command list changes
+verify:
+  sequence:
+    - doctor
+    - build
+    - test
+    - debug
+  cli_commands:
+    - help
+    - echo hello workbench
+    - status

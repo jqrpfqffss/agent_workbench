@@ -1,0 +1,13 @@
+
+[2026-04-04T07:38:58.662+00:00] $ cmake -S . -B H:\stm32_RAG\code\SmartFarm\build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\SmartFarm\cmake\gcc-arm-none-eabi.cmake
+Build type: Debug
+-- Configuring done (0.0s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/stm32_RAG/code/SmartFarm/build
+[2026-04-04T07:38:58.904+00:00] exit=0
+
+[2026-04-04T07:38:58.905+00:00] $ cmake --build H:\stm32_RAG\code\SmartFarm\build -j
+[ 22%] Built target FreeRTOS
+[ 44%] Built target STM32_Drivers
+[100%] Built target SmartFarm
+[2026-04-04T07:38:59.725+00:00] exit=0

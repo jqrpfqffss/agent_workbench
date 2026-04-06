@@ -1,0 +1,460 @@
+{"ts": "2026-04-05T04:03:54.076+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.076+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.076+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.076+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.076+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.185+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.185+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.185+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.185+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.185+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.293+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.293+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.293+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.293+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.293+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.403+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.403+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.403+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.403+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.403+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.514+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.514+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.514+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.514+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.514+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.622+00:00", "item": "temp_c", "value": 27.56195068359375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.622+00:00", "item": "humidity", "value": 82.47442626953125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.622+00:00", "item": "soil_moisture", "value": 48, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.622+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.622+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.732+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.732+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.732+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.732+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.732+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.841+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.841+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.841+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.841+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.841+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:54.949+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.949+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.949+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.949+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:54.949+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.059+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.059+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.059+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.059+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.059+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.168+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.168+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.168+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.168+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.168+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.277+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.277+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.277+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.277+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.277+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.388+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.388+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.388+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.388+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.388+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.497+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.497+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.497+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.497+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.497+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.607+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.607+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.607+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.607+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.607+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.717+00:00", "item": "temp_c", "value": 27.55908966064453, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.717+00:00", "item": "humidity", "value": 82.62939453125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.717+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.717+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.717+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.826+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.826+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.826+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.826+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.826+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:55.935+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.935+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.935+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.935+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:55.935+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.045+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.045+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.045+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.045+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.045+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.154+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.154+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.154+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.154+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.154+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.264+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.264+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.264+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.264+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.264+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.374+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.374+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.374+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.374+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.374+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.484+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.484+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.484+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.484+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.484+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.592+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.592+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.592+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.592+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.592+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.701+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.701+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.701+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.701+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.701+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.809+00:00", "item": "temp_c", "value": 27.57110595703125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.809+00:00", "item": "humidity", "value": 82.6913833618164, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.809+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.809+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.809+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:56.919+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.919+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.919+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.919+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:56.919+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.028+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.028+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.028+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.028+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.028+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.138+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.138+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.138+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.138+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.138+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.249+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.249+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.249+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.249+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.249+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.359+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.359+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.359+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.359+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.359+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.470+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.470+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.470+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.470+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.470+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.582+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.582+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.582+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.582+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.582+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.691+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.691+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.691+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.691+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.691+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.799+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.799+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.799+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.799+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.799+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:57.909+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.909+00:00", "item": "humidity", "value": 82.70425415039062, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.909+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.909+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:57.909+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.018+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.018+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.018+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.018+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.018+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.128+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.128+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.128+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.128+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.128+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.237+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.237+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.237+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.237+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.237+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.345+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.345+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.345+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.345+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.345+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.456+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.456+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.456+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.456+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.456+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.563+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.563+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.563+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.563+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.563+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.674+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.674+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.674+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.674+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.674+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.783+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.783+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.783+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.783+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.783+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:58.894+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.894+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.894+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.894+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:58.894+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.003+00:00", "item": "temp_c", "value": 27.57434844970703, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.003+00:00", "item": "humidity", "value": 82.66134643554688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.003+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.003+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.003+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.111+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.111+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.111+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.111+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.111+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.221+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.221+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.221+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.221+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.221+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.330+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.330+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.330+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.330+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.330+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.439+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.439+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.439+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.439+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.439+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.547+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.547+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.547+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.547+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.547+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.656+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.656+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.656+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.656+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.656+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.765+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.765+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.765+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.765+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.765+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.875+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.875+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.875+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.875+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.875+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:03:59.984+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.984+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.984+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.984+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:03:59.984+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.093+00:00", "item": "temp_c", "value": 27.542877197265625, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.093+00:00", "item": "humidity", "value": 82.59868621826172, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.093+00:00", "item": "soil_moisture", "value": 51, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.093+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.093+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.203+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.203+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.203+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.203+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.203+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.312+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.312+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.312+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.312+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.312+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.421+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.421+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.421+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.421+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.421+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.530+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.530+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.530+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.530+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.530+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.640+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.640+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.640+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.640+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.640+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.747+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.747+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.747+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.747+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.747+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.857+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.857+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.857+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.857+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.857+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:00.968+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.968+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.968+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.968+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:00.968+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.076+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.076+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.076+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.076+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.076+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.185+00:00", "item": "temp_c", "value": 27.570343017578125, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.185+00:00", "item": "humidity", "value": 82.53631591796875, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.185+00:00", "item": "soil_moisture", "value": 50, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.185+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.185+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.295+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.295+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.295+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.295+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.295+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.404+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.404+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.404+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.404+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.404+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.514+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.514+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.514+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.514+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.514+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.622+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.622+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.622+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.622+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.622+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.732+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.732+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.732+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.732+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.732+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.840+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.840+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.840+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.840+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.840+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:01.949+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.949+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.949+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.949+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:01.949+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.060+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.060+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.060+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.060+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.060+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.170+00:00", "item": "temp_c", "value": 27.570724487304688, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.170+00:00", "item": "humidity", "value": 82.48587036132812, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.170+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.170+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.170+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.279+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.279+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.279+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.279+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.279+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.388+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.388+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.388+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.388+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.388+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.496+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.496+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.496+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.496+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.496+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.604+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.604+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.604+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.604+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.604+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.715+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.715+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.715+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.715+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.715+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.823+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.823+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.823+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.823+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.823+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:02.931+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.931+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.931+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.931+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:02.931+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.040+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.040+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.040+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.040+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.040+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.148+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.148+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.148+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.148+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.148+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.257+00:00", "item": "temp_c", "value": 27.581787109375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.257+00:00", "item": "humidity", "value": 82.64408111572266, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.257+00:00", "item": "soil_moisture", "value": 52, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.257+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.257+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.367+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.367+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.367+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.367+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.367+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.478+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.478+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.478+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.478+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.478+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.587+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.587+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.587+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.587+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.587+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.696+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.696+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.696+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.696+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.696+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.806+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.806+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.806+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.806+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.806+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:03.915+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.915+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.915+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.915+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:03.915+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}
+{"ts": "2026-04-05T04:04:04.023+00:00", "item": "temp_c", "value": 27.58636474609375, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:04.023+00:00", "item": "humidity", "value": 82.6333999633789, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:04.023+00:00", "item": "soil_moisture", "value": 49, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:04.023+00:00", "item": "light_lux", "value": 0, "ok": true, "message": ""}
+{"ts": "2026-04-05T04:04:04.023+00:00", "item": "cpu_r0", "value": "", "ok": false, "message": "cannot parse register output: reg r0\r\n\u0000Could not read register 'r0'\r\n\r\n\r> "}

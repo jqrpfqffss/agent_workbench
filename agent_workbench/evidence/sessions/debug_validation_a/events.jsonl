@@ -1,0 +1,11 @@
+{"ts": "2026-04-04T07:31:56.387+00:00", "event": "session_start"}
+{"ts": "2026-04-04T07:31:56.406+00:00", "event": "doctor_done", "code": 0, "summary": {"results": [{"name": "python", "level": "ok", "detail": "D:\\Anaconda1\\python.exe"}, {"name": "yaml", "level": "ok", "detail": "PyYAML available"}, {"name": "runtime_root", "level": "ok", "detail": "ok"}, {"name": "evidence_root", "level": "ok", "detail": "ok"}, {"name": "generated_root", "level": "ok", "detail": "ok"}, {"name": "cmake", "level": "ok", "detail": "cmake"}, {"name": "toolchain_file", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\cmake\\gcc-arm-none-eabi.cmake"}, {"name": "artifact_elf", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\SmartFarm.elf"}, {"name": "compile_commands", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\compile_commands.json"}, {"name": "openocd", "level": "ok", "detail": "openocd"}, {"name": "flash_method", "level": "warn", "detail": "stlink_cli: STM32_Programmer_CLI"}, {"name": "uart_backend", "level": "warn", "detail": "pyserial unavailable: No module named 'serial'"}, {"name": "unit_command", "level": "ok", "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""}], "fail_count": 0, "warn_count": 2}}
+{"ts": "2026-04-04T07:31:57.536+00:00", "event": "build_done", "code": 0}
+{"ts": "2026-04-04T07:31:57.814+00:00", "event": "unit_done", "code": 0, "log": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\debug_validation_a\\unit.log"}
+{"ts": "2026-04-04T07:31:58.555+00:00", "event": "openocd_start", "message": "openocd started pid=2236 (127.0.0.1:4444)"}
+{"ts": "2026-04-04T07:31:58.565+00:00", "event": "flash_skipped", "reason": "command unavailable"}
+{"ts": "2026-04-04T07:31:58.574+00:00", "event": "reset_skipped", "reason": "command unavailable"}
+{"ts": "2026-04-04T07:31:58.574+00:00", "event": "uart_skipped", "reason": "pyserial unavailable"}
+{"ts": "2026-04-04T07:31:58.900+00:00", "event": "observe_start", "seconds": 10}
+{"ts": "2026-04-04T07:32:08.930+00:00", "event": "openocd_stop", "message": "openocd stopped pid=12700"}
+{"ts": "2026-04-04T07:32:09.006+00:00", "event": "assertions_done", "passed": 0, "failed": 0, "skipped": 0}

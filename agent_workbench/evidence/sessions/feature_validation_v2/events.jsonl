@@ -1,0 +1,14 @@
+{"ts": "2026-04-04T07:39:37.170+00:00", "event": "tests_generated", "path": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\generated\\tasks\\add_version_cli"}
+{"ts": "2026-04-04T07:39:37.170+00:00", "event": "session_start"}
+{"ts": "2026-04-04T07:39:37.188+00:00", "event": "doctor_done", "code": 0, "summary": {"results": [{"name": "python", "level": "ok", "detail": "D:\\Anaconda1\\python.exe"}, {"name": "yaml", "level": "ok", "detail": "PyYAML available"}, {"name": "runtime_root", "level": "ok", "detail": "ok"}, {"name": "evidence_root", "level": "ok", "detail": "ok"}, {"name": "generated_root", "level": "ok", "detail": "ok"}, {"name": "cmake", "level": "ok", "detail": "cmake"}, {"name": "toolchain_file", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\cmake\\gcc-arm-none-eabi.cmake"}, {"name": "artifact_elf", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\SmartFarm.elf"}, {"name": "compile_commands", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\compile_commands.json"}, {"name": "openocd", "level": "ok", "detail": "openocd"}, {"name": "flash_method", "level": "warn", "detail": "stlink_cli: STM32_Programmer_CLI"}, {"name": "uart_backend", "level": "warn", "detail": "pyserial unavailable: No module named 'serial'"}, {"name": "unit_command", "level": "ok", "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""}], "fail_count": 0, "warn_count": 2}}
+{"ts": "2026-04-04T07:39:38.225+00:00", "event": "build_done", "code": 0}
+{"ts": "2026-04-04T07:39:38.518+00:00", "event": "unit_done", "code": 0, "log": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\feature_validation_v2\\unit.log"}
+{"ts": "2026-04-04T07:39:39.257+00:00", "event": "openocd_start", "message": "openocd started pid=20260 (127.0.0.1:4444)"}
+{"ts": "2026-04-04T07:39:39.265+00:00", "event": "flash_skipped", "reason": "command unavailable"}
+{"ts": "2026-04-04T07:39:39.273+00:00", "event": "reset_skipped", "reason": "command unavailable"}
+{"ts": "2026-04-04T07:39:39.274+00:00", "event": "uart_skipped", "reason": "pyserial unavailable"}
+{"ts": "2026-04-04T07:39:39.298+00:00", "event": "observe_start", "seconds": 10}
+{"ts": "2026-04-04T07:39:49.315+00:00", "event": "openocd_stop", "message": "openocd stale pid cleaned pid=20260"}
+{"ts": "2026-04-04T07:39:49.348+00:00", "event": "assertions_done", "passed": 1, "failed": 0, "skipped": 1}
+{"ts": "2026-04-04T07:39:49.352+00:00", "event": "session_done", "summary": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\feature_validation_v2\\session_summary.md"}
+{"ts": "2026-04-04T07:39:49.353+00:00", "event": "feature_summary_done", "path": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\feature_validation_v2\\feature_summary.md"}

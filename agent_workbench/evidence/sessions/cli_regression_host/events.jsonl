@@ -1,0 +1,15 @@
+{"ts": "2026-04-05T04:03:45.190+00:00", "event": "tests_generated", "path": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\generated\\tasks\\cli_automation_regression"}
+{"ts": "2026-04-05T04:03:45.191+00:00", "event": "session_start"}
+{"ts": "2026-04-05T04:03:45.207+00:00", "event": "doctor_done", "code": 0, "summary": {"results": [{"name": "python", "level": "ok", "detail": "D:\\Anaconda1\\python.exe"}, {"name": "yaml", "level": "ok", "detail": "PyYAML available"}, {"name": "runtime_root", "level": "ok", "detail": "ok"}, {"name": "evidence_root", "level": "ok", "detail": "ok"}, {"name": "generated_root", "level": "ok", "detail": "ok"}, {"name": "cmake", "level": "ok", "detail": "cmake"}, {"name": "toolchain_file", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\cmake\\gcc-arm-none-eabi.cmake"}, {"name": "artifact_elf", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\SmartFarm.elf"}, {"name": "compile_commands", "level": "ok", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\compile_commands.json"}, {"name": "openocd", "level": "ok", "detail": "openocd"}, {"name": "flash_method", "level": "ok", "detail": "openocd_cmd: openocd"}, {"name": "uart_backend", "level": "warn", "detail": "pyserial unavailable: No module named 'serial'"}, {"name": "unit_command", "level": "ok", "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""}], "fail_count": 0, "warn_count": 1}}
+{"ts": "2026-04-05T04:03:46.294+00:00", "event": "build_done", "code": 0}
+{"ts": "2026-04-05T04:03:46.578+00:00", "event": "unit_done", "code": 0, "log": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\cli_regression_host\\unit.log"}
+{"ts": "2026-04-05T04:03:53.233+00:00", "event": "flash_done", "code": 0}
+{"ts": "2026-04-05T04:03:53.496+00:00", "event": "reset_done", "code": 0}
+{"ts": "2026-04-05T04:03:53.749+00:00", "event": "openocd_start", "message": "openocd started pid=8856 (127.0.0.1:4444)"}
+{"ts": "2026-04-05T04:03:53.750+00:00", "event": "uart_skipped", "reason": "pyserial unavailable"}
+{"ts": "2026-04-05T04:03:54.063+00:00", "event": "observe_start", "seconds": 10}
+{"ts": "2026-04-05T04:04:04.134+00:00", "event": "openocd_stop", "message": "openocd stopped via telnet pid=8856"}
+{"ts": "2026-04-05T04:04:04.150+00:00", "event": "cli_probe_skipped", "reason": "pyserial unavailable"}
+{"ts": "2026-04-05T04:04:04.153+00:00", "event": "assertions_done", "passed": 0, "failed": 0, "skipped": 4}
+{"ts": "2026-04-05T04:04:04.157+00:00", "event": "session_done", "summary": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\cli_regression_host\\session_summary.md"}
+{"ts": "2026-04-05T04:04:04.158+00:00", "event": "feature_summary_done", "path": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\cli_regression_host\\feature_summary.md"}

@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-04-06T10:14:09.206+00:00",
+  "symbol": "DebugCliStats",
+  "saw_ready": false,
+  "saw_prompt": false,
+  "timeout_commands": [],
+  "openocd": {
+    "host": "127.0.0.1",
+    "port": 4444,
+    "command": "openocd",
+    "startup_message": "openocd started pid=1712 (127.0.0.1:4444)",
+    "halt_output": "\b\b  \b\berror during read: Bad file descriptor\r\n>",
+    "shutdown_message": "openocd stopped via telnet pid=1712"
+  },
+  "status": "error",
+  "symbol_address": "0x200001b0",
+  "error": "cannot parse 14 words from memory output: \b\b  \b\bdropped 'telnet' connection (error -400)\r\n> ",
+  "classification": {
+    "code": "diag_unavailable",
+    "summary": "CLI diagnostics unavailable",
+    "detail": "OpenOCD or DebugCliStats symbol could not be read."
+  }
+}

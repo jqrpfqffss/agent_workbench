@@ -1,0 +1,7 @@
+assertions:
+- name: version_command_report_exists
+  type: file_exists
+  path: session_manifest.json
+- name: version_uart_contains
+  type: uart_contains
+  needle: version

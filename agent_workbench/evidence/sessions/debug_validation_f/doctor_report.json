@@ -1,0 +1,71 @@
+{
+  "results": [
+    {
+      "name": "python",
+      "level": "ok",
+      "detail": "D:\\Anaconda1\\python.exe"
+    },
+    {
+      "name": "yaml",
+      "level": "ok",
+      "detail": "PyYAML available"
+    },
+    {
+      "name": "runtime_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "evidence_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "generated_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "cmake",
+      "level": "ok",
+      "detail": "cmake"
+    },
+    {
+      "name": "toolchain_file",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\SmartFarm\\cmake\\gcc-arm-none-eabi.cmake"
+    },
+    {
+      "name": "artifact_elf",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\SmartFarm.elf"
+    },
+    {
+      "name": "compile_commands",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\SmartFarm\\build\\compile_commands.json"
+    },
+    {
+      "name": "openocd",
+      "level": "ok",
+      "detail": "openocd"
+    },
+    {
+      "name": "flash_method",
+      "level": "warn",
+      "detail": "stlink_cli: STM32_Programmer_CLI"
+    },
+    {
+      "name": "uart_backend",
+      "level": "warn",
+      "detail": "pyserial unavailable: No module named 'serial'"
+    },
+    {
+      "name": "unit_command",
+      "level": "ok",
+      "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+    }
+  ],
+  "fail_count": 0,
+  "warn_count": 2
+}

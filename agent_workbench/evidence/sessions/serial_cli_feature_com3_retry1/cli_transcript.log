@@ -1,0 +1,4 @@
+[2026-04-06T10:06:07.023+00:00] [cli] reset-first exit=0
+[2026-04-06T10:06:07.516+00:00] [cli] start port=COM3 baud=115200 expect_ready=1 reset_first=1 backend=powershell
+[2026-04-06T10:06:13.701+00:00] [cli] ready-missing expected=STM32 UART CLI ready.
+[2026-04-06T10:06:13.731+00:00] [cli] stop

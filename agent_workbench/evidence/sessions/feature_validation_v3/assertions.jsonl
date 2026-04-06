@@ -1,0 +1,2 @@
+{"ts": "2026-04-04T08:02:16.934+00:00", "name": "version_command_report_exists", "type": "file_exists", "ok": true, "status": "pass", "detail": "H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\evidence\\sessions\\feature_validation_v3\\session_manifest.json"}
+{"ts": "2026-04-04T08:02:16.935+00:00", "name": "version_uart_contains", "type": "uart_contains", "ok": false, "status": "skip", "detail": "uart.log missing"}

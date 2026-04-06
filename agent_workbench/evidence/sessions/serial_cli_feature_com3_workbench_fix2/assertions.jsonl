@@ -1,0 +1,10 @@
+{"ts": "2026-04-06T10:33:02.894+00:00", "name": "cli_ready_banner_seen", "type": "cli_ready", "ok": true, "status": "pass", "detail": "STM32 UART CLI ready."}
+{"ts": "2026-04-06T10:33:02.895+00:00", "name": "cli_prompt_seen", "type": "cli_prompt_seen", "ok": true, "status": "pass", "detail": "cli>"}
+{"ts": "2026-04-06T10:33:02.896+00:00", "name": "cli_has_no_timeout", "type": "cli_no_timeout", "ok": true, "status": "pass", "detail": "no [timeout] expected"}
+{"ts": "2026-04-06T10:33:02.896+00:00", "name": "cli_help_lists_commands", "type": "cli_contains", "ok": true, "status": "pass", "detail": "Available commands:"}
+{"ts": "2026-04-06T10:33:02.896+00:00", "name": "cli_status_reports_uart", "type": "cli_contains", "ok": true, "status": "pass", "detail": "UART: USART2 @ 115200 8N1"}
+{"ts": "2026-04-06T10:33:02.897+00:00", "name": "cli_status_reports_led", "type": "cli_contains", "ok": true, "status": "pass", "detail": "LED RED"}
+{"ts": "2026-04-06T10:33:02.898+00:00", "name": "cli_red_ack", "type": "cli_contains", "ok": true, "status": "pass", "detail": "[ok] red -> on"}
+{"ts": "2026-04-06T10:33:02.898+00:00", "name": "cli_green_ack", "type": "cli_contains", "ok": true, "status": "pass", "detail": "[ok] green -> off"}
+{"ts": "2026-04-06T10:33:02.899+00:00", "name": "cli_blue_ack", "type": "cli_contains", "ok": true, "status": "pass", "detail": "[ok] blue -> toggle"}
+{"ts": "2026-04-06T10:33:02.899+00:00", "name": "cli_all_off_ack", "type": "cli_contains", "ok": true, "status": "pass", "detail": "[ok] all -> off"}

@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-04-06T10:06:13.769+00:00",
+  "symbol": "DebugCliStats",
+  "saw_ready": false,
+  "saw_prompt": false,
+  "timeout_commands": [],
+  "openocd": {
+    "host": "127.0.0.1",
+    "port": 4444,
+    "command": "openocd"
+  },
+  "status": "error",
+  "error": "symbol not found in ELF: DebugCliStats",
+  "classification": {
+    "code": "diag_unavailable",
+    "summary": "CLI diagnostics unavailable",
+    "detail": "OpenOCD or DebugCliStats symbol could not be read."
+  }
+}

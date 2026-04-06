@@ -1,0 +1,228 @@
+
+[2026-04-04T07:30:56.896+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.062s
+
+OK
+p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.063s
+
+OK
+[2026-04-04T07:30:57.750+00:00] exit=0
+[2026-04-04T07:30:57.750+00:00] exit=0
+
+[2026-04-04T07:36:16.348+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.063s
+
+OK
+[2026-04-04T07:36:16.719+00:00] exit=0
+
+[2026-04-04T07:44:52.570+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.056s
+
+OK
+[2026-04-04T07:44:52.856+00:00] exit=0
+
+[2026-04-04T07:51:23.190+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.061s
+
+OK
+[2026-04-04T07:51:23.488+00:00] exit=0
+
+[2026-04-05T04:01:22.164+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.348s
+
+OK
+[2026-04-05T04:01:24.787+00:00] exit=0
+
+[2026-04-05T04:05:16.571+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.026s
+
+OK
+[2026-04-05T04:05:16.837+00:00] exit=0
+
+[2026-04-05T05:12:58.442+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..H:\stm32_RAG\code\SmartFarm\Core\App\cli\debug_cli_core.c: In function 'Cli_GetAlertTotal':
+H:\stm32_RAG\code\SmartFarm\Core\App\cli\debug_cli_core.c:135:3: error: implicit declaration of function '__disable_irq' [-Wimplicit-function-declaration]
+  135 |   __disable_irq();
+      |   ^~~~~~~~~~~~~
+H:\stm32_RAG\code\SmartFarm\Core\App\cli\debug_cli_core.c:137:3: error: implicit declaration of function '__enable_irq' [-Wimplicit-function-declaration]
+  137 |   __enable_irq();
+      |   ^~~~~~~~~~~~
+E.....
+======================================================================
+ERROR: test_cli_core_host_harness (test_cli_core_host.CliCoreHostTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\SmartFarm\agent_workbench\tests\test_cli_core_host.py", line 260, in test_cli_core_host_harness
+    exe_path = self._build_harness()
+  File "H:\stm32_RAG\code\SmartFarm\agent_workbench\tests\test_cli_core_host.py", line 256, in _build_harness
+    subprocess.check_call(cmd, cwd=str(self.repo_root))
+  File "D:\Anaconda1\lib\subprocess.py", line 364, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['gcc', '-std=c99', '-Wall', '-Wextra', '-IH:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_wsqnrh14\\stubs', '-IH:\\stm32_RAG\\code\\SmartFarm\\Core\\App', '-IH:\\stm32_RAG\\code\\SmartFarm\\Core\\App\\cli', '-DSMARTFARM_FW_VERSION="1.2.3"', '-DSMARTFARM_BUILD_PROFILE="host-test"', 'H:\\stm32_RAG\\code\\SmartFarm\\Core\\App\\cli\\debug_cli_core.c', 'H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_wsqnrh14\\cli_core_harness.c', '-o', 'H:\\stm32_RAG\\code\\SmartFarm\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_wsqnrh14\\cli_core_harness.exe']' returned non-zero exit status 1.
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.867s
+
+FAILED (errors=1)
+[2026-04-05T05:12:59.586+00:00] exit=1
+
+[2026-04-05T05:13:25.252+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..F.....
+======================================================================
+FAIL: test_cli_core_host_harness (test_cli_core_host.CliCoreHostTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\SmartFarm\agent_workbench\tests\test_cli_core_host.py", line 270, in test_cli_core_host_harness
+    self.assertIn("OK set_range key=min_temp value=18.5", stdout)
+AssertionError: 'OK set_range key=min_temp value=18.5' not found in '=== BOOT ===\ncli ready fw=1.2.3 profile=host-test\ncli>\n=== END BOOT ===\n=== help ===\ncmd | usage | args\nhelp | help | none\nping | ping | none\necho | echo <text> | text\nversion | version | none\nstate | state | none\nrange | range | none\nset_range | set_range <key> <value> | key,value\npump | pump <auto|on|off> | mode\nbeep | beep <on|off> | on/off\nalerts | alerts [count] | count\nclear_alerts | clear_alerts | none\nstream | stream [on|off] | on/off\nselftest | selftest | none\nstats | stats | none\ncli>\n=== END help ===\n=== version ===\nversion fw=1.2.3 profile=host-test built=Apr  5 2026 13:13:25\ncli>\n=== END version ===\n=== pump on ===\nOK pump on\ncli>\n=== END pump on ===\n=== pump auto ===\nOK pump auto\ncli>\n=== END pump auto ===\n=== set_range min_temp 18.5 ===\nERR value not int\ncli>\n=== END set_range min_temp 18.5 ===\n=== alerts ===\nalerts count=1 total=1 stream=0\nalert seq=1 tick=1234 reason=temperature_high value=35.5\ncli>\n=== END alerts ===\n=== stats ===\nstats rx_bytes=0 rx_lines=0 cmd_ok=5 cmd_err=1 rx_overflow=0 uart_error=0 last_cmd=stats\ncli>\n=== END stats ===\n=== selftest ===\nselftest status=ok alerts=1 pump_mode=auto pump=0\ncli>\n=== END selftest ===\n=== unknown ===\nERR cmd\ncli>\n=== END unknown ===\n=== OVERFLOW ===\nERR overflow\ncli>\n=== END OVERFLOW ===\n'
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.928s
+
+FAILED (failures=1)
+[2026-04-05T05:13:27.418+00:00] exit=1
+
+[2026-04-05T05:14:05.607+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.717s
+
+OK
+[2026-04-05T05:14:06.559+00:00] exit=0
+
+[2026-04-05T05:23:01.396+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.775s
+
+OK
+[2026-04-05T05:23:02.427+00:00] exit=0
+
+[2026-04-05T05:31:19.332+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.772s
+
+OK
+[2026-04-05T05:31:20.341+00:00] exit=0
+
+[2026-04-05T05:32:58.080+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+FF......
+======================================================================
+FAIL: test_cli_protocol_assertions (test_assertions.AssertionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\SmartFarm\agent_workbench\tests\test_assertions.py", line 59, in test_cli_protocol_assertions
+    self.assertEqual(passed, 4)
+AssertionError: 2 != 4
+
+======================================================================
+FAIL: test_file_and_uart_assertions (test_assertions.AssertionTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\SmartFarm\agent_workbench\tests\test_assertions.py", line 35, in test_file_and_uart_assertions
+    self.assertEqual(passed, 3)
+AssertionError: 2 != 3
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.722s
+
+FAILED (failures=2)
+[2026-04-05T05:32:59.044+00:00] exit=1
+
+[2026-04-05T05:33:36.158+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.716s
+
+OK
+[2026-04-05T05:33:37.112+00:00] exit=0
+
+[2026-04-06T09:44:27.615+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..cc1.exe: fatal error: H:\stm32_RAG\code\serial\Core\App\cli\debug_cli_core.c: No such file or directory
+compilation terminated.
+H:\stm32_RAG\code\serial\agent_workbench\runtime\test_tmp\awb_cli_core_r7zi7gbb\cli_core_harness.c:8:10: fatal error: cli/debug_cli_core.h: No such file or directory
+    8 | #include "cli/debug_cli_core.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+E.....
+======================================================================
+ERROR: test_cli_core_host_harness (test_cli_core_host.CliCoreHostTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_cli_core_host.py", line 262, in test_cli_core_host_harness
+    exe_path = self._build_harness()
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_cli_core_host.py", line 258, in _build_harness
+    subprocess.check_call(cmd, cwd=str(self.repo_root))
+  File "D:\Anaconda1\lib\subprocess.py", line 364, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['gcc', '-std=c99', '-Wall', '-Wextra', '-IH:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_r7zi7gbb\\stubs', '-IH:\\stm32_RAG\\code\\serial\\Core\\App', '-IH:\\stm32_RAG\\code\\serial\\Core\\App\\cli', '-DSMARTFARM_FW_VERSION="1.2.3"', '-DSMARTFARM_BUILD_PROFILE="host-test"', 'H:\\stm32_RAG\\code\\serial\\Core\\App\\cli\\debug_cli_core.c', 'H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_r7zi7gbb\\cli_core_harness.c', '-o', 'H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_cli_core_r7zi7gbb\\cli_core_harness.exe']' returned non-zero exit status 1.
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.292s
+
+FAILED (errors=1)
+[2026-04-06T09:44:29.025+00:00] exit=1
+
+[2026-04-06T09:45:20.882+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s.....
+----------------------------------------------------------------------
+Ran 8 tests in 0.085s
+
+OK (skipped=1)
+[2026-04-06T09:45:21.251+00:00] exit=0
+
+[2026-04-06T09:56:43.346+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s.....
+----------------------------------------------------------------------
+Ran 8 tests in 0.079s
+
+OK (skipped=1)
+[2026-04-06T09:56:43.660+00:00] exit=0
+
+[2026-04-06T10:13:14.763+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s.....
+----------------------------------------------------------------------
+Ran 8 tests in 0.086s
+
+OK (skipped=1)
+[2026-04-06T10:13:15.102+00:00] exit=0
+
+[2026-04-06T10:27:47.513+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s......
+----------------------------------------------------------------------
+Ran 9 tests in 0.087s
+
+OK (skipped=1)
+[2026-04-06T10:27:47.857+00:00] exit=0
+
+[2026-04-06T10:29:10.935+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s......
+----------------------------------------------------------------------
+Ran 9 tests in 0.090s
+
+OK (skipped=1)
+[2026-04-06T10:29:11.290+00:00] exit=0
+
+[2026-04-06T10:32:28.323+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s......
+----------------------------------------------------------------------
+Ran 9 tests in 0.087s
+
+OK (skipped=1)
+[2026-04-06T10:32:28.664+00:00] exit=0

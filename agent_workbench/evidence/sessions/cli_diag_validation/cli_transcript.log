@@ -1,0 +1,3 @@
+﻿[2026-04-05T05:27:07.325+00:00] [cli] start port=COM3 baud=9600 expect_ready=1 reset_first=0 backend=powershell
+[2026-04-05T05:27:13.494+00:00] [cli] ready-missing expected=cli ready
+[2026-04-05T05:27:13.526+00:00] [cli] stop
