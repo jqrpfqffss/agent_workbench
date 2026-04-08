@@ -111,6 +111,40 @@ workflow:
 vscode:
   tasks_file: .vscode/tasks.json
 
+agent:
+  default_profile: balanced_local
+  profiles:
+    balanced_local:
+      max_pack_words: 550
+      max_fact_items: 12
+      max_cli_tail_lines: 6
+      max_failed_assertions_shown: 3
+      max_extra_reads: 2
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+    deepseek16k:
+      max_pack_words: 420
+      max_fact_items: 10
+      max_cli_tail_lines: 5
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+    qwen32k:
+      max_pack_words: 520
+      max_fact_items: 12
+      max_cli_tail_lines: 6
+      max_failed_assertions_shown: 3
+      max_extra_reads: 2
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
 prompts:
   debug: prompts/continue_debug.md
   feature: prompts/continue_feature.md

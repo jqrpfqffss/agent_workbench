@@ -34,3 +34,7 @@ class TaskSpecTests(unittest.TestCase):
         self.assertEqual(task["acceptance"]["blackbox"], [])
         self.assertEqual(task["verify"]["sequence"], ["doctor", "build", "test", "debug"])
         self.assertEqual(task["verify"]["cli_commands"], [])
+        self.assertEqual(task["implementation"]["read_candidates"], [])
+        self.assertEqual(task["implementation"]["edit_candidates"], [])
+        self.assertEqual(task["implementation"]["stable_strings"], [])
+        self.assertEqual(task["implementation"]["max_edit_files"], 2)

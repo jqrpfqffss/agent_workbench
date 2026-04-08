@@ -129,6 +129,44 @@ def _defaults() -> dict[str, Any]:
         "vscode": {
             "tasks_file": ".vscode/tasks.json",
         },
+        "agent": {
+            "default_profile": "balanced_local",
+            "profiles": {
+                "balanced_local": {
+                    "max_pack_words": 550,
+                    "max_fact_items": 12,
+                    "max_cli_tail_lines": 6,
+                    "max_failed_assertions_shown": 3,
+                    "max_extra_reads": 2,
+                    "max_edit_files": 2,
+                    "require_fact_citations": True,
+                    "prefer_ascii_runtime_artifacts": True,
+                    "session_pick_strategy": "latest_failed_then_latest_pass",
+                },
+                "deepseek16k": {
+                    "max_pack_words": 420,
+                    "max_fact_items": 10,
+                    "max_cli_tail_lines": 5,
+                    "max_failed_assertions_shown": 2,
+                    "max_extra_reads": 1,
+                    "max_edit_files": 2,
+                    "require_fact_citations": True,
+                    "prefer_ascii_runtime_artifacts": True,
+                    "session_pick_strategy": "latest_failed_then_latest_pass",
+                },
+                "qwen32k": {
+                    "max_pack_words": 520,
+                    "max_fact_items": 12,
+                    "max_cli_tail_lines": 6,
+                    "max_failed_assertions_shown": 3,
+                    "max_extra_reads": 2,
+                    "max_edit_files": 2,
+                    "require_fact_citations": True,
+                    "prefer_ascii_runtime_artifacts": True,
+                    "session_pick_strategy": "latest_failed_then_latest_pass",
+                },
+            },
+        },
         "prompts": {
             "debug": "prompts/continue_debug.md",
             "feature": "prompts/continue_feature.md",
@@ -152,6 +190,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
+    raw["outputs"]["continue_runtime_root_path"] = raw["outputs"]["runtime_root_path"] / "continue"
     raw["monitor"]["symbols"]["elf_path"] = str(_resolve(raw["monitor"]["symbols"]["elf_path"], project_root))
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
         _resolve(raw["tools"]["cmake"]["toolchain_file"], project_root)
@@ -161,6 +200,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["prompts"]["feature_path"] = _resolve(raw["prompts"]["feature"], workbench_root)
     raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)
     raw["prompts"]["report_path"] = _resolve(raw["prompts"]["report"], workbench_root)
+    raw["agent"]["state_path"] = raw["outputs"]["runtime_root_path"] / "agent_state.json"
     raw["template_values"] = {
         "python": sys.executable,
         "project_root": str(project_root),

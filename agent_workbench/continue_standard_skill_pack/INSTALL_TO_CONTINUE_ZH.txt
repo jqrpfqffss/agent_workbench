@@ -1,0 +1,69 @@
+Continue 标准格式技能包安装说明
+
+这份包使用 Continue 1.2.22 已支持的标准 Prompt File 格式：
+- 文件后缀：`.prompt`
+- 放置位置：`C:\Users\Administrator\.continue\prompts\`
+- 加载方式：Continue 会自动把这些 `.prompt` 文件加载为 slash commands
+
+一、安装方法
+
+1. 关闭 VS Code 中的 Continue 面板
+2. 将本压缩包直接解压到：
+   `C:\Users\Administrator\.continue\`
+3. 解压后应出现：
+   `C:\Users\Administrator\.continue\prompts\agent_workbench\`
+4. 重新打开 VS Code / Continue
+
+二、如何确认安装成功
+
+在 Continue 的聊天输入框里输入 `/`
+如果能看到类似这些命令，说明已经成功：
+- `/awb-serial-verify`
+- `/awb-general`
+- `/awb-debug`
+- `/awb-test`
+- `/awb-feature`
+- `/awb-ds-general`
+- `/awb-qwen-general`
+
+三、推荐使用方式
+
+1. 当前 serial 项目直接验证：
+   `/awb-serial-verify`
+
+2. 通用自动化调试：
+   `/awb-debug agent_workbench/tasks/cli_automation_regression.yaml`
+
+3. 通用自动化测试：
+   `/awb-test agent_workbench/tasks/cli_automation_regression.yaml`
+
+4. 通用功能实现与验证：
+   `/awb-feature agent_workbench/tasks/cli_automation_regression.yaml`
+
+5. DeepSeek 本地模型：
+   使用 `/awb-ds-*`
+
+6. Qwen 本地模型：
+   使用 `/awb-qwen-*`
+
+四、目录说明
+
+- `prompts/agent_workbench/common/`
+  通用专业版
+- `prompts/agent_workbench/deepseek/`
+  DeepSeek 专版，约束更强，输出更短
+- `prompts/agent_workbench/qwen/`
+  Qwen 专版，保留少量阶段弹性
+
+五、注意事项
+
+1. 这些是 Continue 标准 `.prompt` 文件，不是 Codex 的 `SKILL.md`
+2. 命令名为了稳定性使用 ASCII，正文和说明全部使用中文
+3. 如果模型容易跑偏，优先使用：
+   - `/awb-serial-verify`
+   - `/awb-ds-general`
+   - `/awb-qwen-general`
+4. 如果你迁移到别的项目，只需要：
+   - 修改 `agent_workbench.yaml`
+   - 修改 task yaml
+   - 继续复用这些命令

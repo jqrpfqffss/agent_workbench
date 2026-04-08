@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-04-08T13:16:30.722+00:00",
+  "session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression",
+  "mode": "feature",
+  "task_id": "cli_automation_regression",
+  "status": "pass",
+  "summary": "CLI probe completed successfully.",
+  "strongest_evidence": "saw_ready=True saw_prompt=True",
+  "classification_code": "",
+  "next_step": "Reuse this session as the current baseline or continue with the next task.",
+  "assertions": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  },
+  "probe": {
+    "code": 0,
+    "saw_ready": true,
+    "saw_prompt": true,
+    "timeout_commands": []
+  },
+  "evidence": {
+    "session_summary": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression\\session_summary.md",
+    "session_brief": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression\\session_brief.md",
+    "cli_diag": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression\\cli_diag.json",
+    "cli_transcript": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression\\cli_transcript.log",
+    "assertions": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression\\assertions.jsonl"
+  }
+}

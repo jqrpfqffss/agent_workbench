@@ -1,0 +1,26 @@
+
+[2026-04-08T11:33:34.047+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-08T11:33:35.822+00:00] exit=0
+
+[2026-04-08T11:33:35.823+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-08T11:33:36.717+00:00] exit=0
+
+[2026-04-08T11:33:37.242+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-04-08T11:33:38.846+00:00] exit=1

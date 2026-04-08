@@ -14,6 +14,7 @@
                              "  green    Shortcut for \u0027led green ...\u0027.",
                              "  blue     Shortcut for \u0027led blue ...\u0027.",
                              "  all      Shortcut for \u0027led all ...\u0027.",
+                             "  led_status Print the on/off state of all LEDs.",
                              "Use \u0027help \u003ccommand\u003e\u0027 for details.",
                              "cli\u003e",
                              "status",

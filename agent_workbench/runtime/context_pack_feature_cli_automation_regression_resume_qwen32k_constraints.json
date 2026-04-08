@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-04-08T11:56:12.377+00:00",
+  "mode": "feature",
+  "stage": "resume",
+  "profile": "qwen32k",
+  "task_id": "cli_automation_regression",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml",
+  "session_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation",
+  "max_pack_words": 520,
+  "max_fact_items": 12,
+  "max_cli_tail_lines": 6,
+  "max_failed_assertions_shown": 3,
+  "max_extra_reads": 2,
+  "max_edit_files": 2,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\agent_state.json",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\session_brief.md",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\session_verdict.json",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml"
+  ],
+  "allowed_edits": [],
+  "unknowns": [
+    "No CLI diagnostic file exists for the selected session."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not restart the workflow from README; resume from the saved state."
+  ],
+  "next_commands": [
+    "agent_workbench.bat context --mode feature --stage analyze --task H:/stm32_RAG/code/serial/agent_workbench/tasks/cli_automation_regression.yaml --profile qwen32k"
+  ]
+}

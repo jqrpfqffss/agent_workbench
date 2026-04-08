@@ -1,0 +1,30 @@
+Continue 原生技能包安装说明
+
+这是一套按 `.continue/skills/` 标准目录整理的技能包。
+
+安装方式：
+
+1. 将压缩包解压到你的项目根目录
+2. 解压后应出现：
+   .continue\skills\agent-workbench-general\
+   .continue\skills\agent-workbench-debug\
+   .continue\skills\agent-workbench-test\
+   .continue\skills\agent-workbench-feature\
+3. 如果项目里原本没有 `.continue\skills\`，会自动新建
+
+技能说明：
+
+1. `agent-workbench-general`
+   通用自动化总控技能
+2. `agent-workbench-debug`
+   自动化调试技能
+3. `agent-workbench-test`
+   自动化测试技能
+4. `agent-workbench-feature`
+   自动化功能实现与验证技能
+
+建议：
+
+1. 当前请求只是验证状态时，优先让模型使用 `agent-workbench-general` 或 `agent-workbench-debug`
+2. 当前请求是测试工作时，优先使用 `agent-workbench-test`
+3. 当前请求要改功能并闭环验证时，优先使用 `agent-workbench-feature`

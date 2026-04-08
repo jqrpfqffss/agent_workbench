@@ -190,8 +190,24 @@ def _cmd_compare(args: argparse.Namespace) -> int:
 
 
 def _cmd_report(args: argparse.Namespace) -> int:
+    from core.compare_service import list_session_dirs
     from core.session_service import rebuild_report
+    from core.utils import read_text
 
+    if args.latest:
+        cfg = _cfg(args.config)
+        sessions = list_session_dirs(Path(cfg["outputs"]["evidence_root_path"]))
+        if not sessions:
+            print("report requires --session or an existing latest session", file=sys.stderr)
+            return 2
+        result = rebuild_report(sessions[-1])
+        print(f"report generated: {result}")
+        brief_path = sessions[-1] / "session_brief.md"
+        if brief_path.exists():
+            first_line = next((line for line in read_text(brief_path).splitlines() if line.startswith("- summary: ")), "")
+            if first_line:
+                print(first_line.replace("- summary: ", "report summary: ", 1))
+        return 0
     result = rebuild_report(Path(args.session))
     print(f"report generated: {result}")
     return 0
@@ -204,6 +220,42 @@ def _cmd_init_vscode(args: argparse.Namespace) -> int:
     tasks_path = write_vscode_tasks(cfg)
     print(f"vscode tasks written: {tasks_path}")
     return 0
+
+
+def _cmd_context(args: argparse.Namespace) -> int:
+    from core.context_service import write_context_pack
+
+    cfg = _cfg(args.config)
+    task_path = Path(args.task).resolve() if args.task else None
+    session_path = Path(args.session).resolve() if args.session else None
+    out_path = Path(args.out).resolve() if args.out else None
+    result = write_context_pack(
+        cfg,
+        mode=args.mode,
+        stage=args.stage,
+        profile_name=args.profile,
+        task_path=task_path,
+        session_dir=session_path,
+        out_path=out_path,
+    )
+    print(f"context pack: {result}")
+    return 0
+
+
+def _cmd_verify(args: argparse.Namespace) -> int:
+    from core.session_service import run_current_verify
+    from core.utils import read_text
+
+    cfg = _cfg(args.config)
+    if args.mode == "current":
+        code, summary_path = run_current_verify(cfg, Path(args.task))
+        print(f"verify summary: {summary_path}")
+        first_lines = read_text(summary_path).splitlines()[:8]
+        for line in first_lines:
+            print(line)
+        return int(code)
+    print(f"unknown verify mode: {args.mode}", file=sys.stderr)
+    return 2
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -274,13 +326,31 @@ def build_parser() -> argparse.ArgumentParser:
     p_compare.add_argument("--out", default="")
     p_compare.set_defaults(func=_cmd_compare)
 
-    p_report = sub.add_parser("report", help="rebuild session summary")
-    p_report.add_argument("--session", required=True)
+    p_report = sub.add_parser("report", help="rebuild session summary or the latest verdict set")
+    p_report.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_report.add_argument("--session", default="")
+    p_report.add_argument("--latest", action="store_true")
     p_report.set_defaults(func=_cmd_report)
 
     p_vscode = sub.add_parser("init-vscode", help="generate VS Code tasks.json")
     p_vscode.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_vscode.set_defaults(func=_cmd_init_vscode)
+
+    p_context = sub.add_parser("context", help="generate a compact context pack for low-context models")
+    p_context.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_context.add_argument("--mode", choices=["debug", "feature", "test", "report"], default="debug")
+    p_context.add_argument("--stage", choices=["analyze", "implement", "verify", "resume"], default="analyze")
+    p_context.add_argument("--profile", default="")
+    p_context.add_argument("--task", default="")
+    p_context.add_argument("--session", default="")
+    p_context.add_argument("--out", default="")
+    p_context.set_defaults(func=_cmd_context)
+
+    p_verify = sub.add_parser("verify", help="run a one-command verification flow")
+    p_verify.add_argument("mode", choices=["current"])
+    p_verify.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_verify.add_argument("--task", default="")
+    p_verify.set_defaults(func=_cmd_verify)
 
     return parser
 
@@ -293,6 +363,12 @@ def main() -> int:
         return 2
     if hasattr(args, "action") and args.action == "generate" and hasattr(args, "task") and not args.task:
         print("test generate requires --task <task.yaml>", file=sys.stderr)
+        return 2
+    if getattr(args, "command", "") == "verify" and getattr(args, "mode", "") == "current" and not getattr(args, "task", ""):
+        print("verify current requires --task <task.yaml>", file=sys.stderr)
+        return 2
+    if getattr(args, "command", "") == "report" and not getattr(args, "latest", False) and not getattr(args, "session", ""):
+        print("report requires --session <session_dir> or --latest", file=sys.stderr)
         return 2
     return int(args.func(args))
 

@@ -1,0 +1,81 @@
+{
+  "results": [
+    {
+      "name": "python",
+      "level": "ok",
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
+    },
+    {
+      "name": "yaml",
+      "level": "ok",
+      "detail": "PyYAML available"
+    },
+    {
+      "name": "runtime_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "evidence_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "generated_root",
+      "level": "ok",
+      "detail": "ok"
+    },
+    {
+      "name": "cmake",
+      "level": "ok",
+      "detail": "cmake"
+    },
+    {
+      "name": "toolchain_file",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\cmake\\arm-none-eabi-toolchain.cmake"
+    },
+    {
+      "name": "artifact_elf",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\serial.elf"
+    },
+    {
+      "name": "compile_commands",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\compile_commands.json"
+    },
+    {
+      "name": "openocd",
+      "level": "ok",
+      "detail": "openocd"
+    },
+    {
+      "name": "flash_method",
+      "level": "ok",
+      "detail": "openocd_cmd: openocd"
+    },
+    {
+      "name": "uart_protocol",
+      "level": "ok",
+      "detail": "ready_banner=STM32 UART CLI ready. prompt=cli>"
+    },
+    {
+      "name": "uart_backend",
+      "level": "ok",
+      "detail": "pyserial available"
+    },
+    {
+      "name": "uart_port",
+      "level": "ok",
+      "detail": "COM3"
+    },
+    {
+      "name": "unit_command",
+      "level": "ok",
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+    }
+  ],
+  "fail_count": 0,
+  "warn_count": 0
+}

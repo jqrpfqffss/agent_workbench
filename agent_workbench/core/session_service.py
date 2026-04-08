@@ -14,7 +14,7 @@ from .doctor import run_doctor
 from .flash_service import run_flash, run_reset
 from .monitor_service import MonitorEngine
 from .openocd_service import start_openocd_daemon, stop_openocd_daemon
-from .reporting import write_feature_summary, write_session_summary
+from .reporting import derive_session_verdict, write_feature_summary, write_session_summary
 from .task_spec import load_task_spec
 from .test_service import generate_tests, run_tests
 from .uart_service import UartLogger, execute_uart_commands, serial, uart_exec_supported, uart_logger_supported
@@ -257,6 +257,8 @@ def run_feature_session(cfg: dict, task_path: Path, session_name: str | None = N
     exit_code = _run_debug_steps(cfg, session_dir, task=task, auto_compare=False)
     feature_summary = write_feature_summary(session_dir, task)
     append_jsonl(session_dir / "events.jsonl", {"ts": utc_now_iso(), "event": "feature_summary_done", "path": str(feature_summary)})
+    refreshed_summary = write_session_summary(session_dir)
+    append_jsonl(session_dir / "events.jsonl", {"ts": utc_now_iso(), "event": "session_summary_refreshed", "path": str(refreshed_summary)})
     return exit_code
 
 
@@ -271,3 +273,161 @@ def rebuild_report(session_dir: Path) -> Path:
         if manifest.get("mode") == "feature" and manifest.get("task"):
             write_feature_summary(session_dir, manifest["task"])
     return write_session_summary(session_dir)
+
+
+def run_current_verify(cfg: dict, task_path: Path, session_name: str | None = None) -> tuple[int, Path]:
+    task = load_task_spec(task_path)
+    runtime_root = cfg["outputs"]["runtime_root_path"]
+    ensure_dir(runtime_root)
+
+    summary_json_path = runtime_root / "direct_verify_summary.json"
+    summary_md_path = runtime_root / "direct_verify_summary.md"
+    smoke_transcript = runtime_root / "cli_transcript.log"
+    smoke_diag = runtime_root / "cli_diag.json"
+    cli_commands = ["help", "status"]
+    steps: list[dict[str, Any]] = []
+
+    def _record(name: str, *, code: int, status: str, detail: str = "", artifact: str = "") -> None:
+        steps.append({"name": name, "code": int(code), "status": status, "detail": detail, "artifact": artifact})
+
+    doctor_code, doctor_summary = run_doctor(cfg, runtime_root)
+    _record(
+        "doctor",
+        code=doctor_code,
+        status="pass" if doctor_code == 0 else "fail",
+        detail=f"fail={doctor_summary['fail_count']} warn={doctor_summary['warn_count']}",
+        artifact=str(runtime_root / "doctor_report.md"),
+    )
+
+    build_code = run_build(cfg, runtime_root / "build.log")
+    _record(
+        "build",
+        code=build_code,
+        status="pass" if build_code == 0 else "fail",
+        detail=f"exit={build_code}",
+        artifact=str(runtime_root / "build.log"),
+    )
+
+    generated_dir = generate_tests(cfg, task_path)
+    _record("test_generate", code=0, status="pass", detail="generated", artifact=str(generated_dir))
+
+    unit_code, unit_log = run_tests(cfg)
+    _record(
+        "test_run",
+        code=unit_code,
+        status="pass" if unit_code == 0 else "fail",
+        detail=f"exit={unit_code}",
+        artifact=str(unit_log),
+    )
+
+    smoke_code = 0
+    smoke_status = "skipped"
+    smoke_detail = "UART smoke skipped."
+    smoke_artifact = str(smoke_transcript)
+    if cfg.get("uart", {}).get("enabled", True) and uart_exec_supported():
+        smoke_result = execute_uart_commands(
+            cfg,
+            cli_commands,
+            smoke_transcript,
+            reset_first=True,
+            expect_ready=True,
+            diag_path=smoke_diag,
+            reset_log_path=runtime_root / "uart_exec_reset.log",
+        )
+        smoke_code = smoke_result.exit_code
+        if smoke_code == 0:
+            smoke_status = "pass"
+            smoke_detail = "ready banner, prompt, and help/status smoke all completed."
+        elif smoke_code == 35:
+            smoke_status = "blocked"
+            smoke_detail = "PowerShell UART backend could not open the configured COM port."
+        else:
+            smoke_status = "fail"
+            smoke_detail = f"exit={smoke_code}"
+        smoke_artifact = str(smoke_result.diag_path or smoke_transcript)
+    elif cfg.get("uart", {}).get("enabled", True):
+        smoke_code = 36
+        smoke_status = "blocked"
+        smoke_detail = "No UART backend is available in the current Python/PowerShell environment."
+    _record("uart_smoke", code=smoke_code, status=smoke_status, detail=smoke_detail, artifact=smoke_artifact)
+
+    feature_session_dir: Path | None = None
+    feature_code = 0
+    feature_status = "skipped"
+    feature_detail = "Feature session skipped because a host-side prerequisite failed."
+    compare_path = ""
+    report_path = ""
+    if doctor_code == 0 and build_code == 0 and unit_code == 0 and smoke_status != "blocked":
+        feature_session_name = session_name or f"{task['id']}_direct_verify_{local_now_tag()}"
+        feature_session_dir = cfg["outputs"]["evidence_root_path"] / feature_session_name
+        feature_code = run_feature_session(cfg, task_path, session_name=feature_session_name)
+        report_path = str(rebuild_report(feature_session_dir))
+        verdict = derive_session_verdict(feature_session_dir)
+        feature_status = str(verdict.get("status", "needs_review"))
+        feature_detail = str(verdict.get("summary", "feature session finished"))
+        previous = find_previous_session(cfg["outputs"]["evidence_root_path"], feature_session_dir)
+        if previous is not None:
+            compare_target = feature_session_dir / f"compare_vs_{previous.name}.md"
+            compare_path = str(compare_sessions(previous, feature_session_dir, compare_target))
+    elif doctor_code == 0 and build_code == 0 and unit_code == 0 and smoke_status == "blocked":
+        feature_status = "blocked"
+        feature_detail = "Feature session skipped because UART smoke was blocked by the current environment."
+    _record(
+        "feature_session",
+        code=feature_code,
+        status=feature_status,
+        detail=feature_detail,
+        artifact=str(feature_session_dir) if feature_session_dir else "",
+    )
+
+    overall_status = "pass"
+    if any(step["status"] == "fail" for step in steps):
+        overall_status = "fail"
+    elif any(step["status"] == "blocked" for step in steps):
+        overall_status = "blocked"
+    elif any(step["status"] == "needs_review" for step in steps):
+        overall_status = "needs_review"
+
+    exit_code = 0 if overall_status == "pass" else 1
+    summary = {
+        "generated_at": utc_now_iso(),
+        "task_id": task["id"],
+        "status": overall_status,
+        "exit_code": exit_code,
+        "steps": steps,
+        "artifacts": {
+            "runtime_cli_transcript": str(smoke_transcript),
+            "runtime_cli_diag": str(smoke_diag),
+            "feature_session_dir": str(feature_session_dir) if feature_session_dir else "",
+            "report_path": report_path,
+            "compare_path": compare_path,
+        },
+        "next_step": "Read direct_verify_summary.md first, then inspect the linked evidence files.",
+    }
+    write_json(summary_json_path, summary)
+
+    with summary_md_path.open("w", encoding="utf-8") as fp:
+        fp.write("# Direct Verify Summary\n\n")
+        fp.write(f"- generated_at: {summary['generated_at']}\n")
+        fp.write(f"- task_id: `{task['id']}`\n")
+        fp.write(f"- status: `{overall_status}`\n")
+        fp.write(f"- exit_code: `{exit_code}`\n")
+        fp.write(f"- next_step: {summary['next_step']}\n\n")
+        fp.write("## Steps\n")
+        for step in steps:
+            fp.write(
+                f"- {step['name']}: status={step['status']} code={step['code']} detail={step['detail']}"
+                + (f" artifact=`{step['artifact']}`" if step["artifact"] else "")
+                + "\n"
+            )
+        fp.write("\n## Key Artifacts\n")
+        fp.write(f"- runtime_cli_transcript: `{smoke_transcript}`\n")
+        fp.write(f"- runtime_cli_diag: `{smoke_diag}`\n")
+        if feature_session_dir is not None:
+            fp.write(f"- feature_session_dir: `{feature_session_dir}`\n")
+        if report_path:
+            fp.write(f"- report_path: `{report_path}`\n")
+        if compare_path:
+            fp.write(f"- compare_path: `{compare_path}`\n")
+
+    return exit_code, summary_md_path

@@ -4,19 +4,19 @@
     {
       "label": "Agent Workbench: Setup",
       "type": "shell",
-      "command": "setup_workbench.bat",
+      "command": "cmd /c \".\\setup_workbench.bat\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Doctor",
       "type": "shell",
-      "command": "agent_workbench.bat doctor",
+      "command": "cmd /c \".\\agent_workbench.bat doctor\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Build",
       "type": "shell",
-      "command": "agent_workbench.bat build",
+      "command": "cmd /c \".\\agent_workbench.bat build\"",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -24,93 +24,135 @@
       "problemMatcher": []
     },
     {
+      "label": "Agent Workbench: Context Pack (Debug Analyze)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat context --mode debug --stage analyze\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Context Pack (Feature Implement)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat context --mode feature --stage implement --task agent_workbench/tasks/cli_automation_regression.yaml\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Context Pack (Feature Verify)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat context --mode feature --stage verify --task agent_workbench/tasks/cli_automation_regression.yaml\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Context Pack (Test Analyze)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat context --mode test --stage analyze --task agent_workbench/tasks/cli_automation_regression.yaml\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Resume Latest Local-Model Task",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat context --stage resume\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Direct Verify (CLI Regression)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Report Latest Verdict",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat report --latest\"",
+      "problemMatcher": []
+    },
+    {
       "label": "Agent Workbench: Debug Session",
       "type": "shell",
-      "command": "agent_workbench.bat session debug",
+      "command": "cmd /c \".\\agent_workbench.bat session debug\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Compare Latest",
       "type": "shell",
-      "command": "agent_workbench.bat compare --latest",
+      "command": "cmd /c \".\\agent_workbench.bat compare --latest\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Test Generate (Example)",
       "type": "shell",
-      "command": "agent_workbench.bat test generate --task agent_workbench/tasks/example_feature.yaml",
+      "command": "cmd /c \".\\agent_workbench.bat test generate --task agent_workbench/tasks/example_feature.yaml\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Test Generate (CLI Regression)",
       "type": "shell",
-      "command": "agent_workbench.bat test generate --task agent_workbench/tasks/cli_automation_regression.yaml",
+      "command": "cmd /c \".\\agent_workbench.bat test generate --task agent_workbench/tasks/cli_automation_regression.yaml\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Test Run",
       "type": "shell",
-      "command": "agent_workbench.bat test run",
+      "command": "cmd /c \".\\agent_workbench.bat test run\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: UART Console",
       "type": "shell",
-      "command": "agent_workbench.bat uart console",
+      "command": "cmd /c \".\\agent_workbench.bat uart console\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: UART CLI Smoke",
       "type": "shell",
-      "command": "agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --command red on --command green on --command blue on --command all off",
+      "command": "cmd /c \".\\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Monitor Start",
       "type": "shell",
-      "command": "agent_workbench.bat monitor start",
+      "command": "cmd /c \".\\agent_workbench.bat monitor start\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Monitor Stop",
       "type": "shell",
-      "command": "agent_workbench.bat monitor stop",
+      "command": "cmd /c \".\\agent_workbench.bat monitor stop\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: OpenOCD Start",
       "type": "shell",
-      "command": "agent_workbench.bat openocd start",
+      "command": "cmd /c \".\\agent_workbench.bat openocd start\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: OpenOCD Stop",
       "type": "shell",
-      "command": "agent_workbench.bat openocd stop",
+      "command": "cmd /c \".\\agent_workbench.bat openocd stop\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Flash (ST-Link)",
       "type": "shell",
-      "command": "agent_workbench.bat flash --method stlink_cli",
+      "command": "cmd /c \".\\agent_workbench.bat flash --method stlink_cli\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Flash (OpenOCD)",
       "type": "shell",
-      "command": "agent_workbench.bat flash --method openocd_cmd",
+      "command": "cmd /c \".\\agent_workbench.bat flash --method openocd_cmd\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Feature Session (Example)",
       "type": "shell",
-      "command": "agent_workbench.bat session feature --task agent_workbench/tasks/example_feature.yaml",
+      "command": "cmd /c \".\\agent_workbench.bat session feature --task agent_workbench/tasks/example_feature.yaml\"",
       "problemMatcher": []
     },
     {
       "label": "Agent Workbench: Feature Session (CLI Regression)",
       "type": "shell",
-      "command": "agent_workbench.bat session feature --task agent_workbench/tasks/cli_automation_regression.yaml",
+      "command": "cmd /c \".\\agent_workbench.bat session feature --task agent_workbench/tasks/cli_automation_regression.yaml\"",
       "problemMatcher": []
     }
   ]

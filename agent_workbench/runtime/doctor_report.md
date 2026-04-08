@@ -2,7 +2,7 @@
 
 | check | level | detail |
 |---|---|---|
-| python | ok | D:\Anaconda1\python.exe |
+| python | ok | C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe |
 | yaml | ok | PyYAML available |
 | runtime_root | ok | ok |
 | evidence_root | ok | ok |
@@ -14,5 +14,13 @@
 | openocd | ok | openocd |
 | flash_method | ok | openocd_cmd: openocd |
 | uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> |
-| uart_backend | warn | pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial. |
-| unit_command | ok | D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |
+| uart_backend | ok | pyserial available |
+| uart_port | ok | COM3 |
+| agent_profile | ok | balanced_local missing=none |
+| uart_markers | ok | ready=STM32 UART CLI ready. prompt=cli> probe_count=6 |
+| agent_state | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\agent_state.json |
+| context_budget | ok | context_pack_feature_cli_automation_regression_resume_qwen32k_brief.md words=191 budget=550 |
+| paste_card | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\context_pack_feature_cli_automation_regression_resume_qwen32k_paste.md |
+| task_scope | ok | include=5 max_edit_files=2 |
+| task_candidates | ok | read_candidates=2 edit_candidates=2 |
+| unit_command | ok | C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |

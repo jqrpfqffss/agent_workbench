@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-04-08T11:56:30.487+00:00",
+  "old_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\add_led_status_cli",
+  "new_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation",
+  "verdict": {
+    "old": "fail",
+    "new": "fail"
+  },
+  "uart": {
+    "old_lines": 8,
+    "new_lines": 1,
+    "delta_lines": -7,
+    "old_warn_like": 0,
+    "new_warn_like": 0,
+    "delta_warn_like": 0
+  },
+  "cli": {
+    "old_lines": 68,
+    "new_lines": 0,
+    "delta_lines": -68,
+    "new_unique_lines": []
+  },
+  "assertions": {
+    "old": {
+      "passed": 33,
+      "failed": 3,
+      "skipped": 0
+    },
+    "new": {
+      "passed": 1,
+      "failed": 9,
+      "skipped": 0
+    },
+    "delta_failed": 6
+  },
+  "diag": {
+    "old": "",
+    "new": ""
+  }
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from .task_spec import load_task_spec
 from .uart_service import SERIAL_IMPORT_ERROR, serial, uart_exec_supported
 from .utils import can_write_directory, command_exists, command_head, render_template, write_json
 
@@ -13,6 +14,23 @@ def _append(results: list[dict], name: str, level: str, detail: str) -> None:
 
 def _required_hardware(cfg: dict) -> bool:
     return cfg.get("hardware", {}).get("mode", "prefer").lower() == "required"
+
+
+def _read_json(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        import json
+
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _word_count(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(1 for item in path.read_text(encoding="utf-8", errors="ignore").split() if item.strip())
 
 
 def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
@@ -96,6 +114,83 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
                 _append(results, "uart_port", level, str(exc))
     else:
         _append(results, "uart_backend", "warn", "UART disabled by config")
+
+    agent_cfg = cfg.get("agent", {})
+    profiles = agent_cfg.get("profiles", {})
+    default_profile = str(agent_cfg.get("default_profile", "balanced_local")).strip() or "balanced_local"
+    profile = profiles.get(default_profile)
+    if not profile:
+        _append(results, "agent_profile", "fail", f"missing agent profile: {default_profile}")
+    else:
+        required_keys = [
+            "max_pack_words",
+            "max_fact_items",
+            "max_cli_tail_lines",
+            "max_failed_assertions_shown",
+            "max_extra_reads",
+            "max_edit_files",
+            "require_fact_citations",
+            "prefer_ascii_runtime_artifacts",
+            "session_pick_strategy",
+        ]
+        missing_keys = [key for key in required_keys if key not in profile]
+        _append(results, "agent_profile", "ok" if not missing_keys else "fail", f"{default_profile} missing={','.join(missing_keys) or 'none'}")
+
+    ready_banner = str(cfg["uart"].get("ready_banner", "")).strip()
+    prompt = str(cfg["uart"].get("prompt", "")).strip()
+    probe_commands = [str(item).strip() for item in cfg["uart"].get("probe_commands", []) if str(item).strip()]
+    markers_ok = bool(ready_banner and prompt and probe_commands)
+    _append(
+        results,
+        "uart_markers",
+        "ok" if markers_ok else "warn",
+        f"ready={ready_banner or 'missing'} prompt={prompt or 'missing'} probe_count={len(probe_commands)}",
+    )
+
+    state_path = Path(cfg["agent"]["state_path"])
+    state = _read_json(state_path)
+    if state:
+        _append(results, "agent_state", "ok", str(state_path))
+        brief_path = Path(str((state.get("generated_files") or {}).get("brief", ""))) if (state.get("generated_files") or {}).get("brief") else None
+        paste_path = Path(str((state.get("generated_files") or {}).get("paste", ""))) if (state.get("generated_files") or {}).get("paste") else None
+        if brief_path and brief_path.exists() and profile:
+            words = _word_count(brief_path)
+            budget = int(profile.get("max_pack_words", 550))
+            level = "ok" if words <= budget else "warn"
+            _append(results, "context_budget", level, f"{brief_path.name} words={words} budget={budget}")
+        else:
+            _append(results, "context_budget", "warn", "no generated brief found in agent_state")
+        if paste_path and paste_path.exists():
+            _append(results, "paste_card", "ok", str(paste_path))
+        else:
+            _append(results, "paste_card", "warn", "no generated paste card found in agent_state")
+
+        task_text = str(state.get("task_path", "")).strip()
+        if task_text:
+            task_path = Path(task_text)
+            try:
+                task = load_task_spec(task_path)
+            except Exception as exc:
+                _append(results, "task_spec", "warn", str(exc))
+            else:
+                include_count = len(task.get("scope", {}).get("include", []))
+                impl = task.get("implementation", {})
+                read_candidates = impl.get("read_candidates", [])
+                edit_candidates = impl.get("edit_candidates", [])
+                max_edit_files = int(impl.get("max_edit_files", profile.get("max_edit_files", 2) if profile else 2))
+                scope_level = "ok" if include_count <= max(max_edit_files * 3, 6) else "warn"
+                _append(results, "task_scope", scope_level, f"include={include_count} max_edit_files={max_edit_files}")
+                candidate_level = "ok" if read_candidates and edit_candidates else "warn"
+                _append(
+                    results,
+                    "task_candidates",
+                    candidate_level,
+                    f"read_candidates={len(read_candidates)} edit_candidates={len(edit_candidates)}",
+                )
+    else:
+        _append(results, "agent_state", "warn", f"missing {state_path}")
+        _append(results, "context_budget", "warn", "no active local-model context has been generated yet")
+        _append(results, "paste_card", "warn", "no paste card available until `agent_workbench.bat context ...` runs")
 
     unit_cfg = cfg["checks"].get("unit", {})
     if unit_cfg.get("enabled", False):

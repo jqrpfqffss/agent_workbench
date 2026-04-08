@@ -1,0 +1,36 @@
+将本压缩包解压到下面任一目录即可使用：
+
+1. 如果设置了 CODEX_HOME：
+   %CODEX_HOME%\skills\
+
+2. 如果没有设置 CODEX_HOME：
+   %USERPROFILE%\.codex\skills\
+
+解压后应直接看到这些技能目录：
+
+- agent-workbench-general
+- agent-workbench-debug
+- agent-workbench-test
+- agent-workbench-feature
+
+不要多套一层父目录。
+
+推荐做法：
+
+1. 关闭当前 Codex / Continue 会话
+2. 把压缩包解压到 skills 目录
+3. 重新打开会话
+4. 在任务里明确提到对应 skill 名称，或直接描述相关意图
+
+这些技能面向：
+
+- agent_workbench 驱动的 STM32 / C / UART CLI 项目
+- VS Code + Continue Agent
+- DeepSeek / Qwen 这类小上下文、本地模型
+
+核心特点：
+
+- 强制使用 PowerShell 安全命令格式
+- 强制 evidence-first
+- 强制优先使用 agent_workbench.bat
+- 强制减少模型自行编排长命令链

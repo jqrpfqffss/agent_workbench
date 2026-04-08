@@ -1,0 +1,51 @@
+{
+  "generated_at": "2026-04-08T12:33:06.981+00:00",
+  "old_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression",
+  "new_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression_direct_verify_20260408_203250",
+  "verdict": {
+    "old": "needs_review",
+    "new": "pass"
+  },
+  "uart": {
+    "old_lines": 0,
+    "new_lines": 2,
+    "delta_lines": 2,
+    "old_warn_like": 0,
+    "new_warn_like": 0,
+    "delta_warn_like": 0
+  },
+  "cli": {
+    "old_lines": 0,
+    "new_lines": 78,
+    "delta_lines": 78,
+    "new_unique_lines": [
+      "cli>",
+      "blue toggle",
+      "[ok] blue -> toggle",
+      "System status:",
+      "  UART: USART2 @ 115200 8N1",
+      "  Pins: TX=PA2, RX=PA3",
+      "  LED RED  : off",
+      "  LED GREEN: off",
+      "  LED BLUE : on",
+      "cli>"
+    ]
+  },
+  "assertions": {
+    "old": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    "new": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "delta_failed": 0
+  },
+  "diag": {
+    "old": "",
+    "new": ""
+  }
+}
