@@ -487,3 +487,21 @@ mingw32-make[2]: *** [CMakeFiles\serial.dir\build.make:134: CMakeFiles/serial.di
 mingw32-make[1]: *** [CMakeFiles\Makefile2:86: CMakeFiles/serial.dir/all] Error 2
 mingw32-make: *** [Makefile:90: all] Error 2
 [2026-04-08T14:27:04.215+00:00] exit=2
+
+[2026-04-08T14:49:27.364+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-08T14:49:27.562+00:00] exit=0
+
+[2026-04-08T14:49:27.563+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[  4%] [32mBuilding C object CMakeFiles/serial.dir/Core/Src/main.c.obj[0m
+[  9%] [32mBuilding C object CMakeFiles/serial.dir/Core/Src/cli.c.obj[0m
+[ 13%] [32mBuilding C object CMakeFiles/serial.dir/Core/Src/app_cli_commands.c.obj[0m
+[ 18%] [32mBuilding C object CMakeFiles/serial.dir/Core/Src/stm32f1xx_hal_msp.c.obj[0m
+[ 22%] [32mBuilding C object CMakeFiles/serial.dir/Core/Src/stm32f1xx_it.c.obj[0m
+[ 27%] [32m[1mLinking C executable serial.elf[0m
+   text	   data	    bss	    dec	    hex	filename
+  16964	    120	   1936	  19020	   4a4c	H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf
+[100%] Built target serial
+[2026-04-08T14:49:31.089+00:00] exit=0

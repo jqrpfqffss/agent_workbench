@@ -88,22 +88,22 @@
     {
       "name": "context_budget",
       "level": "ok",
-      "detail": "context_pack_feature_cli_automation_regression_resume_qwen32k_brief.md words=191 budget=550"
+      "detail": "context_pack_feature_timer_led_blink_implement_balanced_local_brief.md words=199 budget=550"
     },
     {
       "name": "paste_card",
       "level": "ok",
-      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_cli_automation_regression_resume_qwen32k_paste.md"
+      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_timer_led_blink_implement_balanced_local_paste.md"
     },
     {
       "name": "task_scope",
       "level": "ok",
-      "detail": "include=5 max_edit_files=2"
+      "detail": "include=3 max_edit_files=3"
     },
     {
       "name": "task_candidates",
       "level": "ok",
-      "detail": "read_candidates=2 edit_candidates=2"
+      "detail": "read_candidates=3 edit_candidates=3"
     },
     {
       "name": "unit_command",

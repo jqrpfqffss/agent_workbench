@@ -19,8 +19,8 @@
 | agent_profile | ok | balanced_local missing=none |
 | uart_markers | ok | ready=STM32 UART CLI ready. prompt=cli> probe_count=6 |
 | agent_state | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\agent_state.json |
-| context_budget | ok | context_pack_feature_cli_automation_regression_resume_qwen32k_brief.md words=191 budget=550 |
-| paste_card | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\context_pack_feature_cli_automation_regression_resume_qwen32k_paste.md |
-| task_scope | ok | include=5 max_edit_files=2 |
-| task_candidates | ok | read_candidates=2 edit_candidates=2 |
+| context_budget | ok | context_pack_feature_timer_led_blink_implement_balanced_local_brief.md words=199 budget=550 |
+| paste_card | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\context_pack_feature_timer_led_blink_implement_balanced_local_paste.md |
+| task_scope | ok | include=3 max_edit_files=3 |
+| task_candidates | ok | read_candidates=3 edit_candidates=3 |
 | unit_command | ok | C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |
