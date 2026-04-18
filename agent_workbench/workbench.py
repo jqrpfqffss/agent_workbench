@@ -8,10 +8,64 @@ from core.config import load_config
 
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent / "agent_workbench.yaml"
+UART_ACTIONS = {"console", "exec", "start", "run", "stop", "status"}
+UART_ALIAS_FLAGS = {
+    "--console": "console",
+    "--exec": "exec",
+    "--start": "start",
+    "--run": "run",
+    "--stop": "stop",
+    "--status": "status",
+}
 
 
 def _cfg(path_text: str) -> dict:
     return load_config(Path(path_text).resolve())
+
+
+def _normalize_uart_argv(argv: list[str]) -> list[str]:
+    if not argv or argv[0] != "uart":
+        return argv
+    if len(argv) > 1 and argv[1] in UART_ACTIONS:
+        return argv
+    if "--help" in argv or "-h" in argv:
+        return argv
+
+    rest = list(argv[1:])
+    has_exec_payload = any(token in {"--command", "--script"} for token in rest) or ("--exec" in rest)
+    action = "exec" if has_exec_payload else None
+    normalized: list[str] = []
+    index = 0
+    while index < len(rest):
+        token = rest[index]
+        if token in UART_ALIAS_FLAGS:
+            if token == "--exec":
+                if index + 1 < len(rest) and not str(rest[index + 1]).startswith("-"):
+                    normalized.extend(["--command", rest[index + 1]])
+                    index += 2
+                    continue
+                index += 1
+                continue
+            if action is None:
+                action = UART_ALIAS_FLAGS[token]
+            index += 1
+            continue
+        normalized.append(token)
+        index += 1
+
+    if action is None and any(token in {"--command", "--script"} for token in normalized):
+        action = "exec"
+    if action is None:
+        return argv
+    return ["uart", action, *normalized]
+
+
+def _normalize_argv(argv: list[str]) -> list[str]:
+    if not argv:
+        return argv
+    if argv[0] == "uart":
+        return _normalize_uart_argv(argv)
+    return argv
 
 
 def _cmd_doctor(args: argparse.Namespace) -> int:
@@ -55,6 +109,10 @@ def _cmd_uart(args: argparse.Namespace) -> int:
     from core.utils import ensure_dir
 
     cfg = _cfg(args.config)
+    if args.port:
+        cfg["uart"]["port"] = str(args.port).strip()
+    if args.baudrate:
+        cfg["uart"]["baudrate"] = int(args.baudrate)
     if args.action == "console":
         return run_uart_console(cfg, cfg["outputs"]["runtime_root_path"] / "uart_console.log")
     if args.action == "start":
@@ -107,6 +165,39 @@ def _cmd_uart(args: argparse.Namespace) -> int:
         )
         return logger.run(echo_stdout=False)
     raise ValueError(f"unknown uart action: {args.action}")
+
+
+def _cmd_diag(args: argparse.Namespace) -> int:
+    from core.diag_uart_service import execute_diag_exchange
+
+    cfg = _cfg(args.config)
+    if args.port:
+        cfg["diag_uart"]["port"] = str(args.port).strip()
+    if args.baudrate:
+        cfg["diag_uart"]["baudrate"] = int(args.baudrate)
+    if args.action == "exchange":
+        if not args.hex:
+            print("diag exchange requires --hex \"01 03 00 10 ...\"", file=sys.stderr)
+            return 2
+        log_path = Path(args.log_path) if args.log_path else cfg["outputs"]["runtime_root_path"] / "diag_exchange.log"
+        try:
+            result = execute_diag_exchange(
+                cfg,
+                args.hex,
+                log_path,
+                append_crc=args.append_crc,
+                response_timeout_sec=(float(args.timeout_sec) if args.timeout_sec > 0 else None),
+                expected_length=max(0, int(args.rx_len)),
+            )
+        except (RuntimeError, ValueError) as exc:
+            print(f"diag exchange failed: {exc}", file=sys.stderr)
+            return 1
+        print(
+            f"diag exchange exit={result.exit_code} port={cfg['diag_uart']['port']} "
+            f"tx=\"{result.request_hex}\" rx=\"{result.response_hex or '[timeout]'}\" log={result.log_path}"
+        )
+        return int(result.exit_code)
+    raise ValueError(f"unknown diag action: {args.action}")
 
 
 def _cmd_monitor(args: argparse.Namespace) -> int:
@@ -169,6 +260,69 @@ def _cmd_test(args: argparse.Namespace) -> int:
     code, log_path = run_tests(cfg)
     print(f"tests exit={code} log={log_path}")
     return int(code)
+
+
+def _cmd_decompose(args: argparse.Namespace) -> int:
+    from core.task_breakdown import write_task_breakdown
+
+    cfg = _cfg(args.config)
+    out_path = write_task_breakdown(cfg, Path(args.task))
+    print(f"task breakdown: {out_path}")
+    return 0
+
+
+def _cmd_autoflow(args: argparse.Namespace) -> int:
+    from core.autoflow_service import mark_autoflow_progress, resume_autoflow, run_autoflow, status_autoflow
+
+    cfg = _cfg(args.config)
+    task_path = Path(args.task).resolve() if args.task else None
+    if args.status:
+        start_path = status_autoflow(cfg, task_path=task_path)
+        print(f"autoflow start: {start_path}")
+        return 0
+    if args.done:
+        start_path = mark_autoflow_progress(
+            cfg,
+            status="done",
+            subtask_ids=[item.strip() for item in str(args.done).split(",") if item.strip()],
+            note=args.note,
+            task_path=task_path,
+        )
+        print(f"autoflow start: {start_path}")
+        return 0
+    if args.blocked:
+        start_path = mark_autoflow_progress(
+            cfg,
+            status="blocked",
+            subtask_ids=[item.strip() for item in str(args.blocked).split(",") if item.strip()],
+            note=args.note,
+            task_path=task_path,
+        )
+        print(f"autoflow start: {start_path}")
+        return 0
+    if args.skip:
+        start_path = mark_autoflow_progress(
+            cfg,
+            status="skipped",
+            subtask_ids=[item.strip() for item in str(args.skip).split(",") if item.strip()],
+            note=args.note,
+            task_path=task_path,
+        )
+        print(f"autoflow start: {start_path}")
+        return 0
+    if args.resume:
+        start_path = resume_autoflow(cfg)
+        print(f"autoflow start: {start_path}")
+        return 0
+    start_path = run_autoflow(
+        cfg,
+        goal=args.goal,
+        mode=args.mode,
+        profile_name=args.profile,
+        task_path=task_path,
+    )
+    print(f"autoflow start: {start_path}")
+    return 0
 
 
 def _cmd_compare(args: argparse.Namespace) -> int:
@@ -290,7 +444,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_uart.add_argument("--diag-path", default="")
     p_uart.add_argument("--reset-first", action="store_true")
     p_uart.add_argument("--expect-ready", action="store_true")
+    p_uart.add_argument("--port", default="")
+    p_uart.add_argument("--baudrate", type=int, default=0)
     p_uart.set_defaults(func=_cmd_uart)
+
+    p_diag = sub.add_parser("diag", help="diagnostic UART hex exchange")
+    p_diag.add_argument("action", choices=["exchange"])
+    p_diag.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_diag.add_argument("--hex", default="")
+    p_diag.add_argument("--append-crc", choices=["none", "modbus"], default="")
+    p_diag.add_argument("--timeout-sec", type=float, default=0.0)
+    p_diag.add_argument("--rx-len", type=int, default=0)
+    p_diag.add_argument("--log-path", default="")
+    p_diag.add_argument("--port", default="")
+    p_diag.add_argument("--baudrate", type=int, default=0)
+    p_diag.set_defaults(func=_cmd_diag)
 
     p_monitor = sub.add_parser("monitor", help="monitor variables/registers/memory")
     p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export"])
@@ -317,6 +485,25 @@ def build_parser() -> argparse.ArgumentParser:
     p_test.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_test.add_argument("--task", default="")
     p_test.set_defaults(func=_cmd_test)
+
+    p_decompose = sub.add_parser("decompose", help="generate a small-step breakdown for a task")
+    p_decompose.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_decompose.add_argument("--task", default="")
+    p_decompose.set_defaults(func=_cmd_decompose)
+
+    p_autoflow = sub.add_parser("autoflow", help="start or resume one-line staged automation from a natural-language goal")
+    p_autoflow.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_autoflow.add_argument("--goal", default="")
+    p_autoflow.add_argument("--mode", choices=["debug", "feature", "test"], default="")
+    p_autoflow.add_argument("--profile", default="")
+    p_autoflow.add_argument("--task", default="")
+    p_autoflow.add_argument("--resume", action="store_true")
+    p_autoflow.add_argument("--status", action="store_true")
+    p_autoflow.add_argument("--done", default="")
+    p_autoflow.add_argument("--blocked", default="")
+    p_autoflow.add_argument("--skip", default="")
+    p_autoflow.add_argument("--note", default="")
+    p_autoflow.set_defaults(func=_cmd_autoflow)
 
     p_compare = sub.add_parser("compare", help="compare session outputs")
     p_compare.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -357,13 +544,33 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     parser = build_parser()
-    args = parser.parse_args()
-    if hasattr(args, "mode") and args.mode == "feature" and not args.task:
+    args = parser.parse_args(_normalize_argv(sys.argv[1:]))
+    if getattr(args, "command", "") == "session" and getattr(args, "mode", "") == "feature" and not getattr(args, "task", ""):
         print("session feature requires --task <task.yaml>", file=sys.stderr)
         return 2
-    if hasattr(args, "action") and args.action == "generate" and hasattr(args, "task") and not args.task:
+    if getattr(args, "command", "") == "test" and getattr(args, "action", "") == "generate" and not getattr(args, "task", ""):
         print("test generate requires --task <task.yaml>", file=sys.stderr)
         return 2
+    if getattr(args, "command", "") == "decompose" and not getattr(args, "task", ""):
+        print("decompose requires --task <task.yaml>", file=sys.stderr)
+        return 2
+    if getattr(args, "command", "") == "autoflow":
+        action_flags = [
+            bool(getattr(args, "resume", False)),
+            bool(getattr(args, "status", False)),
+            bool(getattr(args, "done", "")),
+            bool(getattr(args, "blocked", "")),
+            bool(getattr(args, "skip", "")),
+        ]
+        if sum(1 for item in action_flags if item) > 1:
+            print("autoflow accepts only one of --resume, --status, --done, --blocked, or --skip", file=sys.stderr)
+            return 2
+        if not any(action_flags) and not getattr(args, "goal", "") and not getattr(args, "task", ""):
+            print("autoflow requires --goal <natural language task>, --task <task.yaml>, or one of --resume/--status/--done/--blocked/--skip", file=sys.stderr)
+            return 2
+        if any(action_flags) and getattr(args, "goal", ""):
+            print("autoflow status/update actions do not accept --goal", file=sys.stderr)
+            return 2
     if getattr(args, "command", "") == "verify" and getattr(args, "mode", "") == "current" and not getattr(args, "task", ""):
         print("verify current requires --task <task.yaml>", file=sys.stderr)
         return 2

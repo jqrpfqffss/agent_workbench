@@ -77,7 +77,8 @@
       "keep the ready banner and cli> prompt as stable machine-readable markers",
       "prefer explicit command responses over unsolicited serial output",
       "keep control acknowledgements short and easy to assert from cli_transcript.log"
-    ]
+    ],
+    "manual_checks": []
   },
   "implementation": {
     "read_candidates": [
@@ -115,5 +116,9 @@
       "blue toggle",
       "all off"
     ]
+  },
+  "decomposition": {
+    "enabled": true,
+    "subtasks": []
   }
 }

@@ -41,6 +41,8 @@ endif()
 set(PROJECT_SOURCES
   Core/Src/main.c
   Core/Src/cli.c
+  Core/Src/diag_link.c
+  Core/Src/app_diag_modbus.c
   Core/Src/app_cli_commands.c
   Core/Src/stm32f1xx_hal_msp.c
   Core/Src/stm32f1xx_it.c

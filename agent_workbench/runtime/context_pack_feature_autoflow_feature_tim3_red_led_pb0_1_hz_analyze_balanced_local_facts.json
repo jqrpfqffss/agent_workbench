@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-04-12T05:10:12.174+00:00",
+  "mode": "feature",
+  "stage": "analyze",
+  "profile": "balanced_local",
+  "task_id": "autoflow_feature_tim3_red_led_pb0_1_hz",
+  "session_dir": "",
+  "facts": [
+    {
+      "fact_id": "F01",
+      "name": "project",
+      "value": "serial",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F02",
+      "name": "mode_stage_profile",
+      "value": "feature/analyze/balanced_local",
+      "source": "context",
+      "evidence": "runtime state"
+    },
+    {
+      "fact_id": "F03",
+      "name": "uart_contract",
+      "value": "COM3 @ 115200 ready=STM32 UART CLI ready. prompt=cli>",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F04",
+      "name": "task_id",
+      "value": "autoflow_feature_tim3_red_led_pb0_1_hz",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\tim3_red_led_pb0_1_hz_20260412_131012\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F05",
+      "name": "task_goal",
+      "value": "使用 TIM3 定时器让 RED LED(PB0) 以约 1 Hz 闪烁",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\tim3_red_led_pb0_1_hz_20260412_131012\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F06",
+      "name": "task_verify_commands",
+      "value": "help, status",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\tim3_red_led_pb0_1_hz_20260412_131012\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F13",
+      "name": "current_subtasks",
+      "value": "S1, S2",
+      "source": "task_breakdown",
+      "evidence": "generated task breakdown"
+    }
+  ]
+}

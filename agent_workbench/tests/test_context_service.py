@@ -173,20 +173,26 @@ class ContextServiceTests(unittest.TestCase):
 
         out_path = write_context_pack(cfg, mode="feature", stage="implement", task_path=task_path)
 
-        facts_path = Path(str(json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))["generated_files"]["facts"]))
-        constraints_path = Path(str(json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))["generated_files"]["constraints"]))
-        paste_path = Path(str(json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))["generated_files"]["paste"]))
+        state = json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))
+        facts_path = Path(str(state["generated_files"]["facts"]))
+        constraints_path = Path(str(state["generated_files"]["constraints"]))
+        paste_path = Path(str(state["generated_files"]["paste"]))
+        breakdown_path = Path(str(state["generated_files"]["task_breakdown"]))
 
         self.assertTrue(out_path.exists())
         self.assertTrue(facts_path.exists())
         self.assertTrue(constraints_path.exists())
         self.assertTrue(paste_path.exists())
+        self.assertTrue(breakdown_path.exists())
 
         constraints = json.loads(constraints_path.read_text(encoding="utf-8"))
         self.assertEqual(constraints["mode"], "feature")
         self.assertEqual(constraints["stage"], "implement")
         self.assertEqual(len(constraints["allowed_edits"]), 1)
+        self.assertEqual(constraints["current_subtasks"], ["S4", "S5"])
         self.assertIn("Core\\Src\\app_cli_commands.c", constraints["allowed_edits"][0])
+        self.assertIn("## Current Subtasks", out_path.read_text(encoding="utf-8"))
+        self.assertIn("Complete only these subtasks in this round: S4, S5.", paste_path.read_text(encoding="utf-8"))
         self.assertIn("implement the smallest safe change only", paste_path.read_text(encoding="utf-8"))
 
     def test_verify_stage_brief_stays_under_budget(self) -> None:
@@ -222,3 +228,63 @@ class ContextServiceTests(unittest.TestCase):
 
         words = sum(1 for item in out_path.read_text(encoding="utf-8").split() if item.strip())
         self.assertLessEqual(words, 90)
+
+    def test_direct_cli_task_skips_implement_and_generates_uart_exec_verify_commands(self) -> None:
+        cfg = self._cfg()
+        task_path = self.temp_dir / "direct_cli_task.yaml"
+        task_path.write_text(
+            "id: autoflow_cli_red_on\n"
+            "mode: feature\n"
+            "goal: point the red LED on using existing CLI\n"
+            "scope:\n"
+            "  include: []\n"
+            "  exclude: [Drivers]\n"
+            "acceptance:\n"
+            "  blackbox:\n"
+            "    - name: cli_command_ack_seen\n"
+            "      type: cli_contains\n"
+            "      needle: '[ok] red -> on'\n"
+            "  unit:\n"
+            "    - no code changes required\n"
+            "observability:\n"
+            "  notes:\n"
+            "    - Treat this as a direct CLI operation.\n"
+            "verify:\n"
+            "  sequence: [uart_smoke]\n"
+            "  cli_commands: ['red on', 'status']\n"
+            "implementation:\n"
+            "  read_candidates: []\n"
+            "  edit_candidates: []\n"
+            "  stable_strings: ['[ok] red -> on']\n"
+            "  max_edit_files: 0\n"
+            "decomposition:\n"
+            "  enabled: true\n"
+            "  subtasks:\n"
+            "    - id: S1\n"
+            "      stage: analyze\n"
+            "      title: confirm command\n"
+            "    - id: S2\n"
+            "      stage: analyze\n"
+            "      title: skip edits\n"
+            "    - id: S3\n"
+            "      stage: verify\n"
+            "      title: run uart\n"
+            "    - id: S4\n"
+            "      stage: verify\n"
+            "      title: report from transcript\n",
+            encoding="utf-8",
+        )
+
+        analyze_path = write_context_pack(cfg, mode="feature", stage="analyze", task_path=task_path)
+        analyze_state = json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))
+        self.assertEqual(analyze_state["current_subtasks"], ["S1", "S2"])
+        self.assertIn("autoflow --done S1,S2", analyze_state["next_commands"][0])
+        self.assertEqual(len(analyze_state["next_commands"]), 2)
+        self.assertIn("F06B: task_max_edit_files = 0", analyze_path.read_text(encoding="utf-8"))
+
+        verify_path = write_context_pack(cfg, mode="feature", stage="verify", task_path=task_path)
+        verify_state = json.loads((self.runtime_root / "agent_state.json").read_text(encoding="utf-8"))
+        self.assertEqual(verify_state["current_subtasks"], ["S3", "S4"])
+        self.assertTrue(any('uart exec --reset-first --expect-ready --command ""red on"" --command ""status""' in command for command in verify_state["next_commands"]))
+        self.assertTrue(any("autoflow --done S3,S4" in command for command in verify_state["next_commands"]))
+        self.assertIn("## Next Commands", verify_path.read_text(encoding="utf-8"))

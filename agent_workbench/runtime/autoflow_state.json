@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-12T12:12:13.559+00:00",
+  "goal": "请通过 CLI 点亮红灯",
+  "mode": "feature",
+  "profile": "balanced_local",
+  "task_id": "autoflow_cli_red_on",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml",
+  "stage": "verify",
+  "stage_sequence": [
+    "analyze",
+    "verify"
+  ],
+  "latest_session": "",
+  "latest_session_path": "",
+  "latest_verdict": "needs_review",
+  "current_subtasks": [
+    "S3",
+    "S4"
+  ],
+  "next_stage": "verify",
+  "next_commands": [
+    "cmd /c \".\\agent_workbench.bat uart exec --reset-first --expect-ready --command \"\"red on\"\" --command \"\"status\"\"\""
+  ],
+  "stop_conditions": [
+    "Stop if a workbench command returns a non-zero exit code.",
+    "Stop if the current stage card or task breakdown file is missing.",
+    "Stop when manual_checks_pending becomes true and wait for manual confirmation.",
+    "Stop when the latest verdict becomes pass, fail, or needs_review after verify."
+  ],
+  "generated_files": {
+    "brief": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_brief.md",
+    "facts": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_facts.json",
+    "constraints": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_constraints.json",
+    "resume": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_resume.md",
+    "paste": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_paste.md",
+    "task_breakdown": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_cli_red_on\\task_breakdown.md",
+    "task_draft": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml",
+    "generated_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_cli_red_on",
+    "start_card": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\autoflow_start.md"
+  }
+}

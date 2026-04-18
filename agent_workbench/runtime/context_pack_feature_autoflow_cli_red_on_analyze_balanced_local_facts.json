@@ -1,0 +1,66 @@
+{
+  "generated_at": "2026-04-12T12:06:32.352+00:00",
+  "mode": "feature",
+  "stage": "analyze",
+  "profile": "balanced_local",
+  "task_id": "autoflow_cli_red_on",
+  "session_dir": "",
+  "facts": [
+    {
+      "fact_id": "F01",
+      "name": "project",
+      "value": "serial",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F02",
+      "name": "mode_stage_profile",
+      "value": "feature/analyze/balanced_local",
+      "source": "context",
+      "evidence": "runtime state"
+    },
+    {
+      "fact_id": "F03",
+      "name": "uart_contract",
+      "value": "COM3 @ 115200 ready=STM32 UART CLI ready. prompt=cli>",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F04",
+      "name": "task_id",
+      "value": "autoflow_cli_red_on",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F05",
+      "name": "task_goal",
+      "value": "请通过 CLI 点亮红灯",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F06",
+      "name": "task_verify_commands",
+      "value": "red on, status",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F06B",
+      "name": "task_max_edit_files",
+      "value": "0",
+      "source": "task",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml"
+    },
+    {
+      "fact_id": "F13",
+      "name": "current_subtasks",
+      "value": "S1, S2",
+      "source": "task_breakdown",
+      "evidence": "generated task breakdown"
+    }
+  ]
+}

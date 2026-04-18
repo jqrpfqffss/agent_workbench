@@ -93,6 +93,8 @@ def _cli_tail(session_dir: Path, limit: int = 12) -> list[str]:
 
 def derive_session_verdict(session_dir: Path) -> dict[str, Any]:
     manifest = _read_json(session_dir / "session_manifest.json") or {}
+    task = manifest.get("task") or {}
+    manual_checks = task.get("observability", {}).get("manual_checks", []) if isinstance(task, dict) else []
     diag = _read_json(session_dir / "cli_diag.json") or {}
     diag_class = diag.get("classification", {}) if isinstance(diag, dict) else {}
     assertions = _assertion_summary(session_dir)
@@ -159,6 +161,13 @@ def derive_session_verdict(session_dir: Path) -> dict[str, Any]:
         strongest = f"assertions pass={assertions['passed']} fail=0 skip={assertions['skipped']}"
         next_step = "Reuse this session as the current baseline or continue with the next task."
 
+    manual_checks_pending = bool(manual_checks) and status == "pass"
+    if manual_checks_pending:
+        status = "needs_review"
+        summary = "Automated checks passed; manual verification is still required."
+        strongest = f"manual_checks_pending={len(manual_checks)}"
+        next_step = "Complete the listed manual checks before declaring the task done."
+
     return {
         "generated_at": utc_now_iso(),
         "session": str(session_dir),
@@ -169,6 +178,8 @@ def derive_session_verdict(session_dir: Path) -> dict[str, Any]:
         "strongest_evidence": strongest,
         "classification_code": str(diag_class.get("code", "")),
         "next_step": next_step,
+        "manual_checks_pending": manual_checks_pending,
+        "manual_checks": manual_checks,
         "assertions": {
             "passed": assertions["passed"],
             "failed": assertions["failed"],
@@ -211,10 +222,16 @@ def write_session_brief(session_dir: Path) -> Path:
         fp.write(
             f"- assertions: pass={assertions.get('passed', 0)} fail={assertions.get('failed', 0)} skip={assertions.get('skipped', 0)}\n"
         )
+        fp.write(f"- manual_checks_pending: {verdict.get('manual_checks_pending', False)}\n")
         if diag_class:
             fp.write(f"- cli_diag: {diag_class.get('code', '')} | {diag_class.get('summary', '')}\n")
         else:
             fp.write("- cli_diag: missing\n")
+        manual_checks = verdict.get("manual_checks", [])
+        if manual_checks:
+            fp.write("\n## Manual Checks\n")
+            for item in manual_checks:
+                fp.write(f"- {item.get('name', 'manual_check')}: {item.get('instructions', '')}\n")
         fp.write("\n## Read First\n")
         fp.write(f"- `{session_dir / 'session_verdict.json'}`\n")
         fp.write(f"- `{session_dir / 'session_summary.md'}`\n")
@@ -269,6 +286,7 @@ def write_session_summary(session_dir: Path) -> Path:
         fp.write(
             f"- assertions: pass={assertions.get('passed', 0)} fail={assertions.get('failed', 0)} skip={assertions.get('skipped', 0)}\n"
         )
+        fp.write(f"- manual_checks_pending: {verdict.get('manual_checks_pending', False)}\n")
 
         fp.write("\n## CLI Diagnostics\n")
         if not cli_diag:
@@ -287,6 +305,14 @@ def write_session_summary(session_dir: Path) -> Path:
         else:
             for row in failed_rows[:3]:
                 fp.write(f"- {row.get('name', '')}: {_clip(str(row.get('detail', '')))}\n")
+
+        fp.write("\n## Manual Checks\n")
+        manual_checks = verdict.get("manual_checks", [])
+        if not manual_checks:
+            fp.write("- none\n")
+        else:
+            for item in manual_checks:
+                fp.write(f"- {item.get('name', 'manual_check')}: {item.get('instructions', '')}\n")
 
         fp.write("\n## CLI Tail\n")
         tail = _cli_tail(session_dir, limit=12)
@@ -336,10 +362,19 @@ def write_feature_summary(session_dir: Path, task: dict) -> Path:
         fp.write(f"- passed: {verdict.get('assertions', {}).get('passed', 0)}\n")
         fp.write(f"- failed: {verdict.get('assertions', {}).get('failed', 0)}\n")
         fp.write(f"- skipped: {verdict.get('assertions', {}).get('skipped', 0)}\n")
+        fp.write(f"- manual_checks_pending: {verdict.get('manual_checks_pending', False)}\n")
         if failed_rows:
             fp.write("- top_failed:\n")
             for row in failed_rows[:3]:
                 fp.write(f"  - {row.get('name', '')}: {_clip(str(row.get('detail', '')))}\n")
+
+        fp.write("\n## Manual Checks\n")
+        manual_checks = verdict.get("manual_checks", [])
+        if not manual_checks:
+            fp.write("- none\n")
+        else:
+            for item in manual_checks:
+                fp.write(f"- {item.get('name', 'manual_check')}: {item.get('instructions', '')}\n")
 
         fp.write("\n## Evidence\n")
         fp.write(f"- session_brief: `{session_dir / 'session_brief.md'}`\n")

@@ -5,6 +5,13 @@ from pathlib import Path
 from typing import Any
 
 from .compare_service import list_session_dirs
+from .task_breakdown import (
+    derive_task_breakdown,
+    load_task_progress,
+    pick_focus_subtasks,
+    task_generated_paths,
+    write_task_breakdown,
+)
 from .task_spec import load_task_spec
 from .utils import ensure_dir, read_text, utc_now_iso, write_json
 
@@ -12,6 +19,11 @@ from .utils import ensure_dir, read_text, utc_now_iso, write_json
 DEFAULT_STAGE = "analyze"
 DEFAULT_PROFILE = "balanced_local"
 STAGES = {"analyze", "implement", "verify", "resume"}
+
+
+def _ps_safe_workbench(command_text: str) -> str:
+    escaped = str(command_text).replace('"', '""')
+    return f'cmd /c ".\\{escaped}"'
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -178,6 +190,8 @@ def _matching_sessions(sessions_root: Path, mode: str, task_id: str) -> list[Pat
 def _pick_session(sessions_root: Path, mode: str, task_id: str, strategy: str) -> Path | None:
     sessions = _matching_sessions(sessions_root, mode, task_id)
     if not sessions:
+        if task_id:
+            return None
         sessions = list_session_dirs(sessions_root)
     if not sessions:
         return None
@@ -210,13 +224,16 @@ def _session_artifacts(session_dir: Path | None) -> dict[str, Path]:
 def _task_generated_files(cfg: dict, task: dict[str, Any] | None) -> dict[str, Path]:
     if task is None:
         return {}
-    generated_root = Path(cfg["outputs"]["generated_root_path"]) / "tasks" / _task_id(task)
-    return {
-        "generated_dir": generated_root,
-        "implementation_brief": generated_root / "implementation_brief.md",
-        "task_snapshot": generated_root / "task_snapshot.json",
-        "unit_plan": generated_root / "unit_test_plan.md",
-    }
+    generated = dict(task_generated_paths(cfg, task))
+    generated_root = generated["generated_dir"]
+    generated.update(
+        {
+            "implementation_brief": generated_root / "implementation_brief.md",
+            "task_snapshot": generated_root / "task_snapshot.json",
+            "unit_plan": generated_root / "unit_test_plan.md",
+        }
+    )
+    return generated
 
 
 def _allowed_reads(
@@ -240,17 +257,32 @@ def _allowed_reads(
                 candidates.append(path)
         if task_path is not None:
             candidates.append(task_path)
+        impl_brief = generated.get("implementation_brief")
+        if impl_brief is not None:
+            candidates.append(impl_brief)
+        for key in ("task_breakdown", "task_board", "task_progress"):
+            path = generated.get(key)
+            if path is not None:
+                candidates.append(path)
     elif stage == "implement":
         if task_path is not None:
             candidates.append(task_path)
         impl_brief = generated.get("implementation_brief")
         if impl_brief is not None:
             candidates.append(impl_brief)
+        for key in ("task_breakdown", "task_board", "task_progress"):
+            path = generated.get(key)
+            if path is not None:
+                candidates.append(path)
         for item in impl.get("read_candidates", [])[:max_reads]:
             candidates.append(Path(cfg["project_root_path"]) / str(item))
     elif stage == "verify":
         if task_path is not None:
             candidates.append(task_path)
+        for key in ("task_breakdown", "task_board", "task_progress"):
+            path = generated.get(key)
+            if path is not None:
+                candidates.append(path)
         for key in ("session_verdict", "session_brief", "compare_brief"):
             path = session_files.get(key)
             if path is not None:
@@ -264,6 +296,10 @@ def _allowed_reads(
                 candidates.append(path)
         if task_path is not None:
             candidates.append(task_path)
+        for key in ("task_board", "task_progress"):
+            path = generated.get(key)
+            if path is not None:
+                candidates.append(path)
     return _dedupe_paths(candidates)
 
 
@@ -276,6 +312,14 @@ def _allowed_edits(cfg: dict, stage: str, profile_name: str, task: dict[str, Any
     return _dedupe_paths(
         [Path(cfg["project_root_path"]) / str(item) for item in impl.get("edit_candidates", [])[:max_edit_files]]
     )
+
+
+def _focus_subtasks(
+    breakdown: dict[str, Any] | None,
+    progress: dict[str, Any] | None,
+    stage: str,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    return pick_focus_subtasks(breakdown, progress, stage)
 
 
 def _unknowns(task: dict[str, Any] | None, session_dir: Path | None, session_verdict: dict[str, Any]) -> list[str]:
@@ -306,48 +350,154 @@ def _forbidden_assumptions(stage: str) -> list[str]:
     return common + ["Do not restart the workflow from README; resume from the saved state."]
 
 
-def _next_commands(mode: str, stage: str, profile_name: str, task_path: Path | None) -> list[str]:
+def _task_stage_sequence(task: dict[str, Any] | None) -> list[str]:
+    if task is None:
+        return ["analyze", "implement", "verify"]
+    payload = derive_task_breakdown({}, task)
+    stage_map = payload.get("stage_map", {})
+    sequence = [item for item in ("analyze", "implement", "verify") if stage_map.get(item)]
+    return sequence or ["analyze", "implement", "verify"]
+
+
+def _task_is_autoflow(task: dict[str, Any] | None) -> bool:
+    if task is None:
+        return False
+    metadata = task.get("metadata", {}) if isinstance(task.get("metadata", {}), dict) else {}
+    return str(metadata.get("generated_by", "")).strip() == "agent_workbench.autoflow" or str(task.get("id", "")).startswith("autoflow_")
+
+
+def _autoflow_mark_command(task_text: str, focus_ids: list[str], status: str = "done") -> str:
+    subtask_arg = ",".join(item for item in focus_ids if item)
+    task_arg = f" --task {task_text}" if task_text else ""
+    return _ps_safe_workbench(f"agent_workbench.bat autoflow --{status} {subtask_arg}{task_arg}")
+
+
+def _verification_commands(mode: str, task: dict[str, Any] | None, task_text: str) -> list[str]:
+    if mode == "debug" and task is None:
+        return [
+            _ps_safe_workbench("agent_workbench.bat doctor"),
+            _ps_safe_workbench("agent_workbench.bat build"),
+            _ps_safe_workbench("agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status"),
+            _ps_safe_workbench("agent_workbench.bat session debug"),
+            _ps_safe_workbench("agent_workbench.bat compare --latest"),
+        ]
+
+    task_verify = (task or {}).get("verify", {}) if isinstance((task or {}).get("verify", {}), dict) else {}
+    sequence = [str(item).strip().lower() for item in task_verify.get("sequence", []) if str(item).strip()]
+    cli_commands = [str(item).strip() for item in task_verify.get("cli_commands", []) if str(item).strip()]
+    built: list[str] = []
+
+    def add(command_text: str) -> None:
+        wrapped = _ps_safe_workbench(command_text)
+        if wrapped not in built:
+            built.append(wrapped)
+
+    if not sequence:
+        sequence = ["doctor", "build", "test", "debug"] if mode == "feature" else ["doctor", "build", "debug"]
+
+    for item in sequence:
+        if item == "doctor":
+            add("agent_workbench.bat doctor")
+            continue
+        if item == "build":
+            add("agent_workbench.bat build")
+            continue
+        if item == "test" and task_text:
+            add(f"agent_workbench.bat test generate --task {task_text}")
+            add("agent_workbench.bat test run")
+            continue
+        if item in {"debug", "uart_smoke", "uart_exec", "cli"}:
+            cli_part = " ".join(f'--command "{command}"' for command in (cli_commands or ["help", "status"]))
+            add(f"agent_workbench.bat uart exec --reset-first --expect-ready {cli_part}".strip())
+            continue
+        if item in {"session_debug", "debug_session"}:
+            add("agent_workbench.bat session debug")
+            continue
+        if item in {"feature", "session_feature", "feature_session"} and task_text:
+            add(f"agent_workbench.bat session feature --task {task_text}")
+            continue
+        if item in {"compare", "compare_latest"}:
+            add("agent_workbench.bat compare --latest")
+            continue
+        if item in {"report", "report_latest"}:
+            add("agent_workbench.bat report --latest")
+            continue
+
+    if built:
+        return built
+    if mode == "debug":
+        return [
+            _ps_safe_workbench("agent_workbench.bat doctor"),
+            _ps_safe_workbench("agent_workbench.bat build"),
+            _ps_safe_workbench("agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status"),
+        ]
+    if mode == "feature" and task_text:
+        return [
+            _ps_safe_workbench("agent_workbench.bat doctor"),
+            _ps_safe_workbench("agent_workbench.bat build"),
+            _ps_safe_workbench(f"agent_workbench.bat test generate --task {task_text}"),
+            _ps_safe_workbench("agent_workbench.bat test run"),
+            _ps_safe_workbench(f"agent_workbench.bat session feature --task {task_text}"),
+            _ps_safe_workbench("agent_workbench.bat compare --latest"),
+        ]
+    if mode == "test" and task_text:
+        return [
+            _ps_safe_workbench("agent_workbench.bat doctor"),
+            _ps_safe_workbench("agent_workbench.bat build"),
+            _ps_safe_workbench(f"agent_workbench.bat test generate --task {task_text}"),
+            _ps_safe_workbench("agent_workbench.bat test run"),
+        ]
+    return [_ps_safe_workbench("agent_workbench.bat report --latest")]
+
+
+def _next_commands(
+    mode: str,
+    stage: str,
+    profile_name: str,
+    task_path: Path | None,
+    task: dict[str, Any] | None,
+    focus_ids: list[str] | None = None,
+) -> list[str]:
     task_text = str(task_path).replace("\\", "/") if task_path else ""
     task_arg = f" --task {task_text}" if task_text else ""
     profile_arg = f" --profile {profile_name}"
-    if stage == "analyze":
-        return [
-            f"agent_workbench.bat context --mode {mode} --stage implement{task_arg}{profile_arg}",
-            "Only after analysis is complete, make the smallest safe change in allowed edit files.",
+    stage_sequence = _task_stage_sequence(task)
+    current_index = stage_sequence.index(stage) if stage in stage_sequence else 0
+    next_stage = stage_sequence[min(current_index + 1, len(stage_sequence) - 1)] if stage_sequence else "verify"
+    should_resume = _task_is_autoflow(task)
+    finish_commands: list[str] = []
+    if should_resume and focus_ids:
+        finish_commands = [
+            _autoflow_mark_command(task_text, focus_ids, status="done"),
+            _ps_safe_workbench("agent_workbench.bat autoflow --resume"),
         ]
+    if stage == "analyze":
+        if finish_commands:
+            return finish_commands
+        commands = [_ps_safe_workbench(f"agent_workbench.bat context --mode {mode} --stage {next_stage}{task_arg}{profile_arg}")]
+        if should_resume:
+            commands.append(_ps_safe_workbench("agent_workbench.bat autoflow --resume"))
+        return commands
     if stage == "implement":
-        commands = ["agent_workbench.bat build"]
-        if mode in {"feature", "test"} and task_text:
-            commands.append(f"agent_workbench.bat test run")
-        commands.append(f"agent_workbench.bat context --mode {mode} --stage verify{task_arg}{profile_arg}")
+        commands = [_ps_safe_workbench("agent_workbench.bat build")]
+        if mode == "test" and task_text:
+            commands.append(_ps_safe_workbench(f"agent_workbench.bat test generate --task {task_text}"))
+            commands.append(_ps_safe_workbench("agent_workbench.bat test run"))
+        elif mode == "feature" and task_text:
+            commands.append(_ps_safe_workbench("agent_workbench.bat test run"))
+        if finish_commands:
+            commands.extend(finish_commands)
+        else:
+            commands.append(_ps_safe_workbench(f"agent_workbench.bat context --mode {mode} --stage {next_stage}{task_arg}{profile_arg}"))
+            if should_resume:
+                commands.append(_ps_safe_workbench("agent_workbench.bat autoflow --resume"))
         return commands
     if stage == "verify":
-        if mode == "debug":
-            return [
-                "agent_workbench.bat doctor",
-                "agent_workbench.bat build",
-                "agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status",
-                "agent_workbench.bat session debug",
-                "agent_workbench.bat compare --latest",
-            ]
-        if mode == "feature":
-            return [
-                "agent_workbench.bat doctor",
-                "agent_workbench.bat build",
-                f"agent_workbench.bat test generate --task {task_text}",
-                "agent_workbench.bat test run",
-                f"agent_workbench.bat session feature --task {task_text}",
-                "agent_workbench.bat compare --latest",
-            ]
-        if mode == "test":
-            return [
-                "agent_workbench.bat doctor",
-                "agent_workbench.bat build",
-                f"agent_workbench.bat test generate --task {task_text}",
-                "agent_workbench.bat test run",
-            ]
-        return ["agent_workbench.bat report --latest"]
-    return [f"agent_workbench.bat context --mode {mode} --stage analyze{task_arg}{profile_arg}"]
+        commands = _verification_commands(mode, task, task_text)
+        if finish_commands:
+            commands.extend(finish_commands)
+        return commands
+    return [_ps_safe_workbench(f"agent_workbench.bat context --mode {mode} --stage analyze{task_arg}{profile_arg}")]
 
 
 def _fact_items(
@@ -359,6 +509,8 @@ def _fact_items(
     task_path: Path | None,
     session_dir: Path | None,
     verdict: dict[str, Any],
+    progress: dict[str, Any] | None = None,
+    focus_ids: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     _, profile = _profile_cfg(cfg, profile_name)
     max_items = int(profile.get("max_fact_items", 12))
@@ -410,8 +562,33 @@ def _fact_items(
                     "source": "task",
                     "evidence": str(task_path) if task_path else "task yaml",
                 },
+                {
+                    "fact_id": "F06B",
+                    "name": "task_max_edit_files",
+                    "value": str(task.get("implementation", {}).get("max_edit_files", "")),
+                    "source": "task",
+                    "evidence": str(task_path) if task_path else "task yaml",
+                },
             ]
         )
+        progress_summary = (progress or {}).get("summary", {})
+        if progress_summary:
+            counts = progress_summary.get("counts", {})
+            facts.append(
+                {
+                    "fact_id": "F06C",
+                    "name": "task_progress",
+                    "value": (
+                        f"workflow={progress_summary.get('workflow_status', 'active')} "
+                        f"done={counts.get('done', 0)} "
+                        f"pending={counts.get('pending', 0)} "
+                        f"in_progress={counts.get('in_progress', 0)} "
+                        f"blocked={counts.get('blocked', 0)}"
+                    ),
+                    "source": "task_progress",
+                    "evidence": str(task_generated_paths(cfg, task)["task_progress"]),
+                }
+            )
     if session_dir is not None:
         facts.extend(
             [
@@ -467,6 +644,16 @@ def _fact_items(
                 "evidence": str(session_dir / "assertions.jsonl"),
             }
         )
+    if focus_ids:
+        facts.append(
+            {
+                "fact_id": "F13",
+                "name": "current_subtasks",
+                "value": ", ".join(focus_ids),
+                "source": "task_breakdown",
+                "evidence": "generated task breakdown",
+            }
+        )
     return facts[:max_items]
 
 
@@ -476,6 +663,7 @@ def _brief_text(
     stage: str,
     profile_name: str,
     facts: list[dict[str, Any]],
+    focus_subtasks: list[dict[str, Any]],
     allowed_reads: list[Path],
     allowed_edits: list[Path],
     unknowns: list[str],
@@ -495,6 +683,18 @@ def _brief_text(
     for fact in facts:
         lines.append(f"- {fact['fact_id']}: {fact['name']} = {_clip(str(fact['value']), 110)}")
     lines.append("")
+    if focus_subtasks:
+        lines.append("## Current Subtasks")
+        for item in focus_subtasks:
+            title = _clip(str(item.get("title", "")), 100)
+            objective = _clip(str(item.get("objective", "")), 110)
+            status = str(item.get("status", "pending")).strip().lower() or "pending"
+            lines.append(f"- {item.get('id', '')} [{status}]: {title}")
+            if objective:
+                lines.append(f"- objective: {objective}")
+            if item.get("note"):
+                lines.append(f"- note: {_clip(str(item.get('note', '')), 110)}")
+        lines.append("")
     lines.append("## Allowed Reads")
     if allowed_reads:
         for path in allowed_reads:
@@ -544,7 +744,10 @@ def _paste_text(
     brief_path: Path,
     facts_path: Path,
     constraints_path: Path,
+    breakdown_path: Path | None,
+    task_board_path: Path | None,
     stage: str,
+    focus_ids: list[str],
     next_commands: list[str],
 ) -> str:
     action = {
@@ -561,14 +764,24 @@ def _paste_text(
         f"- {brief_path.as_posix()}",
         f"- {facts_path.as_posix()}",
         f"- {constraints_path.as_posix()}",
-        "",
+    ]
+    if breakdown_path is not None:
+        lines.append(f"- {breakdown_path.as_posix()}")
+    if task_board_path is not None:
+        lines.append(f"- {task_board_path.as_posix()}")
+    lines.extend(
+        [
+            "",
         f"This round must: {action}.",
+        f"Complete only these subtasks in this round: {', '.join(focus_ids) or 'none'}.",
         "Do not read large files unless they are explicitly listed in allowed_reads.",
         "Do not make claims without citing fact_id or session evidence.",
         "Use agent_workbench.bat for all automation actions.",
+        "Run the listed commands in order. If `autoflow --done ...` appears, execute it only after the evidence-producing commands for this round are finished.",
         "",
         "Then run or prepare only these next commands:",
-    ]
+        ]
+    )
     for command in next_commands[:4]:
         lines.append(f"- {command}")
     lines.extend(["```", ""])
@@ -589,7 +802,7 @@ def _resume_text(state: dict[str, Any]) -> str:
         "",
         "## Continue From",
     ]
-    for key in ("brief", "facts", "constraints", "paste"):
+    for key in ("brief", "facts", "constraints", "task_breakdown", "task_board", "task_progress", "paste"):
         value = generated.get(key, "")
         if value:
             lines.append(f"- {key}: `{value}`")
@@ -629,6 +842,21 @@ def write_context_pack(
 
     chosen_profile, profile = _profile_cfg(cfg, profile_name)
     task = load_task_spec(task_path) if task_path else None
+    breakdown_path: Path | None = None
+    task_board_path: Path | None = None
+    task_progress_path: Path | None = None
+    breakdown: dict[str, Any] | None = None
+    progress: dict[str, Any] | None = None
+    focus_subtasks: list[dict[str, Any]] = []
+    focus_ids: list[str] = []
+    if task is not None and bool(task.get("decomposition", {}).get("enabled", True)):
+        breakdown_path = write_task_breakdown(cfg, task_path)
+        breakdown = derive_task_breakdown(cfg, task, task_path)
+        generated = _task_generated_files(cfg, task)
+        task_board_path = generated.get("task_board")
+        task_progress_path = generated.get("task_progress")
+        progress = load_task_progress(cfg, task)
+        focus_subtasks, focus_ids = _focus_subtasks(breakdown, progress, chosen_stage)
     current_task_id = _task_id(task)
     strategy = str(profile.get("session_pick_strategy", "latest_failed_then_latest_pass"))
     selected_session = session_dir.resolve() if session_dir else _pick_session(
@@ -670,8 +898,19 @@ def write_context_pack(
     allowed_edits = _allowed_edits(cfg, chosen_stage, chosen_profile, task)
     unknown_items = _unknowns(task, selected_session, verdict)
     forbidden = _forbidden_assumptions(chosen_stage)
-    next_commands = _next_commands(chosen_mode, chosen_stage, chosen_profile, task_path)
-    facts = _fact_items(cfg, chosen_mode, chosen_stage, chosen_profile, task, task_path, selected_session, verdict)
+    next_commands = _next_commands(chosen_mode, chosen_stage, chosen_profile, task_path, task, focus_ids)
+    facts = _fact_items(
+        cfg,
+        chosen_mode,
+        chosen_stage,
+        chosen_profile,
+        task,
+        task_path,
+        selected_session,
+        verdict,
+        progress,
+        focus_ids,
+    )
 
     constraints = {
         "generated_at": utc_now_iso(),
@@ -691,6 +930,11 @@ def write_context_pack(
         "prefer_ascii_runtime_artifacts": bool(profile.get("prefer_ascii_runtime_artifacts", True)),
         "allowed_reads": [str(path) for path in allowed_reads],
         "allowed_edits": [str(path) for path in allowed_edits],
+        "task_breakdown_path": str(breakdown_path) if breakdown_path else "",
+        "task_board_path": str(task_board_path) if task_board_path else "",
+        "task_progress_path": str(task_progress_path) if task_progress_path else "",
+        "current_subtasks": focus_ids,
+        "workflow_status": str((progress or {}).get("summary", {}).get("workflow_status", "active")),
         "unknowns": unknown_items,
         "forbidden_assumptions": forbidden,
         "next_commands": next_commands,
@@ -703,6 +947,7 @@ def write_context_pack(
         "profile": chosen_profile,
         "task_id": current_task_id,
         "session_dir": str(selected_session) if selected_session else "",
+        "task_progress_path": str(task_progress_path) if task_progress_path else "",
         "facts": facts,
     }
 
@@ -712,6 +957,7 @@ def write_context_pack(
         chosen_stage,
         chosen_profile,
         facts,
+        focus_subtasks,
         allowed_reads,
         allowed_edits,
         unknown_items,
@@ -739,6 +985,9 @@ def write_context_pack(
         "latest_verdict": verdict.get("status", "needs_review"),
         "latest_verdict_summary": verdict.get("summary", ""),
         "next_commands": next_commands,
+        "current_subtasks": focus_ids,
+        "workflow_status": str((progress or {}).get("summary", {}).get("workflow_status", "active")),
+        "task_progress_summary": (progress or {}).get("summary", {}),
         "allowed_reads": [str(path) for path in allowed_reads],
         "allowed_edits": [str(path) for path in allowed_edits],
         "unknowns": unknown_items,
@@ -748,10 +997,25 @@ def write_context_pack(
             "constraints": str(constraints_path),
             "resume": str(resume_path),
             "paste": str(paste_path),
+            "task_breakdown": str(breakdown_path) if breakdown_path else "",
+            "task_board": str(task_board_path) if task_board_path else "",
+            "task_progress": str(task_progress_path) if task_progress_path else "",
         },
     }
     write_json(state_path, state)
 
-    paste_path.write_text(_paste_text(brief_path, facts_path, constraints_path, chosen_stage, next_commands), encoding="utf-8")
+    paste_path.write_text(
+        _paste_text(
+            brief_path,
+            facts_path,
+            constraints_path,
+            breakdown_path,
+            task_board_path,
+            chosen_stage,
+            focus_ids,
+            next_commands,
+        ),
+        encoding="utf-8",
+    )
     resume_path.write_text(_resume_text(state), encoding="utf-8")
     return brief_path

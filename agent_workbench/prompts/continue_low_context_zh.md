@@ -1,89 +1,42 @@
 # Continue 低上下文阶段模板
 
-这份模板面向 DeepSeek-R1 / Qwen 这类小上下文、本地部署、容易幻觉的模型。
+这份模板用于 DeepSeek-R1 / Qwen 这类本地模型。
 
-默认原则：
+默认规则：
 
-1. 配置里先选好 `agent.default_profile`。
-2. 每一轮先运行 `agent_workbench.bat context ...`。
-3. 只把当前阶段最新生成的 `*_paste.md` 粘给 Continue。
-4. 一轮只做一个阶段，不混做分析、实现、验证。
-5. 不允许模型自行扩读大文件，只能按 `constraints.json` 行动。
-
-如果你想临时覆盖默认 profile，再额外加 `--profile deepseek16k` 或 `--profile qwen32k`。
-
-## 1. 调试分析阶段
-
-先执行：
+1. 如果用户给的是自然语言目标，第一动作固定是运行：
 
 ```powershell
-agent_workbench.bat context --mode debug --stage analyze
+cmd /c ".\agent_workbench.bat autoflow --goal ""<用户原始需求>"""
 ```
 
-再把最新 `*_paste.md` 粘给 Continue。
-
-本轮要求：
-
-- 只分析 evidence
-- 不改代码
-- 不读大文件
-- 只给出根因排序和唯一下一步
-
-## 2. 功能实现阶段
-
-先执行：
+2. 先打开 [autoflow_start.md](../runtime/autoflow_start.md)。
+3. 只读取当前阶段的 `*_paste.md`、`task_breakdown.md` 和 task draft。
+4. 一轮只做当前 `current_subtasks`。
+5. 阶段推进后，固定运行：
 
 ```powershell
-agent_workbench.bat context --mode feature --stage implement --task agent_workbench\tasks\<TASK>.yaml
+cmd /c ".\agent_workbench.bat autoflow --resume"
 ```
 
-再把最新 `*_paste.md` 粘给 Continue。
+6. 只有遇到真实阻塞、非零退出码、或 `manual_checks_pending=true` 才停下。
 
-本轮要求：
-
-- 只做最小修改
-- 只允许读 `constraints.json` 里的 `allowed_reads`
-- 只允许改 `allowed_edits`
-- 不扩 scope
-
-## 3. 验证阶段
-
-先执行：
-
-```powershell
-agent_workbench.bat context --mode feature --stage verify --task agent_workbench\tasks\<TASK>.yaml
-```
-
-再把最新 `*_paste.md` 粘给 Continue。
-
-本轮要求：
-
-- 只执行 workbench 命令
-- 只读最新 evidence
-- 结论必须引用 `session_verdict.json`、`session_brief.md`、`assertions.jsonl`、`cli_transcript.log`
-
-## 4. 续接阶段
-
-如果上下文快满，先执行：
-
-```powershell
-agent_workbench.bat context --stage resume
-```
-
-再把最新 `*_paste.md` 粘给 Continue。
-
-本轮要求：
-
-- 不重新从 README 开始
-- 只基于 `agent_state.json` 和最新 `*_resume.md` 续接
-- 继续当前阶段，而不是重新发散
-
-## 5. 可直接粘贴给 Continue 的最短说明
+可直接粘贴给 Continue 的最短模板：
 
 ```text
-Read only the newest *_paste.md generated under agent_workbench/runtime.
-Follow its stage rules exactly.
-Use agent_workbench.bat for every automation action.
-Do not read extra files unless they are listed in allowed_reads.
-Do not claim anything without citing fact_id or evidence files.
+你现在在当前 STM32 HAL + agent_workbench 项目中工作。
+如果用户给的是自然语言目标，不要自己规划长流程。
+第一动作固定运行：
+cmd /c ".\agent_workbench.bat autoflow --goal ""<用户原始需求>"""
+
+然后先读：
+- agent_workbench/runtime/autoflow_start.md
+
+之后严格遵守：
+1. 只完成当前阶段的 current_subtasks
+2. 只使用 agent_workbench.bat 做自动化动作
+3. 不要额外读大文件
+4. 每次阶段切换后都运行：
+   cmd /c ".\agent_workbench.bat autoflow --resume"
+5. 只基于最新 evidence 下结论
 ```

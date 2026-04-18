@@ -99,6 +99,15 @@ def _defaults() -> dict[str, Any]:
             "probe_commands": ["help", "version", "state", "range", "alerts"],
             "help_rows": [],
         },
+        "diag_uart": {
+            "enabled": True,
+            "port": "COM6",
+            "baudrate": 115200,
+            "default_crc": "modbus",
+            "response_timeout_sec": 1.0,
+            "silence_timeout_sec": 0.05,
+            "read_timeout_sec": 0.02,
+        },
         "monitor": {
             "enabled": True,
             "sample_hz": 10,
@@ -190,6 +199,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
+    raw["outputs"]["requests_root_path"] = raw["outputs"]["generated_root_path"] / "requests"
     raw["outputs"]["continue_runtime_root_path"] = raw["outputs"]["runtime_root_path"] / "continue"
     raw["monitor"]["symbols"]["elf_path"] = str(_resolve(raw["monitor"]["symbols"]["elf_path"], project_root))
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
@@ -201,6 +211,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)
     raw["prompts"]["report_path"] = _resolve(raw["prompts"]["report"], workbench_root)
     raw["agent"]["state_path"] = raw["outputs"]["runtime_root_path"] / "agent_state.json"
+    raw["agent"]["autoflow_state_path"] = raw["outputs"]["runtime_root_path"] / "autoflow_state.json"
     raw["template_values"] = {
         "python": sys.executable,
         "project_root": str(project_root),

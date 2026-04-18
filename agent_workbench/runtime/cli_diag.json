@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-04-17T15:01:56.462+00:00",
+  "symbol": "DebugCliStats",
+  "saw_ready": false,
+  "saw_prompt": false,
+  "timeout_commands": [],
+  "openocd": {
+    "host": "127.0.0.1",
+    "port": 4444,
+    "command": "openocd",
+    "startup_message": "openocd started pid=15512 (127.0.0.1:4444)",
+    "halt_output": "halt\r\n\u0000[stm32f1x.cpu] halted due to debug-request, current mode: Thread \r\nxPSR: 0x01000000 pc: 0x08000240 msp: 0x20004ff0\r\n\r>",
+    "resume_output": "resume\r\n\u0000\r>",
+    "shutdown_message": "openocd stopped via telnet pid=15512"
+  },
+  "status": "ok",
+  "symbol_address": "0x2000034c",
+  "raw_words": [
+    "0x5a308d75",
+    "0x44215467",
+    "0x73b86ec7",
+    "0xac2e9a76",
+    "0x716d6ff5",
+    "0x54245970",
+    "0x742e87ac",
+    "0x2aac0fae",
+    "0x602fd74f",
+    "0xc989599c",
+    "0x090be286",
+    "0x2882924a",
+    "0x9b0dfc57",
+    "0x97aabbbb"
+  ],
+  "stats": {
+    "rx_bytes": 1513131381,
+    "rx_lines": 1143034983,
+    "cmd_ok": 1941466823,
+    "cmd_err": 2888735350,
+    "rx_overflow": 1902997493,
+    "uart_error": 1411668336,
+    "last_cmd": "��.t�\u000f�*O�/`�Y�Ɇ�\u000b\tJ��(W�\r�����"
+  },
+  "classification": {
+    "code": "ready_missing",
+    "summary": "CLI ready banner missing",
+    "detail": "Target did not emit the expected boot handshake after reset."
+  }
+}

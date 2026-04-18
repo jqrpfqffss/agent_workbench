@@ -1,0 +1,58 @@
+{
+  "id": "autoflow_feature_task",
+  "mode": "feature",
+  "goal": "点亮红灯",
+  "scope": {
+    "include": [
+      "Core/Src/main.c"
+    ],
+    "exclude": [
+      "Drivers"
+    ]
+  },
+  "acceptance": {
+    "blackbox": [],
+    "unit": []
+  },
+  "observability": {
+    "notes": [
+      "Keep the change minimal and do not break the UART CLI."
+    ],
+    "manual_checks": []
+  },
+  "verify": {
+    "sequence": [
+      "doctor",
+      "build",
+      "uart_smoke"
+    ],
+    "cli_commands": [
+      "help",
+      "status"
+    ]
+  },
+  "implementation": {
+    "read_candidates": [
+      "Core/Src/main.c"
+    ],
+    "edit_candidates": [
+      "Core/Src/main.c"
+    ],
+    "stable_strings": [
+      "STM32 UART CLI ready.",
+      "cli>",
+      "Available commands:"
+    ],
+    "max_edit_files": 2
+  },
+  "decomposition": {
+    "enabled": true,
+    "subtasks": []
+  },
+  "metadata": {
+    "generated_by": "agent_workbench.autoflow",
+    "project": "serial",
+    "created_at": "2026-04-12T11:48:16.596+00:00",
+    "goal_summary": "点亮红灯"
+  }
+}

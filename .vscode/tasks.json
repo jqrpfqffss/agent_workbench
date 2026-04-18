@@ -1,5 +1,13 @@
 {
   "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "awbAutoflowGoal",
+      "type": "promptString",
+      "description": "Describe the natural-language task goal for autoflow",
+      "default": "\u4f7f\u7528 TIM3 \u5b9a\u65f6\u5668\u8ba9 RED LED(PB0) \u4ee5\u7ea6 1 Hz \u95ea\u70c1"
+    }
+  ],
   "tasks": [
     {
       "label": "Agent Workbench: Setup",
@@ -24,6 +32,18 @@
       "problemMatcher": []
     },
     {
+      "label": "Agent Workbench: Autoflow From Current Goal",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat autoflow --goal \"\"${input:awbAutoflowGoal}\"\"\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Autoflow Resume",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat autoflow --resume\"",
+      "problemMatcher": []
+    },
+    {
       "label": "Agent Workbench: Context Pack (Debug Analyze)",
       "type": "shell",
       "command": "cmd /c \".\\agent_workbench.bat context --mode debug --stage analyze\"",
@@ -45,6 +65,12 @@
       "label": "Agent Workbench: Context Pack (Test Analyze)",
       "type": "shell",
       "command": "cmd /c \".\\agent_workbench.bat context --mode test --stage analyze --task agent_workbench/tasks/cli_automation_regression.yaml\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agent Workbench: Task Breakdown (CLI Regression)",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat decompose --task agent_workbench/tasks/cli_automation_regression.yaml\"",
       "problemMatcher": []
     },
     {

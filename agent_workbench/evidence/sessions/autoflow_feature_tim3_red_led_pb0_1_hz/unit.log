@@ -1,0 +1,16 @@
+
+[2026-04-12T09:19:06.075+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+....s.................F...
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 228, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.651s
+
+FAILED (failures=1, skipped=1)
+[2026-04-12T09:19:06.976+00:00] exit=1

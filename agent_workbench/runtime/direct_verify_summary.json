@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-04-08T14:49:33.178+00:00",
-  "task_id": "timer_led_blink",
+  "generated_at": "2026-04-12T11:42:17.613+00:00",
+  "task_id": "cli_automation_regression",
   "status": "fail",
   "exit_code": 1,
   "steps": [
@@ -23,7 +23,7 @@
       "code": 0,
       "status": "pass",
       "detail": "generated",
-      "artifact": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\timer_led_blink"
+      "artifact": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\cli_automation_regression"
     },
     {
       "name": "test_run",

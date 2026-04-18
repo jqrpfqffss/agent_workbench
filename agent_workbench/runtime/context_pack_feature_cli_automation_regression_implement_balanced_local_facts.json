@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-08T11:55:36.922+00:00",
+  "generated_at": "2026-04-12T04:48:30.627+00:00",
   "mode": "feature",
   "stage": "implement",
   "profile": "balanced_local",
@@ -82,6 +82,13 @@
       "value": "pass=1 fail=9 skip=0",
       "source": "assertions",
       "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\assertions.jsonl"
+    },
+    {
+      "fact_id": "F13",
+      "name": "current_subtasks",
+      "value": "S3, S4",
+      "source": "task_breakdown",
+      "evidence": "generated task breakdown"
     }
   ]
 }

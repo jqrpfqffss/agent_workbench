@@ -50,11 +50,28 @@ class VscodeServiceTests(unittest.TestCase):
             'cmd /c ".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml"',
             commands,
         )
+        self.assertIn(
+            'cmd /c ".\\agent_workbench.bat decompose --task agent_workbench/tasks/cli_automation_regression.yaml"',
+            commands,
+        )
+        self.assertIn(
+            'cmd /c ".\\agent_workbench.bat autoflow --goal ""${input:awbAutoflowGoal}"""',
+            commands,
+        )
+        self.assertIn(
+            'cmd /c ".\\agent_workbench.bat autoflow --resume"',
+            commands,
+        )
         self.assertTrue(all("--profile" not in command for command in commands if " context " in f" {command} "))
         self.assertTrue(all(command.startswith('cmd /c ".\\') for command in commands))
+        self.assertEqual(payload["inputs"][0]["id"], "awbAutoflowGoal")
 
         runtime_prompt = self.temp_dir / "agent_workbench" / "runtime" / "continue" / "local_model_debug_analyze.md"
         continue_prompt = self.temp_dir / ".continue" / "prompts" / "local_model_debug_analyze.md"
+        breakdown_prompt = self.temp_dir / "agent_workbench" / "runtime" / "continue" / "local_model_task_breakdown.md"
+        autoflow_prompt = self.temp_dir / "agent_workbench" / "runtime" / "continue" / "local_model_autoflow.md"
         self.assertTrue(runtime_prompt.exists())
         self.assertTrue(continue_prompt.exists())
+        self.assertTrue(breakdown_prompt.exists())
+        self.assertTrue(autoflow_prompt.exists())
         self.assertIn("deepseek16k", runtime_prompt.read_text(encoding="utf-8"))

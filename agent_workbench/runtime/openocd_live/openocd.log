@@ -7,13 +7,17 @@ Info : Listening on port 6666 for tcl connections
 Info : Listening on port 4444 for telnet connections
 Info : clock speed 1000 kHz
 Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
-Info : Target voltage: 3.201051
+Info : Target voltage: 3.213132
 Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
 Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
 Info : [stm32f1x.cpu] Examination succeed
 Info : [stm32f1x.cpu] starting gdb server on 3333
 Info : Listening on port 3333 for gdb connections
 Info : accepting 'telnet' connection on tcp/4444
+Info : dropped 'telnet' connection (error -400)
+Info : accepting 'telnet' connection on tcp/4444
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08000240 msp: 0x20004ff0
 Info : dropped 'telnet' connection (error -400)
 Info : accepting 'telnet' connection on tcp/4444
 shutdown command invoked

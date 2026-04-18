@@ -1,0 +1,10 @@
+assertions:
+- name: cli_ready_banner_seen
+  type: cli_ready
+  needle: STM32 UART CLI ready.
+- name: cli_prompt_seen
+  type: cli_prompt_seen
+  needle: cli>
+- name: cli_command_ack_seen
+  type: cli_contains
+  needle: '[ok] red -> on'

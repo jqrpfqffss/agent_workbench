@@ -1,0 +1,87 @@
+id: autoflow_cli_red_on
+mode: feature
+goal: 请通过 CLI 点亮红灯
+scope:
+  include: []
+  exclude:
+  - Drivers
+acceptance:
+  blackbox:
+  - name: cli_ready_banner_seen
+    type: cli_ready
+    needle: STM32 UART CLI ready.
+  - name: cli_prompt_seen
+    type: cli_prompt_seen
+    needle: cli>
+  - name: cli_command_ack_seen
+    type: cli_contains
+    needle: '[ok] red -> on'
+  unit:
+  - No firmware code changes are required for this task.
+  - The existing UART CLI command should be sufficient.
+observability:
+  notes:
+  - Treat this as a direct CLI operation, not a code implementation task.
+  - Do not modify source files unless UART evidence proves the existing command path
+    is broken.
+  manual_checks: []
+verify:
+  sequence:
+  - uart_smoke
+  cli_commands:
+  - red on
+  - status
+implementation:
+  read_candidates: []
+  edit_candidates: []
+  stable_strings:
+  - STM32 UART CLI ready.
+  - cli>
+  - '[ok] red -> on'
+  - LED RED
+  max_edit_files: 0
+decomposition:
+  enabled: true
+  subtasks:
+  - id: S1
+    stage: analyze
+    title: Confirm the exact existing CLI command.
+    objective: Map the natural-language goal to a built-in UART CLI command without
+      inventing code work.
+    inputs:
+    - task yaml
+    - verify.cli_commands
+    done_when: The exact UART command is fixed for this run.
+  - id: S2
+    stage: analyze
+    title: Lock the verify-only path.
+    objective: Confirm that no code edits are required and the next round should jump
+      directly to verification.
+    inputs:
+    - implementation.max_edit_files
+    - stable_strings
+    done_when: The task is confirmed as verify-only.
+  - id: S3
+    stage: verify
+    title: Run the UART CLI command.
+    objective: Execute the exact UART command and capture transcript evidence.
+    inputs:
+    - red on
+    - status
+    done_when: A fresh transcript shows the command response.
+  - id: S4
+    stage: verify
+    title: Report from transcript evidence only.
+    objective: Use the transcript and diagnostics to report pass, fail, blocked, or
+      needs_review.
+    inputs:
+    - cli_transcript.log
+    - cli_diag.json
+    done_when: The result is supported by fresh UART evidence.
+metadata:
+  generated_by: agent_workbench.autoflow
+  project: serial
+  created_at: '2026-04-12T12:06:32.251+00:00'
+  goal_summary: 请通过 CLI 点亮红灯
+  autoflow_kind: direct_cli
+  direct_cli_command: red on

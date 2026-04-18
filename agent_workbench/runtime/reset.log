@@ -1,0 +1,19 @@
+
+[2026-04-17T14:50:58.294+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: open failed
+
+
+[2026-04-17T14:50:59.811+00:00] exit=1
+
+[2026-04-17T14:52:27.276+00:00] $ STM32_Programmer_CLI -c port=SWD -rst
+'STM32_Programmer_CLI' is not recognized as an internal or external command,
+operable program or batch file.
+[2026-04-17T14:52:27.606+00:00] exit=1

@@ -6,7 +6,7 @@ scope:
   include:
     - Core/Src/main.c
     - Core/Src/stm32f1xx_it.c
-    - Core/Inc/main.h
+    - Core/Inc/stm32f1xx_hal_conf.h
   exclude:
     - Drivers
     - Core/Src/cli.c
@@ -19,9 +19,6 @@ acceptance:
       needle: "STM32 UART CLI ready."
     - name: cli_prompt_seen
       type: cli_prompt_seen
-    - name: red_led_blinks
-      type: manual_observation
-      notes: "RED LED should toggle on/off approximately every 500ms (1 Hz blink)"
     - name: cli_still_responsive
       type: cli_contains
       needle: "Available commands:"
@@ -33,22 +30,17 @@ acceptance:
 
 implementation:
   max_edit_files: 3
-  allowed_edits:
-    - file: Core/Src/main.c
-      changes:
-        - "Add MX_TIM3_Init() function declaration and call"
-        - "Add HAL_TIM_Base_Start_IT(&htim3) in USER CODE BEGIN 2 section"
-    - file: Core/Src/stm32f1xx_it.c
-      changes:
-        - "Add TIM3_IRQHandler() that calls HAL_TIM_IRQHandler(&htim3)"
-        - "Add HAL_TIM_PeriodElapsedCallback() that toggles LED_RED_Pin"
-    - file: Core/Inc/main.h
-      changes:
-        - "Add TIM_HandleTypeDef htim3 extern declaration if needed"
+  read_candidates:
+    - Core/Src/main.c
+    - Core/Src/stm32f1xx_it.c
+    - Core/Inc/stm32f1xx_hal_conf.h
+  edit_candidates:
+    - Core/Src/main.c
+    - Core/Src/stm32f1xx_it.c
+    - Core/Inc/stm32f1xx_hal_conf.h
   stable_strings:
     - "STM32 UART CLI ready."
     - "Available commands:"
-    - All existing CLI command names and help text
 
 notes:
   - Use HSI clock (8 MHz) as timer source
@@ -62,6 +54,9 @@ observability:
     - TIM3 interrupt toggles LED_RED_Pin every 500ms
     - CLI should remain responsive during timer operation
     - No new CLI output format changes required
+  manual_checks:
+    - name: red_led_blinks
+      instructions: "Verify on hardware that RED LED(PB0) toggles about every 500ms, producing about 1 Hz blinking."
   diagnostics:
     - check TIM3 is running after boot
     - check LED_RED_Pin toggling in interrupt callback

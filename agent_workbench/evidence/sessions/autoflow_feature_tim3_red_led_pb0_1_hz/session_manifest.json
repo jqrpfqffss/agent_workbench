@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-04-12T09:19:05.263+00:00",
+  "mode": "feature",
+  "project": "serial",
+  "project_root": "H:\\stm32_RAG\\code\\serial",
+  "config_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml",
+  "task": {
+    "id": "autoflow_feature_tim3_red_led_pb0_1_hz",
+    "mode": "feature",
+    "goal": "使用 TIM3 定时器让 RED LED(PB0) 以约 1 Hz 闪烁",
+    "scope": {
+      "include": [
+        "Core/Src/main.c",
+        "Core/Src/stm32f1xx_it.c",
+        "Core/Inc/stm32f1xx_hal_conf.h"
+      ],
+      "exclude": [
+        "Drivers",
+        "Core/Src/cli.c",
+        "Core/Src/app_cli_commands.c"
+      ]
+    },
+    "acceptance": {
+      "blackbox": [
+        {
+          "name": "cli_ready_banner_seen",
+          "type": "cli_ready",
+          "needle": "STM32 UART CLI ready."
+        },
+        {
+          "name": "cli_prompt_seen",
+          "type": "cli_prompt_seen",
+          "needle": "cli>"
+        },
+        {
+          "name": "cli_still_responsive",
+          "type": "cli_contains",
+          "needle": "Available commands:"
+        }
+      ],
+      "unit": [
+        "TIM3 is initialized with the expected prescaler and auto-reload values.",
+        "TIM3 interrupt toggles LED_RED_Pin.",
+        "Timer start is triggered after the existing peripheral initialization path.",
+        "Existing UART CLI behavior remains available."
+      ]
+    },
+    "observability": {
+      "notes": [
+        "Use TIM3 interrupt-driven toggling for RED LED(PB0).",
+        "Keep UART CLI ready banner, prompt, and help text stable."
+      ],
+      "manual_checks": [
+        {
+          "name": "red_led_blinks",
+          "instructions": "Verify on hardware that RED LED(PB0) toggles about every 500 ms, producing about 1 Hz blinking.",
+          "source": "autoflow_goal"
+        }
+      ]
+    },
+    "verify": {
+      "sequence": [
+        "doctor",
+        "build",
+        "uart_smoke"
+      ],
+      "cli_commands": [
+        "help",
+        "status"
+      ]
+    },
+    "implementation": {
+      "read_candidates": [
+        "Core/Src/main.c",
+        "Core/Src/stm32f1xx_it.c",
+        "Core/Inc/stm32f1xx_hal_conf.h"
+      ],
+      "edit_candidates": [
+        "Core/Src/main.c",
+        "Core/Src/stm32f1xx_it.c",
+        "Core/Inc/stm32f1xx_hal_conf.h"
+      ],
+      "stable_strings": [
+        "STM32 UART CLI ready.",
+        "cli>",
+        "Available commands:"
+      ],
+      "max_edit_files": 3
+    },
+    "decomposition": {
+      "enabled": true,
+      "subtasks": []
+    },
+    "metadata": {
+      "generated_by": "agent_workbench.autoflow",
+      "project": "serial",
+      "created_at": "2026-04-12T05:10:12.089+00:00",
+      "goal_summary": "使用 TIM3 定时器让 RED LED(PB0) 以约 1 Hz 闪烁"
+    }
+  }
+}

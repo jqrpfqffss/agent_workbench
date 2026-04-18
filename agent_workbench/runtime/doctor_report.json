@@ -3,7 +3,7 @@
     {
       "name": "python",
       "level": "ok",
-      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
+      "detail": "D:\\Anaconda1\\python.exe"
     },
     {
       "name": "yaml",
@@ -62,13 +62,8 @@
     },
     {
       "name": "uart_backend",
-      "level": "ok",
-      "detail": "pyserial available"
-    },
-    {
-      "name": "uart_port",
-      "level": "ok",
-      "detail": "COM3"
+      "level": "warn",
+      "detail": "pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial."
     },
     {
       "name": "agent_profile",
@@ -88,29 +83,39 @@
     {
       "name": "context_budget",
       "level": "ok",
-      "detail": "context_pack_feature_timer_led_blink_implement_balanced_local_brief.md words=199 budget=550"
+      "detail": "context_pack_feature_autoflow_cli_red_on_verify_balanced_local_brief.md words=197 budget=550"
     },
     {
       "name": "paste_card",
       "level": "ok",
-      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_timer_led_blink_implement_balanced_local_paste.md"
+      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\context_pack_feature_autoflow_cli_red_on_verify_balanced_local_paste.md"
     },
     {
       "name": "task_scope",
       "level": "ok",
-      "detail": "include=3 max_edit_files=3"
+      "detail": "include=0 max_edit_files=0"
     },
     {
       "name": "task_candidates",
+      "level": "warn",
+      "detail": "read_candidates=0 edit_candidates=0"
+    },
+    {
+      "name": "autoflow_state",
       "level": "ok",
-      "detail": "read_candidates=3 edit_candidates=3"
+      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\autoflow_state.json"
+    },
+    {
+      "name": "autoflow_start",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\autoflow_start.md"
     },
     {
       "name": "unit_command",
       "level": "ok",
-      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+      "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
     }
   ],
   "fail_count": 0,
-  "warn_count": 0
+  "warn_count": 2
 }

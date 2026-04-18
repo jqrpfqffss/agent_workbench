@@ -505,3 +505,124 @@ mingw32-make: *** [Makefile:90: all] Error 2
   16964	    120	   1936	  19020	   4a4c	H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf
 [100%] Built target serial
 [2026-04-08T14:49:31.089+00:00] exit=0
+
+[2026-04-12T05:10:29.547+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T05:10:31.462+00:00] exit=0
+
+[2026-04-12T05:10:31.462+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[  4%] Building C object CMakeFiles/serial.dir/Core/Src/main.c.obj
+[  9%] Building C object CMakeFiles/serial.dir/Core/Src/cli.c.obj
+[ 13%] Building C object CMakeFiles/serial.dir/Core/Src/app_cli_commands.c.obj
+[ 18%] Building C object CMakeFiles/serial.dir/Core/Src/stm32f1xx_hal_msp.c.obj
+[ 22%] Building C object CMakeFiles/serial.dir/Core/Src/stm32f1xx_it.c.obj
+[ 27%] Building C object CMakeFiles/serial.dir/Core/Src/system_stm32f1xx.c.obj
+[ 31%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c.obj
+[ 36%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c.obj
+[ 40%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c.obj
+[ 45%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c.obj
+[ 50%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c.obj
+[ 54%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c.obj
+[ 59%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c.obj
+[ 63%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c.obj
+[ 68%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c.obj
+[ 72%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj
+[ 77%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c.obj
+[ 81%] Building C object CMakeFiles/serial.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c.obj
+[ 86%] Linking C executable serial.elf
+   text	   data	    bss	    dec	    hex	filename
+  16964	    120	   1936	  19020	   4a4c	H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf
+[100%] Built target serial
+[2026-04-12T05:10:36.059+00:00] exit=0
+
+[2026-04-12T06:14:54.852+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T06:14:55.029+00:00] exit=0
+
+[2026-04-12T06:14:55.030+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T06:14:55.587+00:00] exit=0
+
+[2026-04-12T09:09:20.855+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T09:09:21.036+00:00] exit=0
+
+[2026-04-12T09:09:21.037+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T09:09:21.668+00:00] exit=0
+
+[2026-04-12T11:38:26.570+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T11:38:27.140+00:00] exit=0
+
+[2026-04-12T11:38:27.141+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T11:38:27.924+00:00] exit=0
+
+[2026-04-12T11:39:51.553+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T11:39:51.792+00:00] exit=0
+
+[2026-04-12T11:39:51.793+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T11:39:52.399+00:00] exit=0
+
+[2026-04-12T11:42:14.170+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T11:42:14.402+00:00] exit=0
+
+[2026-04-12T11:42:14.403+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T11:42:15.005+00:00] exit=0
+
+[2026-04-12T11:49:16.981+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T11:49:17.241+00:00] exit=0
+
+[2026-04-12T11:49:17.241+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T11:49:17.865+00:00] exit=0
+
+[2026-04-12T13:02:39.391+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-12T13:02:39.823+00:00] exit=0
+
+[2026-04-12T13:02:39.824+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-12T13:02:40.685+00:00] exit=0
+
+[2026-04-17T14:58:12.682+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-17T14:58:12.852+00:00] exit=0
+
+[2026-04-17T14:58:12.853+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-17T14:58:13.421+00:00] exit=0
+
+[2026-04-17T15:00:00.406+00:00] $ cmake -S . -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
+[2026-04-17T15:00:00.564+00:00] exit=0
+
+[2026-04-17T15:00:00.565+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[100%] Built target serial
+[2026-04-17T15:00:01.557+00:00] exit=0

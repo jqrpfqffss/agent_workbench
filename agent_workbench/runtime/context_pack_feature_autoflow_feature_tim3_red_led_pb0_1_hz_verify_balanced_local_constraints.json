@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-04-12T05:10:39.834+00:00",
+  "mode": "feature",
+  "stage": "verify",
+  "profile": "balanced_local",
+  "task_id": "autoflow_feature_tim3_red_led_pb0_1_hz",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\tim3_red_led_pb0_1_hz_20260412_131012\\task_draft.yaml",
+  "session_dir": "",
+  "max_pack_words": 550,
+  "max_fact_items": 12,
+  "max_cli_tail_lines": 6,
+  "max_failed_assertions_shown": 3,
+  "max_extra_reads": 2,
+  "max_edit_files": 3,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\tim3_red_led_pb0_1_hz_20260412_131012\\task_draft.yaml",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_feature_tim3_red_led_pb0_1_hz\\task_breakdown.md"
+  ],
+  "allowed_edits": [],
+  "task_breakdown_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_feature_tim3_red_led_pb0_1_hz\\task_breakdown.md",
+  "current_subtasks": [
+    "S5",
+    "S6"
+  ],
+  "unknowns": [
+    "No matching evidence session is available.",
+    "The current verdict is incomplete and may require one more validation pass."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not change code in this round.",
+    "Do not claim pass until new evidence is generated."
+  ],
+  "next_commands": [
+    "cmd /c \".\\agent_workbench.bat doctor\"",
+    "cmd /c \".\\agent_workbench.bat build\"",
+    "cmd /c \".\\agent_workbench.bat test generate --task H:/stm32_RAG/code/serial/agent_workbench/generated/requests/tim3_red_led_pb0_1_hz_20260412_131012/task_draft.yaml\"",
+    "cmd /c \".\\agent_workbench.bat test run\"",
+    "cmd /c \".\\agent_workbench.bat session feature --task H:/stm32_RAG/code/serial/agent_workbench/generated/requests/tim3_red_led_pb0_1_hz_20260412_131012/task_draft.yaml\"",
+    "cmd /c \".\\agent_workbench.bat compare --latest\""
+  ]
+}

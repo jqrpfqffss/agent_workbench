@@ -1,4 +1,7 @@
 #include "app_cli_commands.h"
+#include "app_diag_modbus.h"
+#include "app_runtime.h"
+#include "app_serial_config.h"
 
 #include <string.h>
 
@@ -29,10 +32,12 @@ static void AppCli_Red(CliContext *cli, int argc, char **argv);
 static void AppCli_Green(CliContext *cli, int argc, char **argv);
 static void AppCli_Blue(CliContext *cli, int argc, char **argv);
 static void AppCli_All(CliContext *cli, int argc, char **argv);
-static void AppCli_LedStatus(CliContext *cli, int argc, char **argv);  // NEW: led_status handler
+static void AppCli_LedStatus(CliContext *cli, int argc, char **argv);
+static void AppCli_DiagStatus(CliContext *cli, int argc, char **argv);
 
 static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command);
 static void AppCli_PrintLedStatus(CliContext *cli, const char *name, GPIO_TypeDef *port, uint16_t pin);
+static void AppCli_PrintDiagStatus(CliContext *cli);
 static AppLedTarget AppCli_ParseTarget(const char *text);
 static AppLedAction AppCli_ParseAction(const char *text);
 static void AppCli_HandleLedCommand(CliContext *cli, const char *target_text, const char *action_text);
@@ -49,7 +54,8 @@ static const CliCommand app_cli_commands[] =
   { "green", "Shortcut for 'led green ...'.", "green <on|off|toggle>", AppCli_Green },
   { "blue", "Shortcut for 'led blue ...'.", "blue <on|off|toggle>", AppCli_Blue },
   { "all", "Shortcut for 'led all ...'.", "all <on|off|toggle>", AppCli_All },
-  { "led_status", "Print the on/off state of all LEDs.", "led_status", AppCli_LedStatus }
+  { "led_status", "Print the on/off state of all LEDs.", "led_status", AppCli_LedStatus },
+  { "diag_status", "Show diagnostic UART and Modbus state.", "diag_status", AppCli_DiagStatus }
 };
 
 const CliCommand *AppCli_GetCommands(size_t *count)
@@ -103,11 +109,18 @@ static void AppCli_Status(CliContext *cli, int argc, char **argv)
   (void)argv;
 
   Cli_WriteString(cli, "System status:\r\n");
-  Cli_WriteString(cli, "  UART: USART2 @ 115200 8N1\r\n");
-  Cli_WriteString(cli, "  Pins: TX=PA2, RX=PA3\r\n");
+  Cli_Printf(cli, "  Debug UART: %s @ %lu 8N1\r\n", APP_DEBUG_UART_LABEL, (unsigned long)APP_DEBUG_UART_BAUDRATE);
+  Cli_Printf(cli, "  Debug Pins: %s\r\n", APP_DEBUG_UART_PINS_LABEL);
   AppCli_PrintLedStatus(cli, "RED", LED_RED_GPIO_Port, LED_RED_Pin);
   AppCli_PrintLedStatus(cli, "GREEN", LED_GREEN_GPIO_Port, LED_GREEN_Pin);
   AppCli_PrintLedStatus(cli, "BLUE", LED_BLUE_GPIO_Port, LED_BLUE_Pin);
+  Cli_Printf(
+    cli,
+    "  Diag UART: %s @ %lu 8N1, addr=0x%02X\r\n",
+    APP_DIAG_UART_LABEL,
+    (unsigned long)APP_DIAG_UART_BAUDRATE,
+    APP_DIAG_MODBUS_SLAVE_ADDRESS);
+  Cli_Printf(cli, "  Diag Pins: %s\r\n", APP_DIAG_UART_PINS_LABEL);
 }
 
 static void AppCli_Led(CliContext *cli, int argc, char **argv)
@@ -181,6 +194,14 @@ static void AppCli_LedStatus(CliContext *cli, int argc, char **argv)
   AppCli_PrintLedStatus(cli, "BLUE", LED_BLUE_GPIO_Port, LED_BLUE_Pin);
 }
 
+static void AppCli_DiagStatus(CliContext *cli, int argc, char **argv)
+{
+  (void)argc;
+  (void)argv;
+
+  AppCli_PrintDiagStatus(cli);
+}
+
 static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command)
 {
   Cli_Printf(cli, "%s\r\n", command->name);
@@ -191,6 +212,43 @@ static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command)
 static void AppCli_PrintLedStatus(CliContext *cli, const char *name, GPIO_TypeDef *port, uint16_t pin)
 {
   Cli_Printf(cli, "  LED %-5s: %s\r\n", name, AppCli_GetLedStateText(port, pin));
+}
+
+static void AppCli_PrintDiagStatus(CliContext *cli)
+{
+  DiagLinkStats link_stats;
+  AppDiagModbusState modbus_state;
+
+  DiagLink_GetStats(&g_diag_link, &link_stats);
+  AppDiagModbus_GetState(&g_diag_modbus, &modbus_state);
+
+  Cli_WriteString(cli, "Diagnostic port status:\r\n");
+  Cli_Printf(cli, "  UART: %s @ %lu 8N1\r\n", APP_DIAG_UART_LABEL, (unsigned long)APP_DIAG_UART_BAUDRATE);
+  Cli_Printf(cli, "  Pins: %s\r\n", APP_DIAG_UART_PINS_LABEL);
+  Cli_Printf(cli, "  Frame gap: %lu ms\r\n", (unsigned long)APP_DIAG_FRAME_GAP_MS);
+  Cli_Printf(cli, "  Modbus slave: 0x%02X\r\n", modbus_state.slave_address);
+  Cli_Printf(
+    cli,
+    "  Link stats: rx_bytes=%lu rx_frames=%lu tx_frames=%lu dropped=%lu uart_err=%lu\r\n",
+    (unsigned long)link_stats.rx_bytes,
+    (unsigned long)link_stats.rx_frames,
+    (unsigned long)link_stats.tx_frames,
+    (unsigned long)link_stats.dropped_frames,
+    (unsigned long)link_stats.uart_errors);
+  Cli_Printf(
+    cli,
+    "  Modbus stats: handled=%lu ignored=%lu crc_err=%lu exceptions=%lu\r\n",
+    (unsigned long)modbus_state.handled_requests,
+    (unsigned long)modbus_state.ignored_frames,
+    (unsigned long)modbus_state.crc_errors,
+    (unsigned long)modbus_state.exception_responses);
+  Cli_Printf(
+    cli,
+    "  Last frame: func=0x%02X reg=0x%04X arg=0x%04X exc=0x%02X\r\n",
+    modbus_state.last_function,
+    modbus_state.last_register,
+    modbus_state.last_argument,
+    modbus_state.last_exception);
 }
 
 static AppLedTarget AppCli_ParseTarget(const char *text)

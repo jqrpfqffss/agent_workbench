@@ -10,12 +10,14 @@ except ModuleNotFoundError as exc:
     ) from exc
 
 from .task_spec import load_task_spec
+from .task_breakdown import write_task_breakdown
 from .utils import ensure_dir, render_template, run_command, write_json
 
 
 def generate_tests(cfg: dict, task_path: Path) -> Path:
     task = load_task_spec(task_path)
     out_dir = ensure_dir(cfg["outputs"]["generated_root_path"] / "tasks" / task["id"])
+    write_task_breakdown(cfg, task_path)
     impl_cfg = task.get("implementation", {})
     (out_dir / "blackbox_assertions.yaml").write_text(
         yaml.safe_dump({"assertions": task.get("acceptance", {}).get("blackbox", [])}, sort_keys=False, allow_unicode=False),

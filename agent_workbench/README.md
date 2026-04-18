@@ -19,6 +19,7 @@ For this repository, the current board-facing defaults are:
 - project: `serial`
 - build output: `build/cmake-debug/serial.elf`
 - UART console: `USART2 / PA2(TX) / PA3(RX) / 115200 8N1`
+- diagnostic UART: `USART1 / PA9(TX) / PA10(RX) / 115200 8N1 / Modbus-like RTU`
 - ready banner: `STM32 UART CLI ready.`
 - prompt: `cli>`
 
@@ -63,7 +64,11 @@ agent_workbench.bat context --mode debug --stage analyze
 agent_workbench.bat context --mode feature --stage implement --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat context --mode feature --stage verify --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat context --stage resume
+agent_workbench.bat autoflow --goal "Use TIM3 to blink the RED LED at about 1 Hz"
+agent_workbench.bat autoflow --resume
+agent_workbench.bat decompose --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --command red on --command green on --command blue on --command all off
+agent_workbench.bat diag exchange --hex "01 03 00 10 00 03" --append-crc modbus
 agent_workbench.bat uart console
 agent_workbench.bat test generate --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat test run
@@ -83,9 +88,19 @@ The local-model path now uses staged artifacts instead of one large prompt:
 - `*_brief.md`: one-screen summary for the current stage
 - `*_facts.json`: evidence-backed facts with stable ids
 - `*_constraints.json`: allowed reads, allowed edits, and anti-hallucination rules
+- `task_breakdown.md`: small stage-aligned subtasks for the current task
+- `task_breakdown.json`: machine-readable breakdown state for tooling
 - `*_resume.md`: resume card for the next round
 - `*_paste.md`: ready-to-paste Continue prompt
 - `agent_state.json`: current mode, stage, profile, latest session, and next commands
+- `autoflow_state.json`: one-line task goal, current stage, current subtasks, and stop conditions
+- `autoflow_start.md`: the single start card Continue should read after `autoflow --goal ...`
+
+When a task is attached, the workbench now auto-generates a task breakdown so local models can finish one small subtask group at a time. The default stage mapping is:
+
+- `analyze`: understand goal and lock the smallest scope
+- `implement`: make the smallest change and pass local checks
+- `verify`: run validation and close the loop with evidence
 
 Profiles are configured under `agent.profiles` in [agent_workbench.yaml](agent_workbench.yaml):
 
@@ -108,12 +123,20 @@ red <on|off|toggle>
 green <on|off|toggle>
 blue <on|off|toggle>
 all <on|off|toggle>
+diag_status
 ```
 
 Typical manual smoke check:
 
 ```powershell
 agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --command red on --command green on --command blue on --command all off
+```
+
+Typical diagnostic-port checks use hex bytes and a Modbus-style CRC:
+
+```powershell
+agent_workbench.bat diag exchange --hex "01 03 00 10 00 03" --append-crc modbus
+agent_workbench.bat diag exchange --hex "01 06 00 10 00 01" --append-crc modbus
 ```
 
 `uart exec` is strict by default. It waits for the configured ready banner and prompt, then records:
@@ -134,11 +157,18 @@ The recommended human and agent workflow is:
 1. Run `setup_workbench.bat` once.
 2. Open the folder in VS Code.
 3. Use `Terminal: Run Task` and the generated staged `Agent Workbench: ...` tasks.
-4. Switch Continue to `Agent` mode.
-5. Run a matching `Context Pack ...` task first.
-6. Open the newest `*_paste.md` under `agent_workbench/runtime/`.
-7. Paste only that stage card into Continue.
-8. Have Continue drive actions through `agent_workbench.bat ...`, not ad-hoc shell command chains.
+4. If the user request is broad, start with `Agent Workbench: Autoflow From Current Goal`.
+5. Switch Continue to `Agent` mode.
+6. Open `agent_workbench/runtime/autoflow_start.md`.
+7. Paste only the current stage card into Continue.
+8. Have Continue complete only the listed `current_subtasks`, then run `Agent Workbench: Autoflow Resume` after each stage switch.
+9. Keep every automation action inside `agent_workbench.bat ...` commands instead of ad-hoc shell chains.
+
+For simple existing CLI actions such as `red on`, `green off`, or `status`, `autoflow` now generates a verify-only path and skips code-edit stages. The generated verify card points Continue to the exact `uart exec --command ...` command instead of a generic feature workflow.
+
+The optimized Chinese walkthrough for this staged autoflow is:
+
+- [VS_CODE_CONTINUE_GUIDE_ZH.md](VS_CODE_CONTINUE_GUIDE_ZH.md)
 
 For immediate validation in PowerShell, prefer the one-command path:
 
@@ -150,6 +180,8 @@ A repo-specific English guide is available at [VS_CODE_CONTINUE_GUIDE.md](VS_COD
 A repo-specific Chinese guide is available at [VS_CODE_CONTINUE_GUIDE_ZH.md](VS_CODE_CONTINUE_GUIDE_ZH.md).
 For migration into another project, read [MIGRATION_GUIDE_ZH.md](MIGRATION_GUIDE_ZH.md).
 For a ready-to-paste Chinese Continue prompt, use [prompts/continue_agent_zh.md](prompts/continue_agent_zh.md).
+For a direct Chinese startup prompt for Continue Agent, use [prompts/continue_start_zh.md](prompts/continue_start_zh.md).
+For a one-line natural-language autoflow prompt, use [prompts/continue_autoflow_zh.md](prompts/continue_autoflow_zh.md).
 For the current project's one-command verification prompt, use [prompts/continue_verify_current_zh.md](prompts/continue_verify_current_zh.md).
 For low-context local models, read [LOW_CONTEXT_MODELS_GUIDE_ZH.md](LOW_CONTEXT_MODELS_GUIDE_ZH.md) and use [prompts/continue_low_context_zh.md](prompts/continue_low_context_zh.md).
 
@@ -172,4 +204,4 @@ Primary evidence files:
 
 - `uart console` still works best with `pyserial` available in the Python environment.
 - If `pyserial` is unavailable, the workbench still supports PowerShell fallback for `uart exec`, `uart run`, and session logging.
-- If your USB-TTL adapter is not on `COM3`, update [agent_workbench.yaml](agent_workbench.yaml) before running hardware sessions.
+- If your debug USB-TTL adapter is not on `COM3`, or the diagnostic adapter is not on `COM5`, update `uart.port` and `diag_uart.port` in [agent_workbench.yaml](agent_workbench.yaml) before running hardware sessions.

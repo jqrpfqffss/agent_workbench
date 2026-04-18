@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-04-12T12:06:32.352+00:00",
+  "mode": "feature",
+  "stage": "analyze",
+  "profile": "balanced_local",
+  "task_id": "autoflow_cli_red_on",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml",
+  "session_dir": "",
+  "max_pack_words": 550,
+  "max_fact_items": 12,
+  "max_cli_tail_lines": 6,
+  "max_failed_assertions_shown": 3,
+  "max_extra_reads": 2,
+  "max_edit_files": 0,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\requests\\cli_20260412_200632\\task_draft.yaml",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_cli_red_on\\implementation_brief.md",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_cli_red_on\\task_breakdown.md"
+  ],
+  "allowed_edits": [],
+  "task_breakdown_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\autoflow_cli_red_on\\task_breakdown.md",
+  "current_subtasks": [
+    "S1",
+    "S2"
+  ],
+  "unknowns": [
+    "No matching evidence session is available.",
+    "The current verdict is incomplete and may require one more validation pass."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not edit code in this round."
+  ],
+  "next_commands": [
+    "cmd /c \".\\agent_workbench.bat context --mode feature --stage verify --task H:/stm32_RAG/code/serial/agent_workbench/generated/requests/cli_20260412_200632/task_draft.yaml --profile balanced_local\"",
+    "cmd /c \".\\agent_workbench.bat autoflow --resume\""
+  ]
+}

@@ -77,6 +77,17 @@ uart:
       detail: "blue LED shortcut | usage: blue <on|off|toggle> | args: action"
     - command: all
       detail: "all LEDs shortcut | usage: all <on|off|toggle> | args: action"
+    - command: diag_status
+      detail: "show diagnostic UART counters and Modbus state | usage: diag_status | args: none"
+
+diag_uart:
+  enabled: true
+  port: COM5
+  baudrate: 115200
+  default_crc: modbus
+  response_timeout_sec: 1.0
+  silence_timeout_sec: 0.05
+  read_timeout_sec: 0.02
 
 monitor:
   enabled: false

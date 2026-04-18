@@ -1,4 +1,5 @@
 #include "cli.h"
+#include "app_serial_config.h"
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -32,7 +33,12 @@ void Cli_Init(CliContext *cli, UART_HandleTypeDef *uart, const CliCommand *comma
 HAL_StatusTypeDef Cli_Start(CliContext *cli)
 {
   Cli_WriteString(cli, "\r\nSTM32 UART CLI ready.\r\n");
-  Cli_WriteString(cli, "Console: USART2 @ 115200 8N1, TX=PA2, RX=PA3\r\n");
+  Cli_Printf(
+    cli,
+    "Console: %s @ %lu 8N1, %s\r\n",
+    APP_DEBUG_UART_LABEL,
+    (unsigned long)APP_DEBUG_UART_BAUDRATE,
+    APP_DEBUG_UART_PINS_LABEL);
   Cli_WriteString(cli, "Type 'help' to list commands.\r\n\r\n");
   Cli_ShowPrompt(cli);
 

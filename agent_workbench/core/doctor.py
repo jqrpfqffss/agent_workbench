@@ -148,6 +148,8 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
     )
 
     state_path = Path(cfg["agent"]["state_path"])
+    autoflow_state_path = Path(cfg["agent"].get("autoflow_state_path", output_dir / "autoflow_state.json"))
+    autoflow_start_path = Path(cfg["outputs"]["runtime_root_path"]) / "autoflow_start.md"
     state = _read_json(state_path)
     if state:
         _append(results, "agent_state", "ok", str(state_path))
@@ -191,6 +193,18 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
         _append(results, "agent_state", "warn", f"missing {state_path}")
         _append(results, "context_budget", "warn", "no active local-model context has been generated yet")
         _append(results, "paste_card", "warn", "no paste card available until `agent_workbench.bat context ...` runs")
+
+    autoflow_state = _read_json(autoflow_state_path)
+    if autoflow_state:
+        _append(results, "autoflow_state", "ok", str(autoflow_state_path))
+    else:
+        _append(results, "autoflow_state", "warn", f"missing {autoflow_state_path}")
+    _append(
+        results,
+        "autoflow_start",
+        "ok" if autoflow_start_path.exists() else "warn",
+        str(autoflow_start_path),
+    )
 
     unit_cfg = cfg["checks"].get("unit", {})
     if unit_cfg.get("enabled", False):

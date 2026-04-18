@@ -14,10 +14,18 @@
 - F09: verdict_summary = Firmware flash step failed.
 - F10: strongest_evidence = flash_done code=1
 - F12: assertion_counts = pass=1 fail=9 skip=0
+- F13: current_subtasks = S3, S4
+
+## Current Subtasks
+- S3: Implement the feature only in allowed files.
+- objective: Apply the smallest code change that satisfies the task goal without widening scope.
+- S4: Pass local build and automation checks first.
+- objective: Confirm build and local checks are healthy before running the full hardware validation loop.
 
 ## Allowed Reads
 - `H:\stm32_RAG\code\serial\agent_workbench\tasks\cli_automation_regression.yaml`
 - `H:\stm32_RAG\code\serial\agent_workbench\generated\tasks\cli_automation_regression\implementation_brief.md`
+- `H:\stm32_RAG\code\serial\agent_workbench\generated\tasks\cli_automation_regression\task_breakdown.md`
 - `H:\stm32_RAG\code\serial\Core\Src\cli.c`
 - `H:\stm32_RAG\code\serial\Core\Src\app_cli_commands.c`
 

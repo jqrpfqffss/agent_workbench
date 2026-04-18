@@ -84,6 +84,24 @@ def _write_runtime_continue_prompts(cfg: dict) -> list[Path]:
             "This round is verify-only. Run workbench commands and summarize evidence.\n"
             "```\n"
         ),
+        "local_model_task_breakdown.md": (
+            "# Local Model Task Breakdown\n\n"
+            "```text\n"
+            "Run the VS Code task: Agent Workbench: Task Breakdown (CLI Regression)\n"
+            "Then open agent_workbench/generated/tasks/cli_automation_regression/task_breakdown.md first.\n"
+            "Use the breakdown to complete one subtask group at a time instead of solving the whole task in one round.\n"
+            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
+            "```\n"
+        ),
+        "local_model_autoflow.md": (
+            "# Local Model Autoflow\n\n"
+            "```text\n"
+            "Run the VS Code task: Agent Workbench: Autoflow From Current Goal\n"
+            "Then open agent_workbench/runtime/autoflow_start.md first.\n"
+            "Continue must follow the current_subtasks and next_commands in order, and rerun Autoflow Resume after every stage switch.\n"
+            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
+            "```\n"
+        ),
         "local_model_resume.md": (
             "# Local Model Resume\n\n"
             "```text\n"
@@ -128,14 +146,25 @@ def write_vscode_tasks(cfg: dict) -> Path:
     cli_regression_task = paths["cli_regression_task"]
     payload = {
         "version": "2.0.0",
+        "inputs": [
+            {
+                "id": "awbAutoflowGoal",
+                "type": "promptString",
+                "description": "Describe the natural-language task goal for autoflow",
+                "default": "使用 TIM3 定时器让 RED LED(PB0) 以约 1 Hz 闪烁",
+            }
+        ],
         "tasks": [
             {"label": "Agent Workbench: Setup", "type": "shell", "command": _ps_safe("setup_workbench.bat"), "problemMatcher": []},
             {"label": "Agent Workbench: Doctor", "type": "shell", "command": _ps_safe(f"{wrapper} doctor"), "problemMatcher": []},
             {"label": "Agent Workbench: Build", "type": "shell", "command": _ps_safe(f"{wrapper} build"), "group": {"kind": "build", "isDefault": True}, "problemMatcher": []},
+            {"label": "Agent Workbench: Autoflow From Current Goal", "type": "shell", "command": 'cmd /c ".\\agent_workbench.bat autoflow --goal ""${input:awbAutoflowGoal}"""', "problemMatcher": []},
+            {"label": "Agent Workbench: Autoflow Resume", "type": "shell", "command": _ps_safe(f"{wrapper} autoflow --resume"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Debug Analyze)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode debug --stage analyze"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Feature Implement)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage implement --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Feature Verify)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage verify --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Test Analyze)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode test --stage analyze --task {cli_regression_task}"), "problemMatcher": []},
+            {"label": "Agent Workbench: Task Breakdown (CLI Regression)", "type": "shell", "command": _ps_safe(f"{wrapper} decompose --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Resume Latest Local-Model Task", "type": "shell", "command": _ps_safe(f"{wrapper} context --stage resume"), "problemMatcher": []},
             {"label": "Agent Workbench: Direct Verify (CLI Regression)", "type": "shell", "command": _ps_safe(f"{wrapper} verify current --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Report Latest Verdict", "type": "shell", "command": _ps_safe(f"{wrapper} report --latest"), "problemMatcher": []},
