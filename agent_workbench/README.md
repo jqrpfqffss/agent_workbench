@@ -8,6 +8,7 @@ It is not just a loose script bundle. It provides one stable entry point for:
 - CMake build
 - flash and reset
 - UART CLI probing
+- diagnostic UART raw hex exchanges
 - monitor capture
 - automated debug sessions
 - automated feature validation sessions
@@ -19,6 +20,7 @@ For this repository, the current board-facing defaults are:
 - project: `serial`
 - build output: `build/cmake-debug/serial.elf`
 - UART console: `USART2 / PA2(TX) / PA3(RX) / 115200 8N1`
+- diagnostic UART smoke target: `COM3 / 115200 8N1 / raw hex`
 - ready banner: `STM32 UART CLI ready.`
 - prompt: `cli>`
 
@@ -26,7 +28,7 @@ The single source of truth is [agent_workbench.yaml](agent_workbench.yaml).
 
 ## Layout
 
-- `agent_workbench.yaml`: project, tools, outputs, UART, prompts, and workflow config
+- `agent_workbench.yaml`: project, tools, outputs, UART, diagnostic UART, prompts, and workflow config
 - `bin/`: Windows launchers
 - `core/`: Python implementation
 - `checks/`: compatibility scripts
@@ -64,6 +66,9 @@ agent_workbench.bat context --mode feature --stage implement --task agent_workbe
 agent_workbench.bat context --mode feature --stage verify --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat context --stage resume
 agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --command red on --command green on --command blue on --command all off
+agent_workbench.bat diag exec
+agent_workbench.bat diag exec --hex "68 65 6C 70 0D 0A" --hex "73 74 61 74 75 73 0D 0A"
+agent_workbench.bat diag exec --script agent_workbench\runtime\diag_requests.txt
 agent_workbench.bat uart console
 agent_workbench.bat test generate --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat test run
@@ -127,6 +132,29 @@ If the CLI handshake fails, `cli_diag.json` classifies the likely reason:
 - `parser_no_command`
 - `tx_or_host_rx`
 
+## Diagnostic UART Hex Flow
+
+The workbench now supports a second host-side UART path for raw hex exchanges:
+
+- config block: `diag_uart` in [agent_workbench.yaml](agent_workbench.yaml)
+- default log: `agent_workbench/runtime/diag_exchange.log`
+- default result JSON: `agent_workbench/runtime/diag_exec_result.json`
+
+The current repository uses the same `COM3` debug CLI port as the temporary validation target. That lets us validate the host-side diagnostic tooling without changing the STM32 firmware. The default requests send `help\r\n` and `status\r\n` as hex:
+
+```powershell
+agent_workbench.bat diag exec
+```
+
+You can also send explicit requests:
+
+```powershell
+agent_workbench.bat diag exec --hex "68 65 6C 70 0D 0A"
+agent_workbench.bat diag exec --hex "73 74 61 74 75 73 0D 0A"
+```
+
+Each exchange records both hex and escaped text preview so ASCII replies stay readable while binary payloads remain inspectable.
+
 ## VS Code And Continue
 
 The recommended human and agent workflow is:
@@ -161,6 +189,8 @@ Primary evidence files:
 
 - `cli_transcript.log`
 - `cli_diag.json`
+- `diag_exchange.log`
+- `diag_exec_result.json`
 - `uart.log`
 - `monitor_samples.csv`
 - `assertions.jsonl`
@@ -172,4 +202,4 @@ Primary evidence files:
 
 - `uart console` still works best with `pyserial` available in the Python environment.
 - If `pyserial` is unavailable, the workbench still supports PowerShell fallback for `uart exec`, `uart run`, and session logging.
-- If your USB-TTL adapter is not on `COM3`, update [agent_workbench.yaml](agent_workbench.yaml) before running hardware sessions.
+- If your USB-TTL adapter is not on `COM3`, update both `uart.port` and `diag_uart.port` in [agent_workbench.yaml](agent_workbench.yaml) before running hardware sessions.

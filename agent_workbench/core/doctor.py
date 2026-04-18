@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from .diag_uart_service import SERIAL_IMPORT_ERROR as DIAG_SERIAL_IMPORT_ERROR
+from .diag_uart_service import diag_exec_supported, serial as diag_serial
 from .task_spec import load_task_spec
 from .uart_service import SERIAL_IMPORT_ERROR, serial, uart_exec_supported
 from .utils import can_write_directory, command_exists, command_head, render_template, write_json
@@ -114,6 +116,45 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
                 _append(results, "uart_port", level, str(exc))
     else:
         _append(results, "uart_backend", "warn", "UART disabled by config")
+
+    diag_cfg = cfg.get("diag_uart", {})
+    if diag_cfg.get("enabled", True):
+        default_requests = [str(item).strip() for item in diag_cfg.get("default_hex_requests", []) if str(item).strip()]
+        _append(
+            results,
+            "diag_uart_requests",
+            "ok" if default_requests else "warn",
+            f"count={len(default_requests)} port={diag_cfg.get('port', '')}",
+        )
+        if diag_serial is None:
+            if diag_exec_supported():
+                level = "warn"
+                detail = (
+                    f"pyserial unavailable: {DIAG_SERIAL_IMPORT_ERROR}. "
+                    "PowerShell fallback is available for diag exec."
+                )
+            else:
+                level = "fail" if required_hardware else "warn"
+                detail = (
+                    f"pyserial unavailable: {DIAG_SERIAL_IMPORT_ERROR}. "
+                    "Re-run setup or use a Python with PyYAML and pyserial."
+                )
+            _append(results, "diag_uart_backend", level, detail)
+            _append(results, "diag_uart_port", "warn", "port availability not checked without pyserial")
+        else:
+            _append(results, "diag_uart_backend", "ok", "pyserial available")
+            try:
+                with diag_serial.Serial(
+                    diag_cfg["port"],
+                    int(diag_cfg["baudrate"]),
+                    timeout=float(diag_cfg.get("read_timeout_sec", 0.05)),
+                ):
+                    _append(results, "diag_uart_port", "ok", str(diag_cfg["port"]))
+            except Exception as exc:
+                level = "fail" if required_hardware else "warn"
+                _append(results, "diag_uart_port", level, str(exc))
+    else:
+        _append(results, "diag_uart_backend", "warn", "diag_uart disabled by config")
 
     agent_cfg = cfg.get("agent", {})
     profiles = agent_cfg.get("profiles", {})

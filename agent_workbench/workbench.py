@@ -109,6 +109,29 @@ def _cmd_uart(args: argparse.Namespace) -> int:
     raise ValueError(f"unknown uart action: {args.action}")
 
 
+def _cmd_diag(args: argparse.Namespace) -> int:
+    from core.diag_uart_service import execute_diag_requests
+
+    cfg = _cfg(args.config)
+    script_path = Path(args.script) if args.script else None
+    log_path = Path(args.log_path) if args.log_path else cfg["outputs"]["runtime_root_path"] / "diag_exchange.log"
+    result_path = Path(args.result_path) if args.result_path else cfg["outputs"]["runtime_root_path"] / "diag_exec_result.json"
+    result = execute_diag_requests(
+        cfg,
+        list(args.hex or []),
+        log_path,
+        result_path,
+        script_path=script_path,
+    )
+    print(
+        f"diag exec exit={result.exit_code} "
+        f"log={result.log_path} result={result.result_path} exchanges={result.payload.get('exchange_count', 0)}"
+    )
+    if result.payload.get("error"):
+        print(f"diag exec error: {result.payload['error']}")
+    return int(result.exit_code)
+
+
 def _cmd_monitor(args: argparse.Namespace) -> int:
     from core.monitor_service import MonitorEngine, export_monitor_table, monitor_status, start_monitor_daemon, stop_monitor_daemon
     from core.utils import ensure_dir
@@ -291,6 +314,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_uart.add_argument("--reset-first", action="store_true")
     p_uart.add_argument("--expect-ready", action="store_true")
     p_uart.set_defaults(func=_cmd_uart)
+
+    p_diag = sub.add_parser("diag", help="run raw hex request/reply exchanges on the diagnostic UART")
+    p_diag.add_argument("action", choices=["exec"])
+    p_diag.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_diag.add_argument("--hex", action="append", default=[])
+    p_diag.add_argument("--script", default="")
+    p_diag.add_argument("--log-path", default="")
+    p_diag.add_argument("--result-path", default="")
+    p_diag.set_defaults(func=_cmd_diag)
 
     p_monitor = sub.add_parser("monitor", help="monitor variables/registers/memory")
     p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export"])

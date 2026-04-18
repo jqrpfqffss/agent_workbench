@@ -146,6 +146,7 @@ def write_vscode_tasks(cfg: dict) -> Path:
             {"label": "Agent Workbench: Test Run", "type": "shell", "command": _ps_safe(f"{wrapper} test run"), "problemMatcher": []},
             {"label": "Agent Workbench: UART Console", "type": "shell", "command": _ps_safe(f"{wrapper} uart console"), "problemMatcher": []},
             {"label": "Agent Workbench: UART CLI Smoke", "type": "shell", "command": _ps_safe(f"{wrapper} uart exec --reset-first --expect-ready --command help --command status"), "problemMatcher": []},
+            {"label": "Agent Workbench: DIAG Hex Smoke", "type": "shell", "command": _ps_safe(f"{wrapper} diag exec"), "problemMatcher": []},
             {"label": "Agent Workbench: Monitor Start", "type": "shell", "command": _ps_safe(f"{wrapper} monitor start"), "problemMatcher": []},
             {"label": "Agent Workbench: Monitor Stop", "type": "shell", "command": _ps_safe(f"{wrapper} monitor stop"), "problemMatcher": []},
             {"label": "Agent Workbench: OpenOCD Start", "type": "shell", "command": _ps_safe(f"{wrapper} openocd start"), "problemMatcher": []},

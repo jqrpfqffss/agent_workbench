@@ -78,6 +78,14 @@ class DoctorTests(unittest.TestCase):
                 "prompt": "cli>",
                 "probe_commands": ["help"],
             },
+            "diag_uart": {
+                "enabled": True,
+                "port": "COM99",
+                "baudrate": 115200,
+                "encoding": "utf-8",
+                "read_timeout_sec": 0.05,
+                "default_hex_requests": ["68 65 6C 70 0D 0A"],
+            },
             "checks": {"unit": {"enabled": False}},
             "hardware": {"mode": "prefer"},
             "template_values": {},
@@ -107,5 +115,7 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("agent_state", names)
         self.assertIn("context_budget", names)
         self.assertIn("paste_card", names)
+        self.assertIn("diag_uart_backend", names)
+        self.assertIn("diag_uart_requests", names)
         self.assertEqual(names["agent_state"]["level"], "ok")
         self.assertEqual(names["paste_card"]["level"], "ok")

@@ -108,6 +108,12 @@
       "problemMatcher": []
     },
     {
+      "label": "Agent Workbench: DIAG Hex Smoke",
+      "type": "shell",
+      "command": "cmd /c \".\\agent_workbench.bat diag exec\"",
+      "problemMatcher": []
+    },
+    {
       "label": "Agent Workbench: Monitor Start",
       "type": "shell",
       "command": "cmd /c \".\\agent_workbench.bat monitor start\"",

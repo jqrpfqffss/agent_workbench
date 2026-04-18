@@ -99,6 +99,17 @@ def _defaults() -> dict[str, Any]:
             "probe_commands": ["help", "version", "state", "range", "alerts"],
             "help_rows": [],
         },
+        "diag_uart": {
+            "enabled": True,
+            "port": "COM5",
+            "baudrate": 9600,
+            "encoding": "utf-8",
+            "startup_drain_sec": 0.0,
+            "read_timeout_sec": 0.05,
+            "response_timeout_sec": 1.0,
+            "response_idle_timeout_sec": 0.1,
+            "default_hex_requests": [],
+        },
         "monitor": {
             "enabled": True,
             "sample_hz": 10,

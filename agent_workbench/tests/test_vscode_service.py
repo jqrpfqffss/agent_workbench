@@ -50,6 +50,7 @@ class VscodeServiceTests(unittest.TestCase):
             'cmd /c ".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml"',
             commands,
         )
+        self.assertIn('cmd /c ".\\agent_workbench.bat diag exec"', commands)
         self.assertTrue(all("--profile" not in command for command in commands if " context " in f" {command} "))
         self.assertTrue(all(command.startswith('cmd /c ".\\') for command in commands))
 

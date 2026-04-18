@@ -402,3 +402,27 @@ Ran 19 tests in 0.438s
 
 FAILED (failures=1, skipped=1)
 [2026-04-08T14:49:31.787+00:00] exit=1
+
+[2026-04-18T11:31:31.429+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s....................
+----------------------------------------------------------------------
+Ran 23 tests in 0.357s
+
+OK (skipped=1)
+[2026-04-18T11:31:32.830+00:00] exit=0
+
+[2026-04-18T11:32:31.640+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s....................
+----------------------------------------------------------------------
+Ran 23 tests in 0.395s
+
+OK (skipped=1)
+[2026-04-18T11:32:32.280+00:00] exit=0
+
+[2026-04-18T11:34:07.787+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+..s....................
+----------------------------------------------------------------------
+Ran 23 tests in 0.359s
+
+OK (skipped=1)
+[2026-04-18T11:34:08.384+00:00] exit=0
