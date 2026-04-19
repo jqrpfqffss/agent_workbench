@@ -47,98 +47,108 @@ def _ps_safe(command_text: str) -> str:
     return f'cmd /c ".\\{command_text}"'
 
 
-def _write_runtime_continue_prompts(cfg: dict) -> list[Path]:
-    project_root = Path(cfg["project_root_path"])
-    runtime_root = Path(cfg["outputs"]["continue_runtime_root_path"])
-    default_profile = str(cfg.get("agent", {}).get("default_profile", "balanced_local")).strip() or "balanced_local"
-    prompt_roots = [runtime_root]
-    continue_root = project_root / ".continue" / "prompts"
-    if continue_root.parent.parent.exists():
-        prompt_roots.append(continue_root)
-
-    payloads = {
-        "local_model_debug_analyze.md": (
-            "# Local Model Debug Analyze\n\n"
-            "```text\n"
-            "Run the VS Code task: Agent Workbench: Context Pack (Debug Analyze)\n"
-            "Then open the newest *_paste.md file under agent_workbench/runtime and paste it into Continue Agent.\n"
-            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
-            "This round is analyze-only. Do not change code.\n"
-            "```\n"
-        ),
-        "local_model_feature_implement.md": (
-            "# Local Model Feature Implement\n\n"
-            "```text\n"
-            "Run the VS Code task: Agent Workbench: Context Pack (Feature Implement)\n"
-            "Then open the newest *_paste.md file under agent_workbench/runtime and paste it into Continue Agent.\n"
-            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
-            "This round is implement-only. Edit only allowed files.\n"
-            "```\n"
-        ),
-        "local_model_feature_verify.md": (
-            "# Local Model Feature Verify\n\n"
-            "```text\n"
-            "Run the VS Code task: Agent Workbench: Context Pack (Feature Verify)\n"
-            "Then open the newest *_paste.md file under agent_workbench/runtime and paste it into Continue Agent.\n"
-            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
-            "This round is verify-only. Run workbench commands and summarize evidence.\n"
-            "```\n"
-        ),
-        "local_model_resume.md": (
-            "# Local Model Resume\n\n"
-            "```text\n"
-            "Run the VS Code task: Agent Workbench: Resume Latest Local-Model Task\n"
-            "Then open the newest *_paste.md file under agent_workbench/runtime and paste it into Continue Agent.\n"
-            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
-            "This round resumes from the saved agent_state.json.\n"
-            "```\n"
-        ),
-        "local_model_direct_verify.md": (
-            "# Local Model Direct Verify\n\n"
-            "```text\n"
-            "Run the VS Code task: Agent Workbench: Direct Verify (CLI Regression)\n"
-            "Or run exactly this PowerShell-safe command from the workspace root:\n"
-            "cmd /c \".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml\"\n"
-            "Then read agent_workbench/runtime/direct_verify_summary.md first.\n"
-            f"The selected local-model profile comes from agent_workbench.yaml: {default_profile}.\n"
-            "This path is for immediate validation with one workbench command.\n"
-            "```\n"
-        ),
-    }
-
-    generated: list[Path] = []
-    for root in prompt_roots:
-        ensure_dir(root)
-        for name, text in payloads.items():
-            path = root / name
-            path.write_text(text, encoding="utf-8")
-            generated.append(path)
-    return generated
-
-
-def write_continue_rules(cfg: dict) -> list[Path]:
-    rules_dir = Path(cfg["continue"]["rules_dir_path"])
-    template_dir = Path(cfg["continue"]["rules_template_dir_path"])
-    ensure_dir(rules_dir)
-    values = {
+def _render_values(cfg: dict) -> dict:
+    return {
         "project_name": str(cfg["project"]["name"]),
         "ready_banner": str(cfg["uart"].get("ready_banner", "")),
         "prompt": str(cfg["uart"].get("prompt", "")),
         "uart_port": str(cfg["uart"].get("port", "")),
+        "uart_baud": str(cfg["uart"].get("baudrate", "")),
         "diag_uart_port": str(cfg.get("diag_uart", {}).get("port", "")),
         "build_dir": str(cfg["project"].get("build_dir_path", "")),
         "default_profile": str(cfg.get("agent", {}).get("default_profile", "")),
         "source_dirs_csv": ", ".join(str(item) for item in cfg.get("project", {}).get("source_dirs", [])),
     }
+
+
+def write_opencode_agents(cfg: dict) -> list[Path]:
+    """生成 OpenCode 所需全部文件:
+    - AGENTS.md (项目根)
+    - .opencode/agent/*.md (sub-agents)
+    - .opencode/command/*.md (slash commands)
+    - opencode.json (项目配置)
+    - .opencode/agent/model_<name>.md (model profiles)
+    """
+    opencode_cfg = cfg.get("opencode") or {}
+    agents_file = Path(opencode_cfg["agents_file_path"])
+    agents_dir = Path(opencode_cfg["agents_dir_path"])
+    commands_dir = Path(opencode_cfg["commands_dir_path"])
+    project_config_file = Path(opencode_cfg["project_config_file_path"])
+    template_dir = Path(opencode_cfg["agents_template_dir_path"])
+
+    ensure_dir(agents_file.parent)
+    ensure_dir(agents_dir)
+    ensure_dir(commands_dir)
+
+    values = _render_values(cfg)
     generated: list[Path] = []
-    for name in [str(item).strip() for item in cfg["continue"].get("required_rules", []) if str(item).strip()]:
-        template_path = template_dir / name
-        if not template_path.exists():
-            raise FileNotFoundError(f"continue rule template not found: {template_path}")
-        text = render_template(template_path.read_text(encoding="utf-8"), values)
-        target_path = rules_dir / name
-        target_path.write_text(text, encoding="utf-8")
-        generated.append(target_path)
+
+    # 1. 渲染 AGENTS.md
+    agents_tpl = template_dir / "AGENTS.md.tpl"
+    if agents_tpl.exists():
+        agents_file.write_text(
+            render_template(agents_tpl.read_text(encoding="utf-8"), values),
+            encoding="utf-8",
+        )
+        generated.append(agents_file)
+
+    # 2. 渲染 sub-agents
+    for name in [str(x).strip() for x in opencode_cfg.get("required_agents", []) if str(x).strip()]:
+        tpl_source = template_dir / "agent" / f"{name}.tpl"
+        if not tpl_source.exists():
+            tpl_source = template_dir / "agent" / name
+        if not tpl_source.exists():
+            raise FileNotFoundError(f"opencode agent template not found: {tpl_source}")
+        target = agents_dir / name
+        target.write_text(
+            render_template(tpl_source.read_text(encoding="utf-8"), values),
+            encoding="utf-8",
+        )
+        generated.append(target)
+
+    # 3. 渲染 slash commands
+    for name in [str(x).strip() for x in opencode_cfg.get("required_commands", []) if str(x).strip()]:
+        tpl_source = template_dir / "command" / f"{name}.tpl"
+        if not tpl_source.exists():
+            tpl_source = template_dir / "command" / name
+        if not tpl_source.exists():
+            raise FileNotFoundError(f"opencode command template not found: {tpl_source}")
+        target = commands_dir / name
+        target.write_text(
+            render_template(tpl_source.read_text(encoding="utf-8"), values),
+            encoding="utf-8",
+        )
+        generated.append(target)
+
+    # 4. 渲染 opencode.json
+    project_config_tpl = template_dir / "opencode.json.tpl"
+    if project_config_tpl.exists():
+        project_config_file.write_text(
+            render_template(project_config_tpl.read_text(encoding="utf-8"), values),
+            encoding="utf-8",
+        )
+        generated.append(project_config_file)
+
+    # 5. 渲染 model profiles（作为额外的 agent 文件）
+    model_profiles = opencode_cfg.get("model_profiles") or {}
+    for profile_name, meta in model_profiles.items():
+        if not isinstance(meta, dict):
+            continue
+        profile_file = meta.get("profile_file")
+        if not profile_file:
+            continue
+        tpl_source = template_dir / f"{profile_file}.tpl"
+        if not tpl_source.exists():
+            tpl_source = template_dir / profile_file
+        if not tpl_source.exists():
+            continue
+        target = agents_dir / f"model_{profile_name}.md"
+        target.write_text(
+            render_template(tpl_source.read_text(encoding="utf-8"), values),
+            encoding="utf-8",
+        )
+        generated.append(target)
+
     return generated
 
 
@@ -147,7 +157,6 @@ def write_vscode_tasks(cfg: dict) -> Path:
     ensure_dir(tasks_path.parent)
     paths = _command_paths(cfg)
     write_project_wrappers(cfg)
-    _write_runtime_continue_prompts(cfg)
     wrapper = paths["wrapper"]
     example_task = paths["example_task"]
     cli_task = paths["cli_task"]
@@ -158,13 +167,8 @@ def write_vscode_tasks(cfg: dict) -> Path:
             {"label": "Agent Workbench: Setup", "type": "shell", "command": _ps_safe("setup_workbench.bat"), "problemMatcher": []},
             {"label": "Agent Workbench: Doctor", "type": "shell", "command": _ps_safe(f"{wrapper} doctor"), "problemMatcher": []},
             {"label": "Agent Workbench: Build", "type": "shell", "command": _ps_safe(f"{wrapper} build"), "group": {"kind": "build", "isDefault": True}, "problemMatcher": []},
-            {"label": "Agent Workbench: Init Continue Rules", "type": "shell", "command": _ps_safe(f"{wrapper} init-continue-rules"), "problemMatcher": []},
+            {"label": "Agent Workbench: Init OpenCode Agents", "type": "shell", "command": _ps_safe(f"{wrapper} init-opencode-agents"), "problemMatcher": []},
             {"label": "Agent Workbench: Scan Project", "type": "shell", "command": _ps_safe(f"{wrapper} scan-project --json"), "problemMatcher": []},
-            {"label": "Agent Workbench: Context Pack (Debug Analyze)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode debug --stage analyze"), "problemMatcher": []},
-            {"label": "Agent Workbench: Context Pack (Feature Implement)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage implement --task {cli_regression_task}"), "problemMatcher": []},
-            {"label": "Agent Workbench: Context Pack (Feature Verify)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage verify --task {cli_regression_task}"), "problemMatcher": []},
-            {"label": "Agent Workbench: Context Pack (Test Analyze)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode test --stage analyze --task {cli_regression_task}"), "problemMatcher": []},
-            {"label": "Agent Workbench: Resume Latest Local-Model Task", "type": "shell", "command": _ps_safe(f"{wrapper} context --stage resume"), "problemMatcher": []},
             {"label": "Agent Workbench: Direct Verify (CLI Regression)", "type": "shell", "command": _ps_safe(f"{wrapper} verify current --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Report Latest Verdict", "type": "shell", "command": _ps_safe(f"{wrapper} report --latest"), "problemMatcher": []},
             {"label": "Agent Workbench: Debug Session", "type": "shell", "command": _ps_safe(f"{wrapper} session debug"), "problemMatcher": []},

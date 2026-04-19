@@ -554,7 +554,7 @@ def _paste_text(
         "resume": "resume from saved state only",
     }.get(stage, "do one stage only")
     lines = [
-        "# Paste To Continue",
+        "# Paste To OpenCode",
         "",
         "```text",
         "Read only these files first:",
@@ -587,7 +587,7 @@ def _resume_text(state: dict[str, Any]) -> str:
         f"- latest_session: `{state.get('latest_session', '')}`",
         f"- latest_verdict: `{state.get('latest_verdict', '')}`",
         "",
-        "## Continue From",
+        "## Resume From",
     ]
     for key in ("brief", "facts", "constraints", "paste"):
         value = generated.get(key, "")

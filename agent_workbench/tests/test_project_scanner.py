@@ -46,7 +46,11 @@ class ProjectScannerTests(unittest.TestCase):
                 "generated_root_path": self.temp_dir / "agent_workbench" / "generated",
             },
             "planner": {"templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates"},
-            "continue": {"rules_dir_path": self.temp_dir / ".continue" / "rules"},
+            "opencode": {
+                "agents_file_path": self.temp_dir / "AGENTS.md",
+                "agents_dir_path": self.temp_dir / ".opencode" / "agent",
+                "commands_dir_path": self.temp_dir / ".opencode" / "command",
+            },
             "uart": {
                 "enabled": True,
                 "ready_banner": "STM32 UART CLI ready.",

@@ -143,25 +143,40 @@ def _defaults() -> dict[str, Any]:
             "max_total_steps": 15,
             "minimum_template_count": 15,
         },
-        "continue": {
-            "rules_dir": ".continue/rules",
-            "rules_template_dir": "templates/continue_rules",
-            "required_rules": [
-                "stm32_auto_workflow.md",
-                "stm32_weak_model_guard.md",
-                "stm32_task_cookbook.md",
-                "stm32_powershell_syntax.md",
-                "stm32_error_recovery.md",
-                "stm32_hardware_safety.md",
-                "stm32_model_deepseek_r1.md",
-                "stm32_model_qwen7b.md",
-                "stm32_model_glm.md",
+        "opencode": {
+            "agents_file": "AGENTS.md",
+            "agents_dir": ".opencode/agent",
+            "commands_dir": ".opencode/command",
+            "project_config_file": "opencode.json",
+            "agents_template_dir": "templates/opencode_agents",
+            "required_agents": [
+                "stm32_auto.md",
+                "weak_model.md",
+                "code_planner.md",
+                "hardware_verifier.md",
             ],
-            "model_rules": {
-                "deepseek_r1": {"display_name": "DeepSeek-R1"},
-                "qwen7b": {"display_name": "Qwen 7B"},
-                "glm": {"display_name": "GLM"},
+            "required_commands": [
+                "plan-stm32.md",
+                "verify.md",
+                "fix-build.md",
+                "uart-smoke.md",
+                "flash-reset.md",
+            ],
+            "model_profiles": {
+                "deepseek_r1": {
+                    "profile_file": "model_profiles/deepseek_r1.md",
+                    "min_lines": 5,
+                },
+                "glm": {
+                    "profile_file": "model_profiles/glm.md",
+                    "min_lines": 5,
+                },
+                "qwen7b": {
+                    "profile_file": "model_profiles/qwen7b.md",
+                    "min_lines": 5,
+                },
             },
+            "also_install_global": False,
         },
         "vscode": {
             "tasks_file": ".vscode/tasks.json",
@@ -238,10 +253,10 @@ def _defaults() -> dict[str, Any]:
             },
         },
         "prompts": {
-            "debug": "prompts/continue_debug.md",
-            "feature": "prompts/continue_feature.md",
-            "test_author": "prompts/continue_test_author.md",
-            "report": "prompts/continue_report.md",
+            "debug": "prompts/opencode_debug.md",
+            "feature": "prompts/opencode_feature.md",
+            "test_author": "prompts/opencode_test_author.md",
+            "report": "prompts/opencode_report.md",
         },
     }
 
@@ -260,7 +275,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
-    raw["outputs"]["continue_runtime_root_path"] = raw["outputs"]["runtime_root_path"] / "continue"
+    raw["outputs"]["opencode_runtime_root_path"] = raw["outputs"]["runtime_root_path"] / "opencode"
     raw["monitor"]["symbols"]["elf_path"] = str(_resolve(raw["monitor"]["symbols"]["elf_path"], project_root))
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
         _resolve(raw["tools"]["cmake"]["toolchain_file"], project_root)
@@ -268,9 +283,13 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["vscode"]["tasks_file_path"] = _resolve(raw["vscode"]["tasks_file"], project_root)
     raw["planner"]["templates_dir_path"] = _resolve(raw["planner"]["templates_dir"], workbench_root)
     raw["planner"]["hardware_knowledge_dir_path"] = _resolve(raw["planner"]["hardware_knowledge_dir"], workbench_root)
-    raw["continue"]["rules_dir_path"] = _resolve(raw["continue"]["rules_dir"], project_root)
-    raw["continue"]["rules_template_dir_path"] = _resolve(raw["continue"]["rules_template_dir"], workbench_root)
-    raw["continue"]["model_rule_names"] = list((raw["continue"].get("model_rules") or {}).keys())
+    oc = raw.setdefault("opencode", {})
+    oc["agents_file_path"] = _resolve(oc.get("agents_file", "AGENTS.md"), project_root)
+    oc["agents_dir_path"] = _resolve(oc.get("agents_dir", ".opencode/agent"), project_root)
+    oc["commands_dir_path"] = _resolve(oc.get("commands_dir", ".opencode/command"), project_root)
+    oc["project_config_file_path"] = _resolve(oc.get("project_config_file", "opencode.json"), project_root)
+    oc["agents_template_dir_path"] = _resolve(oc.get("agents_template_dir", "templates/opencode_agents"), workbench_root)
+    oc["model_profile_names"] = list((oc.get("model_profiles") or {}).keys())
     raw["prompts"]["debug_path"] = _resolve(raw["prompts"]["debug"], workbench_root)
     raw["prompts"]["feature_path"] = _resolve(raw["prompts"]["feature"], workbench_root)
     raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)

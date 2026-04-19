@@ -47,8 +47,14 @@ class PlannerRegressionSuiteTests(unittest.TestCase):
                 "templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates",
                 "max_total_steps": 15,
             },
-            "continue": {
-                "rules_dir_path": self.temp_dir / ".continue" / "rules",
+            "opencode": {
+                "agents_file_path": self.temp_dir / "AGENTS.md",
+                "agents_dir_path": self.temp_dir / ".opencode" / "agent",
+                "commands_dir_path": self.temp_dir / ".opencode" / "command",
+                "agents_template_dir_path": self.temp_dir / "agent_workbench" / "templates" / "opencode_agents",
+                "required_agents": [],
+                "required_commands": [],
+                "model_profiles": {},
             },
             "uart": {
                 "enabled": True,

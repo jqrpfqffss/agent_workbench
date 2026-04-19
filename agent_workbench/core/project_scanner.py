@@ -273,7 +273,9 @@ def scan_project(cfg: dict) -> dict[str, Any]:
         "tasks": _scan_tasks(cfg),
         "planner_templates": planner_templates,
         "planner_template_count": len(planner_templates),
-        "rules_dir": str(cfg.get("continue", {}).get("rules_dir_path", "")),
+        "opencode_agents_file": str(cfg.get("opencode", {}).get("agents_file_path", "")),
+        "opencode_agents_dir": str(cfg.get("opencode", {}).get("agents_dir_path", "")),
+        "opencode_commands_dir": str(cfg.get("opencode", {}).get("commands_dir_path", "")),
     }
     compile_commands_path = Path(cfg.get("project", {}).get("compile_commands_path", ""))
     if compile_commands_path.exists():

@@ -30,20 +30,30 @@ class DoctorTests(unittest.TestCase):
         paste_path = self.runtime_root / "context_paste.md"
         task_path = self.temp_dir / "task.yaml"
         toolchain_path = self.temp_dir / "toolchain.cmake"
-        rules_dir = self.temp_dir / ".continue" / "rules"
-        rules_dir.mkdir(parents=True, exist_ok=True)
-        for name in (
-            "stm32_auto_workflow.md",
-            "stm32_weak_model_guard.md",
-            "stm32_task_cookbook.md",
-            "stm32_powershell_syntax.md",
-            "stm32_error_recovery.md",
-            "stm32_hardware_safety.md",
-            "stm32_model_deepseek_r1.md",
-            "stm32_model_qwen7b.md",
-            "stm32_model_glm.md",
-        ):
-            (rules_dir / name).write_text("demo ready cli>\n", encoding="utf-8")
+
+        # OpenCode 产物
+        agents_file = self.temp_dir / "AGENTS.md"
+        agents_dir = self.temp_dir / ".opencode" / "agent"
+        commands_dir = self.temp_dir / ".opencode" / "command"
+        agents_dir.mkdir(parents=True, exist_ok=True)
+        commands_dir.mkdir(parents=True, exist_ok=True)
+
+        # AGENTS.md 要包含项目名/ready banner/prompt，否则 binding 检查会 warn
+        agents_file.write_text(
+            "# Test AGENTS\nproject=demo\nready=ready\nprompt=cli>\n",
+            encoding="utf-8",
+        )
+        for name in ("stm32_auto.md", "weak_model.md", "code_planner.md", "hardware_verifier.md"):
+            (agents_dir / name).write_text(f"# {name}\n", encoding="utf-8")
+        for name in ("plan-stm32.md", "verify.md", "fix-build.md", "uart-smoke.md", "flash-reset.md"):
+            (commands_dir / name).write_text(f"# {name}\n", encoding="utf-8")
+        for name in ("deepseek_r1", "glm", "qwen7b"):
+            (agents_dir / f"model_{name}.md").write_text(f"# model {name}\n", encoding="utf-8")
+
+        # 模板目录存在
+        tpl_dir = self.temp_dir / "agent_workbench" / "templates" / "opencode_agents"
+        tpl_dir.mkdir(parents=True, exist_ok=True)
+
         brief_path.write_text("one two three\n", encoding="utf-8")
         paste_path.write_text("paste\n", encoding="utf-8")
         toolchain_path.write_text("# toolchain\n", encoding="utf-8")
@@ -110,20 +120,29 @@ class DoctorTests(unittest.TestCase):
                 "templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates",
                 "minimum_template_count": 15,
             },
-            "continue": {
-                "rules_dir_path": rules_dir,
-                "required_rules": [
-                    "stm32_auto_workflow.md",
-                    "stm32_weak_model_guard.md",
-                    "stm32_task_cookbook.md",
-                    "stm32_powershell_syntax.md",
-                    "stm32_error_recovery.md",
-                    "stm32_hardware_safety.md",
-                    "stm32_model_deepseek_r1.md",
-                    "stm32_model_qwen7b.md",
-                    "stm32_model_glm.md",
+            "opencode": {
+                "agents_file_path": agents_file,
+                "agents_dir_path": agents_dir,
+                "commands_dir_path": commands_dir,
+                "agents_template_dir_path": tpl_dir,
+                "required_agents": [
+                    "stm32_auto.md",
+                    "weak_model.md",
+                    "code_planner.md",
+                    "hardware_verifier.md",
                 ],
-                "model_rule_names": ["deepseek_r1", "qwen7b", "glm"],
+                "required_commands": [
+                    "plan-stm32.md",
+                    "verify.md",
+                    "fix-build.md",
+                    "uart-smoke.md",
+                    "flash-reset.md",
+                ],
+                "model_profiles": {
+                    "deepseek_r1": {"profile_file": "model_profiles/deepseek_r1.md", "min_lines": 5},
+                    "glm": {"profile_file": "model_profiles/glm.md", "min_lines": 5},
+                    "qwen7b": {"profile_file": "model_profiles/qwen7b.md", "min_lines": 5},
+                },
             },
             "agent": {
                 "state_path": state_path,
@@ -153,13 +172,16 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("paste_card", names)
         self.assertIn("diag_uart_backend", names)
         self.assertIn("diag_uart_requests", names)
-        self.assertIn("continue_rules", names)
-        self.assertIn("continue_model_rules", names)
+        self.assertIn("opencode_agents_file", names)
+        self.assertIn("opencode_agents", names)
+        self.assertIn("opencode_commands", names)
+        self.assertIn("opencode_model_profiles", names)
         self.assertIn("planner_templates", names)
         self.assertIn("migration_docs", names)
         self.assertEqual(names["agent_state"]["level"], "ok")
         self.assertEqual(names["paste_card"]["level"], "ok")
-        self.assertEqual(names["continue_rules"]["level"], "ok")
-        self.assertEqual(names["continue_model_rules"]["level"], "ok")
+        self.assertEqual(names["opencode_agents_file"]["level"], "ok")
+        self.assertEqual(names["opencode_agents"]["level"], "ok")
+        self.assertEqual(names["opencode_commands"]["level"], "ok")
+        self.assertEqual(names["opencode_model_profiles"]["level"], "ok")
         self.assertEqual(names["planner_templates"]["level"], "ok")
-        self.assertEqual(names["migration_docs"]["level"], "ok")

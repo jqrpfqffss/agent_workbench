@@ -319,35 +319,51 @@ planner:
   # 第二阶段扩库后建议保持在 15 及以上。
   minimum_template_count: 15
 
-continue:
-  # Continue 自动模式 rules 生成目录，相对 project.root。
-  # `agent_workbench.bat init-continue-rules` 会把项目专属 rules 写到这里。
-  rules_dir: .continue/rules
+opencode:
+  # OpenCode 主 agent 指令文件（项目根 AGENTS.md）
+  agents_file: AGENTS.md
 
-  # rules 模板目录，相对 agent_workbench 根目录。
-  rules_template_dir: templates/continue_rules
+  # sub-agent 目录（相对 project.root）
+  agents_dir: .opencode/agent
 
-  # 必须生成的 rules 文件列表。
-  required_rules:
-    - stm32_auto_workflow.md
-    - stm32_weak_model_guard.md
-    - stm32_task_cookbook.md
-    - stm32_powershell_syntax.md
-    - stm32_error_recovery.md
-    - stm32_hardware_safety.md
-    - stm32_model_deepseek_r1.md
-    - stm32_model_qwen7b.md
-    - stm32_model_glm.md
+  # 自定义 slash 命令目录
+  commands_dir: .opencode/command
 
-  # 多模型专用 rules 映射。
-  # doctor 会检查这些模型对应的 rules 是否都已生成。
-  model_rules:
+  # OpenCode 项目配置文件
+  project_config_file: opencode.json
+
+  # 模板源目录（相对 agent_workbench/ 根目录）
+  agents_template_dir: templates/opencode_agents
+
+  # 必须生成的 sub-agent 文件
+  required_agents:
+    - stm32_auto.md
+    - weak_model.md
+    - code_planner.md
+    - hardware_verifier.md
+
+  # 必须生成的 slash 命令
+  required_commands:
+    - plan-stm32.md
+    - verify.md
+    - fix-build.md
+    - uart-smoke.md
+    - flash-reset.md
+
+  # 针对不同本地模型的专用 profile
+  model_profiles:
     deepseek_r1:
-      display_name: DeepSeek-R1
-    qwen7b:
-      display_name: Qwen 7B
+      profile_file: model_profiles/deepseek_r1.md
+      min_lines: 5
     glm:
-      display_name: GLM
+      profile_file: model_profiles/glm.md
+      min_lines: 5
+    qwen7b:
+      profile_file: model_profiles/qwen7b.md
+      min_lines: 5
+
+  # 是否也同步到全局 ~/.config/opencode/
+  also_install_global: false
 
 vscode:
   # VS Code tasks.json 输出路径，相对 project.root。
@@ -451,13 +467,13 @@ agent:
 
 prompts:
   # debug 阶段默认 prompt 模板路径，相对 agent_workbench 根目录。
-  debug: prompts/continue_debug.md
+  debug: prompts/opencode_debug.md
 
   # feature 实现阶段默认 prompt 模板路径。
-  feature: prompts/continue_feature.md
+  feature: prompts/opencode_feature.md
 
   # 测试生成/测试分析阶段默认 prompt 模板路径。
-  test_author: prompts/continue_test_author.md
+  test_author: prompts/opencode_test_author.md
 
   # 报告总结阶段默认 prompt 模板路径。
-  report: prompts/continue_report.md
+  report: prompts/opencode_report.md

@@ -41,32 +41,22 @@ def _line_count(path: Path) -> int:
     return len(path.read_text(encoding="utf-8", errors="ignore").splitlines())
 
 
-def _check_continue_rules(cfg: dict, results: list[dict]) -> None:
-    continue_cfg = cfg.get("continue", {})
-    if not continue_cfg:
-        _append(results, "continue_rules", "warn", "rules_dir not configured")
+def _check_opencode_agents(cfg: dict, results: list[dict]) -> None:
+    oc_cfg = cfg.get("opencode", {})
+    if not oc_cfg:
+        _append(results, "opencode_agents", "warn", "opencode config missing")
         return
-    rules_dir = Path(continue_cfg.get("rules_dir_path", ""))
-    required_rules = [str(item).strip() for item in continue_cfg.get("required_rules", []) if str(item).strip()]
-    if not rules_dir.exists():
-        _append(results, "continue_rules_dir", "warn", f"missing {rules_dir}")
-        _append(results, "continue_rules", "warn", "run `agent_workbench.bat init-continue-rules` to generate auto-mode rules")
-        return
-    _append(results, "continue_rules_dir", "ok", str(rules_dir))
-    missing = [name for name in required_rules if not (rules_dir / name).exists()]
-    level = "ok" if not missing else "warn"
-    detail = "all required rules present" if not missing else f"missing={','.join(missing)}"
-    _append(results, "continue_rules", level, detail)
-    model_rule_names = [str(item).strip() for item in continue_cfg.get("model_rule_names", []) if str(item).strip()]
-    model_rule_files = [f"stm32_model_{name}.md" for name in model_rule_names]
-    missing_models = [name for name in model_rule_files if not (rules_dir / name).exists()]
-    model_level = "ok" if not missing_models else "warn"
-    model_detail = "all model-specific rules present" if not missing_models else f"missing={','.join(missing_models)}"
-    _append(results, "continue_model_rules", model_level, model_detail)
 
-    auto_rule_path = rules_dir / "stm32_auto_workflow.md"
-    if auto_rule_path.exists():
-        text = auto_rule_path.read_text(encoding="utf-8", errors="ignore")
+    agents_file = Path(oc_cfg.get("agents_file_path", ""))
+    agents_dir = Path(oc_cfg.get("agents_dir_path", ""))
+    commands_dir = Path(oc_cfg.get("commands_dir_path", ""))
+
+    # 检查 AGENTS.md
+    if not agents_file.exists():
+        _append(results, "opencode_agents_file", "warn", f"missing {agents_file} (run init-opencode-agents)")
+    else:
+        _append(results, "opencode_agents_file", "ok", str(agents_file))
+        text = agents_file.read_text(encoding="utf-8", errors="ignore")
         markers = [
             str(cfg.get("project", {}).get("name", "")).strip(),
             str(cfg.get("uart", {}).get("ready_banner", "")).strip(),
@@ -76,27 +66,53 @@ def _check_continue_rules(cfg: dict, results: list[dict]) -> None:
         bound = bool(markers) and all(marker in text for marker in markers)
         _append(
             results,
-            "continue_rules_binding",
+            "opencode_agents_binding",
             "ok" if bound else "warn",
-            "project name and UART markers injected into rules" if bound else "generated rules do not appear to contain current project markers",
+            "project name and UART markers injected into AGENTS.md" if bound else "generated AGENTS.md does not appear to contain current project markers",
         )
 
-    depth_targets = {
-        "stm32_auto_workflow.md": 300,
-        "stm32_weak_model_guard.md": 150,
-        "stm32_task_cookbook.md": 200,
-    }
-    for name, minimum_lines in depth_targets.items():
-        path = rules_dir / name
-        if not path.exists():
+    # 检查 sub-agent 目录
+    required_agents = [str(x).strip() for x in oc_cfg.get("required_agents", []) if str(x).strip()]
+    if not agents_dir.exists():
+        _append(results, "opencode_agents_dir", "warn", f"missing {agents_dir}")
+    else:
+        _append(results, "opencode_agents_dir", "ok", str(agents_dir))
+        missing = [name for name in required_agents if not (agents_dir / name).exists()]
+        level = "ok" if not missing else "warn"
+        detail = "all required agents present" if not missing else f"missing={','.join(missing)}"
+        _append(results, "opencode_agents", level, detail)
+
+    # 检查 slash commands 目录
+    required_commands = [str(x).strip() for x in oc_cfg.get("required_commands", []) if str(x).strip()]
+    if not commands_dir.exists():
+        _append(results, "opencode_commands_dir", "warn", f"missing {commands_dir}")
+    else:
+        _append(results, "opencode_commands_dir", "ok", str(commands_dir))
+        missing = [name for name in required_commands if not (commands_dir / name).exists()]
+        level = "ok" if not missing else "warn"
+        detail = "all required commands present" if not missing else f"missing={','.join(missing)}"
+        _append(results, "opencode_commands", level, detail)
+
+    # 检查模板目录
+    template_dir = Path(oc_cfg.get("agents_template_dir_path", ""))
+    if not template_dir.exists():
+        _append(results, "opencode_templates", "warn", f"missing {template_dir}")
+    else:
+        _append(results, "opencode_templates", "ok", str(template_dir))
+
+    # 检查模型 profile 文件
+    model_profiles = oc_cfg.get("model_profiles") or {}
+    missing_profiles: list[str] = []
+    for profile_name, meta in model_profiles.items():
+        if not isinstance(meta, dict):
             continue
-        lines = _line_count(path)
-        _append(
-            results,
-            f"continue_rule_depth::{name}",
-            "ok" if lines >= minimum_lines else "warn",
-            f"lines={lines} minimum={minimum_lines}",
-        )
+        target = agents_dir / f"model_{profile_name}.md"
+        if not target.exists():
+            missing_profiles.append(profile_name)
+    if model_profiles:
+        level = "ok" if not missing_profiles else "warn"
+        detail = "all model profile files present" if not missing_profiles else f"missing={','.join(missing_profiles)}"
+        _append(results, "opencode_model_profiles", level, detail)
 
 
 def _check_planner_templates(cfg: dict, results: list[dict]) -> None:
@@ -120,9 +136,9 @@ def _check_migration_docs(cfg: dict, results: list[dict]) -> None:
         return
     root = Path(cfg.get("agent_workbench_root_path", ""))
     required_docs = {
-        root / "README.md": ["Continue Auto Mode", "Local-Model Workflow"],
-        root / "MIGRATION_GUIDE_ZH.md": ["agent_workbench 迁移指南", "init-continue-rules"],
-        root / "CONTINUE_AUTO_MODE_GUIDE_ZH.md": ["Continue 自动模式指南", "scan-project", "plan"],
+        root / "README.md": ["OpenCode Auto Mode", "Local-Model Workflow"],
+        root / "MIGRATION_GUIDE_ZH.md": ["agent_workbench 迁移指南", "init-opencode-agents"],
+        root / "OPENCODE_AUTO_MODE_GUIDE_ZH.md": ["OpenCode", "init-opencode-agents"],
     }
     missing = [path.name for path in required_docs if not path.exists()]
     unreadable: list[str] = []
@@ -342,7 +358,7 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
         _append(results, "context_budget", "warn", "no active local-model context has been generated yet")
         _append(results, "paste_card", "warn", "no paste card available until `agent_workbench.bat context ...` runs")
 
-    _check_continue_rules(cfg, results)
+    _check_opencode_agents(cfg, results)
     _check_planner_templates(cfg, results)
     _check_migration_docs(cfg, results)
 

@@ -19,7 +19,7 @@ _KNOWN_COMMANDS = {
     "compare",
     "report",
     "init-vscode",
-    "init-continue-rules",
+    "init-opencode-agents",
     "context",
     "verify",
     "plan",

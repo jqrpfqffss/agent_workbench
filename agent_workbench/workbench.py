@@ -440,16 +440,21 @@ def _cmd_init_vscode(args: argparse.Namespace) -> int:
     return _emit(args, payload, [payload["summary"]])
 
 
-def _cmd_init_continue_rules(args: argparse.Namespace) -> int:
-    from core.vscode_service import write_continue_rules
+def _cmd_init_opencode_agents(args: argparse.Namespace) -> int:
+    from core.vscode_service import write_opencode_agents
 
     cfg = _cfg(args.config)
-    generated = write_continue_rules(cfg)
+    generated = write_opencode_agents(cfg)
     payload = build_result_payload(
-        "init-continue-rules",
+        "init-opencode-agents",
         0,
-        summary=f"continue rules written: {len(generated)}",
-        artifacts={"rules_dir": str(cfg["continue"]["rules_dir_path"]), "files": [str(path) for path in generated]},
+        summary=f"opencode files written: {len(generated)}",
+        artifacts={
+            "agents_file": str(cfg["opencode"]["agents_file_path"]),
+            "agents_dir": str(cfg["opencode"]["agents_dir_path"]),
+            "commands_dir": str(cfg["opencode"]["commands_dir_path"]),
+            "files": [str(path) for path in generated],
+        },
     )
     lines = [payload["summary"], *[str(path) for path in generated]]
     return _emit(args, payload, lines)
@@ -511,7 +516,11 @@ def _cmd_scan_project(args: argparse.Namespace) -> int:
         0,
         summary=f"scan project: {snapshot['project']['name']} files={snapshot['source_file_count']}",
         details=snapshot,
-        artifacts={"rules_dir": str(cfg["continue"]["rules_dir_path"])},
+        artifacts={
+            "opencode_agents_file": str(cfg.get("opencode", {}).get("agents_file_path", "")),
+            "opencode_agents_dir": str(cfg.get("opencode", {}).get("agents_dir_path", "")),
+            "opencode_commands_dir": str(cfg.get("opencode", {}).get("commands_dir_path", "")),
+        },
     )
     lines = [
         payload["summary"],
@@ -726,10 +735,10 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_flag(p_vscode)
     p_vscode.set_defaults(func=_cmd_init_vscode)
 
-    p_rules = sub.add_parser("init-continue-rules", help="generate Continue auto-mode rules under .continue/rules")
-    p_rules.add_argument("--config", default=str(DEFAULT_CONFIG))
-    _add_json_flag(p_rules)
-    p_rules.set_defaults(func=_cmd_init_continue_rules)
+    p_agents = sub.add_parser("init-opencode-agents", help="generate OpenCode AGENTS.md / agent / command files")
+    p_agents.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_agents)
+    p_agents.set_defaults(func=_cmd_init_opencode_agents)
 
     p_context = sub.add_parser("context", help="generate a compact context pack for low-context models")
     p_context.add_argument("--config", default=str(DEFAULT_CONFIG))
