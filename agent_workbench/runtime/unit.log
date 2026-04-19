@@ -664,3 +664,11 @@ Ran 42 tests in 2.340s
 
 FAILED (failures=2, skipped=1)
 [2026-04-19T09:04:52.011+00:00] exit=1
+
+[2026-04-19T13:20:48.894+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s....................................
+----------------------------------------------------------------------
+Ran 42 tests in 2.594s
+
+OK (skipped=1)
+[2026-04-19T13:20:51.818+00:00] exit=0
