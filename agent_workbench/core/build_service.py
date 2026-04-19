@@ -28,6 +28,11 @@ def _build_command(cfg: dict) -> str:
 
 
 def run_build(cfg: dict, log_path: Path) -> int:
+    try:
+        log_path.unlink(missing_ok=True)
+    except TypeError:
+        if log_path.exists():
+            log_path.unlink()
     for command in (_configure_command(cfg), _build_command(cfg)):
         code = run_command(command, cwd=cfg["project_root_path"], log_path=log_path)
         if code != 0:

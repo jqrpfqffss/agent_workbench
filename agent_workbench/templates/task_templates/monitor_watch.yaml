@@ -1,0 +1,31 @@
+id: monitor_watch
+mode: debug
+priority: 15
+description: 为变量监控、寄存器观察和运行时状态采集类需求生成诊断计划。
+keywords:
+  - monitor
+  - watch
+  - 观测
+  - 变量监控
+  - 寄存器
+read_files:
+  - file: Core/Src/main.c
+    why: 了解变量更新路径和主循环节拍。
+  - file: Core/Inc/main.h
+    why: 确认全局状态变量与声明位置。
+shell_steps:
+  - name: 项目扫描
+    command: ./agent_workbench.bat scan-project --json
+    success_criteria: exit_code == 0
+  - name: 环境检查
+    command: ./agent_workbench.bat doctor --json
+    success_criteria: exit_code == 0
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+  - name: 监控能力检查
+    command: ./agent_workbench.bat monitor status --json
+    success_criteria: exit_code == 0
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"

@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-04-08T13:16:20.620+00:00",
+  "old_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression_direct_verify_20260408_203250",
+  "new_session": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\cli_automation_regression",
+  "verdict": {
+    "old": "pass",
+    "new": "pass"
+  },
+  "uart": {
+    "old_lines": 2,
+    "new_lines": 2,
+    "delta_lines": 0,
+    "old_warn_like": 0,
+    "new_warn_like": 0,
+    "delta_warn_like": 0
+  },
+  "cli": {
+    "old_lines": 78,
+    "new_lines": 78,
+    "delta_lines": 0,
+    "new_unique_lines": []
+  },
+  "assertions": {
+    "old": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "new": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "delta_failed": 0
+  },
+  "diag": {
+    "old": "",
+    "new": ""
+  }
+}

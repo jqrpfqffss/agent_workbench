@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-08T11:55:42.579+00:00",
+  "mode": "feature",
+  "stage": "implement",
+  "profile": "deepseek16k",
+  "task_id": "cli_automation_regression",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml",
+  "session_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation",
+  "max_pack_words": 420,
+  "max_fact_items": 10,
+  "max_cli_tail_lines": 5,
+  "max_failed_assertions_shown": 2,
+  "max_extra_reads": 1,
+  "max_edit_files": 2,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\cli_automation_regression\\implementation_brief.md",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\cli.c"
+  ],
+  "allowed_edits": [
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\cli.c",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\app_cli_commands.c"
+  ],
+  "unknowns": [
+    "No CLI diagnostic file exists for the selected session."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not edit files outside allowed_edits.",
+    "Do not expand scope beyond the task goal."
+  ],
+  "next_commands": [
+    "agent_workbench.bat build",
+    "agent_workbench.bat test run",
+    "agent_workbench.bat context --mode feature --stage verify --task H:/stm32_RAG/code/serial/agent_workbench/tasks/cli_automation_regression.yaml --profile deepseek16k"
+  ]
+}

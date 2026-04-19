@@ -1,146 +1,45 @@
-# Debug Session Summary
+# Session Summary
 
-- generated_at: 2026-04-06T10:15:27.903+00:00
+- generated_at: 2026-04-08T11:31:29.911+00:00
 - session_dir: `H:\stm32_RAG\code\serial\agent_workbench\evidence\sessions\serial_cli_feature_com3_diag_v2`
+- verdict: `fail`
+- verdict_file: `H:\stm32_RAG\code\serial\agent_workbench\evidence\sessions\serial_cli_feature_com3_diag_v2\session_verdict.json`
+- brief_file: `H:\stm32_RAG\code\serial\agent_workbench\evidence\sessions\serial_cli_feature_com3_diag_v2\session_brief.md`
+- next_step: Inspect the first failed assertion, then rerun the verify stage.
 
 ## Evidence Files
 - session_manifest.json: exists
+- session_verdict.json: exists
+- session_brief.md: exists
 - commands.log: exists
 - doctor_report.md: exists
-- uart.log: exists
+- feature_summary.md: exists
 - cli_transcript.log: exists
 - cli_diag.json: exists
-- monitor_samples.csv: missing
 - assertions.jsonl: exists
+- compare_brief.md: missing
 
-## Monitor Stats
-- no valid monitor samples
-
-## UART Tail
-```text
-[2026-04-06T10:15:18.215+00:00] [uart] start port=COM3 baud=115200 backend=powershell
-[2026-04-06T10:15:27.892+00:00] [uart] stop
-```
-
-## CLI Tail
-```text
-[2026-04-06T10:15:09.538+00:00] [cli] reset-first exit=0
-[2026-04-06T10:15:10.037+00:00] [cli] start port=COM3 baud=115200 expect_ready=1 reset_first=1 backend=powershell
-[2026-04-06T10:15:16.221+00:00] [cli] ready-missing expected=STM32 UART CLI ready.
-[2026-04-06T10:15:16.252+00:00] [cli] stop
-```
+## Verdict Snapshot
+- summary: 9 black-box assertions failed.
+- strongest_evidence: cli_ready_banner_seen | STM32 UART CLI ready.
+- assertions: pass=1 fail=9 skip=0
 
 ## CLI Diagnostics
 - status: ok
+- code: rx_zero
 - summary: Board did not receive UART bytes
 - detail: Check COM port mapping, RX/TX wiring, and whether the configured UART is the active CLI path.
-- stats: rx_bytes=0 rx_lines=0 cmd_ok=0 cmd_err=0 rx_overflow=0 uart_error=0 last_cmd=
 
-## Manifest Snapshot
-```json
-{
-  "generated_at": "2026-04-06T10:15:06.441+00:00",
-  "mode": "feature",
-  "project": "serial",
-  "project_root": "H:\\stm32_RAG\\code\\serial",
-  "config_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml",
-  "task": {
-    "id": "cli_automation_regression",
-    "mode": "feature",
-    "goal": "Keep the USART2 text CLI command-driven, automation-friendly, and safe for repeated debug sessions.",
-    "scope": {
-      "include": [
-        "Core/Src/cli.c",
-        "Core/Src/app_cli_commands.c",
-        "Core/Src/main.c",
-        "Core/Inc",
-        "CMakeLists.txt"
-      ],
-      "exclude": [
-        "Drivers"
-      ]
-    },
-    "acceptance": {
-      "blackbox": [
-        {
-          "name": "cli_ready_banner_seen",
-          "type": "cli_ready",
-          "needle": "STM32 UART CLI ready."
-        },
-        {
-          "name": "cli_prompt_seen",
-          "type": "cli_prompt_seen"
-        },
-        {
-          "name": "cli_has_no_timeout",
-          "type": "cli_no_timeout"
-        },
-        {
-          "name": "cli_help_lists_commands",
-          "type": "cli_contains",
-          "needle": "Available commands:"
-        },
-        {
-          "name": "cli_status_reports_uart",
-          "type": "cli_contains",
-          "needle": "UART: USART2 @ 115200 8N1"
-        },
-        {
-          "name": "cli_status_reports_led",
-          "type": "cli_contains",
-          "needle": "LED RED"
-        },
-        {
-          "name": "cli_red_ack",
-          "type": "cli_contains",
-          "needle": "[ok] red -> on"
-        },
-        {
-          "name": "cli_green_ack",
-          "type": "cli_contains",
-          "needle": "[ok] green -> off"
-        },
-        {
-          "name": "cli_blue_ack",
-          "type": "cli_contains",
-          "needle": "[ok] blue -> toggle"
-        },
-        {
-          "name": "cli_all_off_ack",
-          "type": "cli_contains",
-          "needle": "[ok] all -> off"
-        }
-      ],
-      "unit": [
-        "help output documents the command table and usage strings",
-        "led command accepts red green blue and all targets",
-        "alias commands red green blue and all delegate to the same LED control path",
-        "CLI parser tolerates CR LF and backspace without breaking prompt recovery"
-      ]
-    },
-    "observability": {
-      "notes": [
-        "keep the ready banner and cli> prompt as stable machine-readable markers",
-        "prefer explicit command responses over unsolicited serial output",
-        "keep control acknowledgements short and easy to assert from cli_transcript.log"
-      ]
-    },
-    "verify": {
-      "sequence": [
-        "doctor",
-        "build",
-        "test",
-        "debug"
-      ],
-      "cli_commands": [
-        "help",
-        "status",
-        "red on",
-        "green off",
-        "blue toggle",
-        "all off"
-      ]
-    }
-  }
-}
-```
+## Failed Assertions
+- cli_ready_banner_seen: STM32 UART CLI ready.
+- cli_prompt_seen: cli>
+- cli_help_lists_commands: Available commands:
+
+## CLI Tail
+- [2026-04-06T10:15:09.538+00:00] [cli] reset-first exit=0
+- [2026-04-06T10:15:10.037+00:00] [cli] start port=COM3 baud=115200 expect_ready=1 reset_first=1 backend=powershell
+- [2026-04-06T10:15:16.221+00:00] [cli] ready-missing expected=STM32 UART CLI ready.
+- [2026-04-06T10:15:16.252+00:00] [cli] stop
+
+## Monitor Stats
+- no valid monitor samples

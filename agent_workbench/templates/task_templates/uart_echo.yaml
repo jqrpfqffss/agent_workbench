@@ -1,0 +1,36 @@
+id: uart_echo
+mode: feature
+priority: 18
+description: 为串口回显、UART 文本响应和简单串口命令类需求生成执行计划。
+keywords:
+  - echo
+  - 回显
+  - uart
+  - 串口
+  - usart
+exclude_keywords:
+  - i2c
+  - spi
+read_files:
+  - file: Core/Src/cli.c
+    why: 了解当前串口接收、发送和命令处理流程。
+  - file: Core/Src/main.c
+    why: 确认 UART 初始化和主流程关系。
+edit_files:
+  - file: Core/Src/cli.c
+    instructions: 根据 `{user_request}` 增加最小安全的串口回显或文本响应逻辑，保持 ready banner 与 prompt 稳定。
+  - file: Core/Src/main.c
+    instructions: 如果需求需要补充 UART 初始化或缓冲设置，只修改与 `{user_request}` 直接相关的最小部分。
+shell_steps:
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+    on_failure:
+      max_retries: 3
+      retry_strategy: 优先修复 UART/CLI 相关的第一条编译错误，再继续。
+  - name: UART CLI 验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"

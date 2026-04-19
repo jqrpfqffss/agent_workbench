@@ -1,9 +1,35 @@
+# Agent Workbench 主配置文件。
+# 这个文件是整个 workbench 的“单一事实来源”：
+# 构建、烧录、串口、诊断口、监控、验证流程、VS Code 任务、模型上下文策略，都会从这里取配置。
+#
+# 阅读建议：
+# 1. 先看每个一级段落前面的说明。
+# 2. 再按需修改具体字段。
+# 3. 改完后优先执行 `agent_workbench.bat doctor` 检查配置是否仍然有效。
+
 project:
+  # 项目名称。用于报告、session 清单、汇总文件中的展示名称。
   name: serial
+
+  # 项目根目录。
+  # 这里是相对 `agent_workbench/` 目录的路径。
+  # 当前写成 `..`，表示项目根目录就是 agent_workbench 的上一级目录，也就是当前仓库根目录。
   root: ..
+
+  # 构建目录，相对 project.root。
+  # CMake / 构建日志 / 编译产物路径都会围绕这个目录展开。
   build_dir: build/cmake-debug
+
+  # 最终 ELF 文件路径，相对 project.root。
+  # 烧录、符号解析、监控符号定位都会用到它。
   artifact_elf: build/cmake-debug/serial.elf
+
+  # compile_commands.json 路径，相对 project.root。
+  # 给代码分析、上下文打包、某些编辑器/工具链使用。
   compile_commands: build/cmake-debug/compile_commands.json
+
+  # 主要源码目录列表，相对 project.root。
+  # 用于帮助上下文收集、项目扫描、任务范围理解。
   source_dirs:
     - Core
     - Drivers
@@ -11,50 +37,138 @@ project:
     - agent_workbench
 
 outputs:
+  # 运行时临时输出目录。
+  # 这里会放 doctor/build/unit 日志、cli_transcript、diag_exchange、context pack 等“当前运行产物”。
   runtime_root: agent_workbench/runtime
+
+  # 会话证据目录。
+  # `session debug`、`session feature` 等流程会在这里为每次会话创建独立目录，保存日志、断言、总结、比较报告。
   evidence_root: agent_workbench/evidence/sessions
+
+  # 生成物目录。
+  # 例如自动生成的测试骨架、任务快照、实现摘要等放这里。
   generated_root: agent_workbench/generated
 
 hardware:
+  # 是否把“真实硬件可用”当成强约束。
+  # 可选值通常有：
+  # - prefer: 优先使用硬件；没有也尽量继续执行可执行的部分
+  # - required: 硬件不可用时视为失败
+  # 当前为 prefer，适合开发期和迁移期。
   mode: prefer
 
 tools:
   cmake:
+    # CMake 生成器名称。
+    # Windows + MinGW 工具链下常用 `MinGW Makefiles`。
     generator: MinGW Makefiles
+
+    # 构建类型。
+    # 常见为 Debug / Release。
     build_type: Debug
+
+    # CMake 交叉编译工具链文件，相对 project.root。
     toolchain_file: cmake/arm-none-eabi-toolchain.cmake
+
+    # 传给 `cmake -S ... -B ...` 的额外参数列表。
+    # 没有特殊需求时可留空数组。
     configure_args: []
+
+    # 传给 `cmake --build ...` 的额外参数列表。
+    # 当前 `-j` 表示并行构建。
     build_args:
       - -j
+
   openocd:
+    # OpenOCD 连接地址。
+    # 通常是本机回环地址。
     host: 127.0.0.1
+
+    # OpenOCD telnet 端口。
+    # 监控、CLI 诊断读取、内存读取等功能会用到。
     telnet_port: 4444
+
+    # 启动 OpenOCD 后等待多久再尝试连接，单位秒。
     startup_wait_sec: 3.0
+
+    # 启动 OpenOCD 守护进程的完整命令模板。
+    # 支持使用 `{...}` 模板变量，运行时会替换成真实路径。
     daemon_cmd: openocd -l "{openocd_live_log_posix}" -f interface/stlink.cfg -f target/stm32f1x.cfg -c "gdb_port 3333; tcl_port 6666; telnet_port 4444"
+
   flash:
+    # 默认烧录方法名。
+    # 必须能在 methods 下找到同名条目。
     default_method: openocd_cmd
+
     methods:
       stlink_cli:
+        # 使用 STM32_Programmer_CLI 进行烧录的命令模板。
+        # `{artifact_elf}` 会替换成 ELF 绝对路径。
         flash: STM32_Programmer_CLI -c port=SWD -w "{artifact_elf}" -v -rst
+
+        # 使用 STM32_Programmer_CLI 执行复位的命令模板。
         reset: STM32_Programmer_CLI -c port=SWD -rst
+
       openocd_cmd:
+        # 使用 OpenOCD 进行烧录的命令模板。
+        # `{artifact_elf_posix}` 用 POSIX 风格路径，兼容 OpenOCD 参数解析。
         flash: openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program {artifact_elf_posix} verify reset exit"
+
+        # 使用 OpenOCD 执行复位的命令模板。
         reset: openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+
+  # 读取 ELF 符号表时使用的 nm 工具名。
+  # `cli_diag_service`、monitor 符号定位等功能会依赖它。
   symbols_nm: arm-none-eabi-nm
 
 uart:
+  # 是否启用“调试口 / CLI 口”能力。
+  # 关闭后，uart exec / uart console / session 里的 CLI 探测会被跳过或降级。
   enabled: true
+
+  # 调试口所在串口号。
+  # Windows 下一般是 COMx。
   port: COM3
+
+  # 调试口波特率。
   baudrate: 115200
+
+  # 串口文本编码。
+  # 目前 CLI 为纯英文文本，utf-8 是安全默认值。
   encoding: utf-8
+
+  # 单次读一行/读一批数据时的底层超时，单位秒。
+  # 越小响应越灵敏，但 CPU 轮询更频繁。
   line_timeout_sec: 0.2
+
+  # 建立串口连接后先“清空启动噪声”的时长，单位秒。
+  # 用于丢弃板子上电瞬间的残留输出，避免干扰 ready 检测。
   startup_drain_sec: 1.0
+
+  # CLI ready banner。
+  # `uart exec --expect-ready` 会等待看到这段文本。
   ready_banner: STM32 UART CLI ready.
+
+  # CLI 提示符。
+  # host 会用它判断一条命令是否执行完毕。
   prompt: cli>
+
+  # 等待 ready banner + prompt 的总超时，单位秒。
   ready_timeout_sec: 5.0
+
+  # 单条 CLI 命令等待回复结束的超时，单位秒。
   command_timeout_sec: 2.0
+
+  # `uart exec` 时是否默认必须先看到 ready banner 和 prompt。
+  # true 更严格，适合自动化验证。
   exec_require_ready: true
+
+  # 命令超时后是否直接判定失败。
+  # true 表示一旦超时就返回非 0 退出码。
   exec_fail_on_timeout: true
+
+  # 调试口烟测命令列表。
+  # debug session、verify current 等自动化流程会优先使用这些命令做基本探测。
   probe_commands:
     - help
     - status
@@ -62,8 +176,12 @@ uart:
     - green on
     - blue on
     - all off
+
+  # 本地交互式控制台帮助表。
+  # `uart console` 输入 `:help` 时会显示这些信息。
   help_rows:
     - command: help
+      # 每一行 detail 建议写成“功能 | usage | args”的固定格式，便于人和工具一起看。
       detail: "list commands or show one command help | usage: help [command] | args: optional command"
     - command: status
       detail: "show UART and LED state | usage: status | args: none"
@@ -78,28 +196,105 @@ uart:
     - command: all
       detail: "all LEDs shortcut | usage: all <on|off|toggle> | args: action"
 
+diag_uart:
+  # 是否启用“诊断口 / 原始报文口”能力。
+  # 这个口与 uart 是两套独立配置；当前样例中为了验证 host 能力，暂时也指向 COM3。
+  enabled: true
+
+  # 诊断口串口号。
+  # 迁移到真实项目后，通常改成第二个 USB-TTL 所在的 COM 口。
+  port: COM3
+
+  # 诊断口波特率。
+  baudrate: 115200
+
+  # 诊断口回复预览使用的文本编码。
+  # 即使收的是二进制，也只影响“preview”显示，不影响原始 hex 记录。
+  encoding: utf-8
+
+  # 打开诊断口后先清空残留输入的时长，单位秒。
+  # 用于丢掉上电噪声或前一轮会话遗留字节。
+  startup_drain_sec: 0.2
+
+  # 底层串口读超时，单位秒。
+  # 这是最细粒度的 read 超时，不等同于整帧等待时间。
+  read_timeout_sec: 0.05
+
+  # 发送一帧请求后，等待“首字节回复”出现的最长时间，单位秒。
+  # 超过这个时间还没收到任何字节，会判定本次请求超时。
+  response_timeout_sec: 1.0
+
+  # 收到首字节后，若在这个空闲时间内没有新字节到来，则认为一帧回复结束，单位秒。
+  # 适合不知道固定长度时做“静默分帧”。
+  response_idle_timeout_sec: 0.15
+
+  # 默认十六进制请求列表。
+  # 当执行 `agent_workbench.bat diag exec` 且没有传 `--hex / --script` 时，就按这里依次发送。
+  # 当前样例中：
+  # - 第一帧是 `help\r\n`
+  # - 第二帧是 `status\r\n`
+  # 目的是用调试 CLI 口验证新的诊断口 host 工具链。
+  default_hex_requests:
+    - 68 65 6C 70 0D 0A
+    - 73 74 61 74 75 73 0D 0A
+
 monitor:
+  # 是否启用变量/寄存器监控功能。
+  # 当前项目关闭；开启后需要 OpenOCD、符号和监控项配置完整。
   enabled: false
+
+  # 监控采样频率，单位 Hz。
   sample_hz: 10
+
+  # 监控环形缓冲区大小。
+  # 值越大，可缓存的样本越多，但内存和导出量也更大。
   ring_size: 2000
+
+  # 监控数据导出周期，单位秒。
   export_interval_sec: 3
+
   openocd:
+    # monitor 子系统连接 OpenOCD 的地址。
     host: 127.0.0.1
+
+    # monitor 子系统连接 OpenOCD 的端口。
     port: 4444
+
+    # monitor 子系统每次 OpenOCD 读操作的超时，单位秒。
     timeout_sec: 2.0
+
   symbols:
+    # 监控时用于查符号地址的 ELF 路径，相对 project.root。
     elf_path: build/cmake-debug/serial.elf
+
+  # 监控项列表。
+  # 每个元素通常描述一个需要观察的变量/寄存器/地址。
+  # 当前为空列表，表示不监控任何项目。
   items: []
 
 checks:
   unit:
+    # 是否启用单元测试检查。
     enabled: true
+
+    # 运行单元测试的命令模板。
+    # `{python}` 会在运行时替换成当前 workbench 解析到的 Python 可执行文件。
     command: '{python} -m unittest discover -s agent_workbench/tests -p "test_*.py"'
 
 workflow:
+  # 是否由 workbench 自动管理 OpenOCD 的启动和关闭。
+  # true 表示 session / verify 流程里会自动尝试拉起和关闭 OpenOCD。
   manage_openocd: true
+
+  # session 流程中的观察窗口时长，单位秒。
+  # 在 flash/reset/cli probe 之后，会留出这段时间给 uart logger / monitor 收集数据。
   observe_seconds: 10
+
+  # 会话完成后是否自动与上一次会话做比较。
   auto_compare_previous: true
+
+  # 默认验证步骤顺序。
+  # 这是高层流程展示顺序；具体某些命令内部可能会按能力条件跳过部分步骤。
   verify_sequence:
     - doctor
     - build
@@ -108,11 +303,135 @@ workflow:
     - observe
     - report
 
+planner:
+  # 任务模板目录，相对 agent_workbench 根目录。
+  # `plan` 命令会从这里读取自然语言需求模板库。
+  templates_dir: templates/task_templates
+
+  # 静态硬件知识库目录，相对 agent_workbench 根目录。
+  hardware_knowledge_dir: templates/hardware_knowledge
+
+  # plan 输出允许的总步骤上限。
+  # 用于避免弱模型在自动流程里无限扩展步骤。
+  max_total_steps: 15
+
+  # doctor 检查时要求的最小模板数量。
+  # 第二阶段扩库后建议保持在 15 及以上。
+  minimum_template_count: 15
+
+integrations:
+  # 可选：doctor 不强制任何集成已安装，保留给用户自行选择。
+  auto_install: []
+
 vscode:
+  # VS Code tasks.json 输出路径，相对 project.root。
+  # 执行 `agent_workbench.bat init-vscode` 时会写入这里。
   tasks_file: .vscode/tasks.json
 
+agent:
+  # 默认上下文 profile。
+  # 不显式传 `--profile` 时，context pack / Continue 辅助流程就使用这个 profile。
+  default_profile: balanced_local
+
+  profiles:
+    balanced_local:
+      # 生成给本地模型的 brief/paste 时，允许的最大词数预算。
+      max_pack_words: 550
+
+      # 最多保留多少条事实项。
+      max_fact_items: 12
+
+      # CLI 尾部日志最多带多少行。
+      max_cli_tail_lines: 6
+
+      # 最多展示多少条失败断言。
+      max_failed_assertions_shown: 3
+
+      # 允许模型额外读取的文件数预算。
+      max_extra_reads: 2
+
+      # 允许模型编辑的文件数预算。
+      max_edit_files: 2
+
+      # 是否强制要求事实带证据引用。
+      require_fact_citations: true
+
+      # 是否尽量生成 ASCII 兼容的运行时产物。
+      prefer_ascii_runtime_artifacts: true
+
+      # 选择“参考历史 session”的策略。
+      # `latest_failed_then_latest_pass` 表示优先拿最近失败会话，没有时再看最近成功会话。
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    deepseek16k:
+      # 该 profile 更适合上下文预算更紧的模型，所以 pack words 更小。
+      max_pack_words: 420
+      max_fact_items: 10
+      max_cli_tail_lines: 5
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    qwen32k:
+      # 该 profile 给更大上下文窗口使用，因此预算略高。
+      max_pack_words: 520
+      max_fact_items: 12
+      max_cli_tail_lines: 6
+      max_failed_assertions_shown: 3
+      max_extra_reads: 2
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    deepseek_r1:
+      # DeepSeek-R1 自动模式推荐 profile。
+      max_pack_words: 380
+      max_fact_items: 9
+      max_cli_tail_lines: 5
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    qwen7b:
+      # Qwen 7B 更适合更短的阶段卡和更小的编辑半径。
+      max_pack_words: 320
+      max_fact_items: 8
+      max_cli_tail_lines: 4
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 1
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    glm:
+      # GLM 系列默认放在中等上下文预算。
+      max_pack_words: 460
+      max_fact_items: 10
+      max_cli_tail_lines: 5
+      max_failed_assertions_shown: 3
+      max_extra_reads: 2
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
 prompts:
-  debug: prompts/continue_debug.md
-  feature: prompts/continue_feature.md
-  test_author: prompts/continue_test_author.md
-  report: prompts/continue_report.md
+  # debug 阶段默认 prompt 模板路径，相对 agent_workbench 根目录。
+  debug: prompts/legacy_debug.md
+
+  # feature 实现阶段默认 prompt 模板路径。
+  feature: prompts/legacy_feature.md
+
+  # 测试生成/测试分析阶段默认 prompt 模板路径。
+  test_author: prompts/legacy_test_author.md
+
+  # 报告总结阶段默认 prompt 模板路径。
+  report: prompts/legacy_report.md

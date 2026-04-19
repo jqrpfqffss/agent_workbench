@@ -1,0 +1,25 @@
+安装方法：
+
+1. 将本包解压到：
+   C:\Users\Administrator\.continue\
+
+2. 解压后应出现：
+   C:\Users\Administrator\.continue\prompts\agent_workbench\
+
+3. 打开 Continue 时，可直接在该目录中查看和复制对应 prompt 文件内容。
+
+说明：
+
+- 这些文件是 Continue 专用提示模板，不是 Codex SKILL.md 格式。
+- 它们的目标是减少 Continue 自己拼接命令和反复纠错。
+- 全部 prompt 都已经按 PowerShell 安全格式写好，默认优先使用：
+  cmd /c ".\agent_workbench.bat ..."
+
+推荐先用：
+
+- prompts\agent_workbench\10-current-serial-direct-verify.md
+
+如果你用的是本地模型：
+
+- DeepSeek：看 prompts\agent_workbench\deepseek\
+- Qwen：看 prompts\agent_workbench\qwen\

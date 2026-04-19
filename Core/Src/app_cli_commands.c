@@ -29,6 +29,7 @@ static void AppCli_Red(CliContext *cli, int argc, char **argv);
 static void AppCli_Green(CliContext *cli, int argc, char **argv);
 static void AppCli_Blue(CliContext *cli, int argc, char **argv);
 static void AppCli_All(CliContext *cli, int argc, char **argv);
+static void AppCli_LedStatus(CliContext *cli, int argc, char **argv);  // NEW: led_status handler
 
 static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command);
 static void AppCli_PrintLedStatus(CliContext *cli, const char *name, GPIO_TypeDef *port, uint16_t pin);
@@ -47,7 +48,8 @@ static const CliCommand app_cli_commands[] =
   { "red", "Shortcut for 'led red ...'.", "red <on|off|toggle>", AppCli_Red },
   { "green", "Shortcut for 'led green ...'.", "green <on|off|toggle>", AppCli_Green },
   { "blue", "Shortcut for 'led blue ...'.", "blue <on|off|toggle>", AppCli_Blue },
-  { "all", "Shortcut for 'led all ...'.", "all <on|off|toggle>", AppCli_All }
+  { "all", "Shortcut for 'led all ...'.", "all <on|off|toggle>", AppCli_All },
+  { "led_status", "Print the on/off state of all LEDs.", "led_status", AppCli_LedStatus }
 };
 
 const CliCommand *AppCli_GetCommands(size_t *count)
@@ -166,6 +168,17 @@ static void AppCli_All(CliContext *cli, int argc, char **argv)
   }
 
   AppCli_HandleLedCommand(cli, "all", argv[1]);
+}
+
+static void AppCli_LedStatus(CliContext *cli, int argc, char **argv)
+{
+  (void)argc;
+  (void)argv;
+
+  Cli_WriteString(cli, "LED status:\r\n");
+  AppCli_PrintLedStatus(cli, "RED", LED_RED_GPIO_Port, LED_RED_Pin);
+  AppCli_PrintLedStatus(cli, "GREEN", LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+  AppCli_PrintLedStatus(cli, "BLUE", LED_BLUE_GPIO_Port, LED_BLUE_Pin);
 }
 
 static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command)

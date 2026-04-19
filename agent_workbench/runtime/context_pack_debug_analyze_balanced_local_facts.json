@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-04-08T11:55:30.636+00:00",
+  "mode": "debug",
+  "stage": "analyze",
+  "profile": "balanced_local",
+  "task_id": "",
+  "session_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3",
+  "facts": [
+    {
+      "fact_id": "F01",
+      "name": "project",
+      "value": "serial",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F02",
+      "name": "mode_stage_profile",
+      "value": "debug/analyze/balanced_local",
+      "source": "context",
+      "evidence": "runtime state"
+    },
+    {
+      "fact_id": "F03",
+      "name": "uart_contract",
+      "value": "COM3 @ 115200 ready=STM32 UART CLI ready. prompt=cli>",
+      "source": "config",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\agent_workbench.yaml"
+    },
+    {
+      "fact_id": "F07",
+      "name": "latest_session",
+      "value": "serial_cli_debug_com3_diag_v3",
+      "source": "session",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\session_manifest.json"
+    },
+    {
+      "fact_id": "F08",
+      "name": "verdict_status",
+      "value": "fail",
+      "source": "session",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\session_verdict.json"
+    },
+    {
+      "fact_id": "F09",
+      "name": "verdict_summary",
+      "value": "CLI diagnostics unavailable",
+      "source": "session",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\session_verdict.json"
+    },
+    {
+      "fact_id": "F10",
+      "name": "strongest_evidence",
+      "value": "OpenOCD or DebugCliStats symbol could not be read.",
+      "source": "session",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\session_verdict.json"
+    },
+    {
+      "fact_id": "F11",
+      "name": "cli_diag_code",
+      "value": "diag_unavailable",
+      "source": "cli_diag",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\cli_diag.json"
+    },
+    {
+      "fact_id": "F12",
+      "name": "assertion_counts",
+      "value": "pass=0 fail=0 skip=0",
+      "source": "assertions",
+      "evidence": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\serial_cli_debug_com3_diag_v3\\assertions.jsonl"
+    }
+  ]
+}

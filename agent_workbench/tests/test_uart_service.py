@@ -196,3 +196,38 @@ class UartExecTests(unittest.TestCase):
         self.assertEqual(result.diag["classification"]["code"], "rx_zero")
         transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
         self.assertIn("[timeout]", transcript)
+
+    def test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback(self) -> None:
+        self.serial_patch.stop()
+        diag_path = self.temp_dir / "cli_diag.json"
+
+        def _fake_diag(*args, **kwargs):
+            diag_path.write_text(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "classification": {"code": "rx_zero", "summary": "rx zero", "detail": "port missing"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return diag_path
+
+        with mock.patch.object(uart_service, "_powershell_available", return_value=True), mock.patch.object(
+            uart_service,
+            "_powershell_exec_backend",
+            side_effect=RuntimeError("The port 'COM3' does not exist."),
+        ), mock.patch.object(uart_service, "collect_cli_diag", side_effect=_fake_diag):
+            result = uart_service.execute_uart_commands(
+                self.cfg,
+                ["help"],
+                self.temp_dir / "cli_transcript.log",
+                expect_ready=True,
+            )
+
+        self.assertEqual(result.exit_code, 35)
+        self.assertEqual(result.diag_path, diag_path)
+        self.assertEqual(result.diag["classification"]["code"], "rx_zero")
+        transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
+        self.assertIn("backend-error", transcript)
+        self.serial_patch.start()

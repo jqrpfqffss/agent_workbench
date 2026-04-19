@@ -1,0 +1,43 @@
+id: continue
+display_name: Continue
+description: Continue rule pack for STM32 hardware workflow
+
+files:
+  - src: rules/stm32_auto_workflow.md.tpl
+    dst: .continue/rules/stm32_auto_workflow.md
+  - src: rules/stm32_weak_model_guard.md.tpl
+    dst: .continue/rules/stm32_weak_model_guard.md
+  - src: rules/stm32_task_cookbook.md.tpl
+    dst: .continue/rules/stm32_task_cookbook.md
+  - src: rules/stm32_powershell_syntax.md.tpl
+    dst: .continue/rules/stm32_powershell_syntax.md
+  - src: rules/stm32_error_recovery.md.tpl
+    dst: .continue/rules/stm32_error_recovery.md
+  - src: rules/stm32_hardware_safety.md.tpl
+    dst: .continue/rules/stm32_hardware_safety.md
+  - src: rules/stm32_model_deepseek_r1.md.tpl
+    dst: .continue/rules/stm32_model_deepseek_r1.md
+  - src: rules/stm32_model_qwen7b.md.tpl
+    dst: .continue/rules/stm32_model_qwen7b.md
+  - src: rules/stm32_model_glm.md.tpl
+    dst: .continue/rules/stm32_model_glm.md
+
+uses_values:
+  - project_name
+  - ready_banner
+  - prompt
+  - uart_port
+  - diag_uart_port
+  - build_dir
+  - default_profile
+  - source_dirs_csv
+
+doctor:
+  required_files:
+    - .continue/rules/stm32_auto_workflow.md
+    - .continue/rules/stm32_weak_model_guard.md
+    - .continue/rules/stm32_task_cookbook.md
+  markers:
+    .continue/rules/stm32_auto_workflow.md:
+      - "{project_name}"
+      - "{ready_banner}"

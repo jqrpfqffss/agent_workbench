@@ -34,3 +34,15 @@ class TaskSpecTests(unittest.TestCase):
         self.assertEqual(task["acceptance"]["blackbox"], [])
         self.assertEqual(task["verify"]["sequence"], ["doctor", "build", "test", "debug"])
         self.assertEqual(task["verify"]["cli_commands"], [])
+        self.assertEqual(task["implementation"]["read_candidates"], [])
+        self.assertEqual(task["implementation"]["edit_candidates"], [])
+        self.assertEqual(task["implementation"]["stable_strings"], [])
+        self.assertEqual(task["implementation"]["max_edit_files"], 2)
+
+    def test_partial_task_can_be_loaded_in_non_strict_mode(self) -> None:
+        task_path = self.temp_dir / "partial.yaml"
+        task_path.write_text("goal: quick task\n", encoding="utf-8")
+        task = load_task_spec(task_path, strict=False)
+        self.assertEqual(task["id"], "ad_hoc_task")
+        self.assertEqual(task["mode"], "feature")
+        self.assertEqual(task["goal"], "quick task")

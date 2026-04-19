@@ -1,0 +1,62 @@
+id: opencode
+display_name: OpenCode
+description: OpenCode agent + slash commands + model profiles for STM32 hardware workflow
+
+files:
+  - src: AGENTS.md.tpl
+    dst: AGENTS.md
+  - src: opencode.json.tpl
+    dst: opencode.json
+  - src: agent/stm32_auto.md.tpl
+    dst: .opencode/agent/stm32_auto.md
+  - src: agent/weak_model.md.tpl
+    dst: .opencode/agent/weak_model.md
+  - src: agent/code_planner.md.tpl
+    dst: .opencode/agent/code_planner.md
+  - src: agent/hardware_verifier.md.tpl
+    dst: .opencode/agent/hardware_verifier.md
+  - src: command/plan-stm32.md.tpl
+    dst: .opencode/command/plan-stm32.md
+  - src: command/verify.md.tpl
+    dst: .opencode/command/verify.md
+  - src: command/fix-build.md.tpl
+    dst: .opencode/command/fix-build.md
+  - src: command/uart-smoke.md.tpl
+    dst: .opencode/command/uart-smoke.md
+  - src: command/flash-reset.md.tpl
+    dst: .opencode/command/flash-reset.md
+  - src: model_profiles/deepseek_r1.md.tpl
+    dst: .opencode/agent/model_deepseek_r1.md
+  - src: model_profiles/glm.md.tpl
+    dst: .opencode/agent/model_glm.md
+  - src: model_profiles/qwen7b.md.tpl
+    dst: .opencode/agent/model_qwen7b.md
+
+uses_values:
+  - project_name
+  - ready_banner
+  - prompt
+  - uart_port
+  - diag_uart_port
+  - build_dir
+  - default_profile
+  - source_dirs_csv
+
+doctor:
+  required_files:
+    - AGENTS.md
+    - opencode.json
+    - .opencode/agent/stm32_auto.md
+    - .opencode/agent/weak_model.md
+    - .opencode/agent/code_planner.md
+    - .opencode/agent/hardware_verifier.md
+    - .opencode/command/plan-stm32.md
+    - .opencode/command/verify.md
+    - .opencode/command/fix-build.md
+    - .opencode/command/uart-smoke.md
+    - .opencode/command/flash-reset.md
+  markers:
+    AGENTS.md:
+      - "{project_name}"
+      - "{ready_banner}"
+      - "{prompt}"

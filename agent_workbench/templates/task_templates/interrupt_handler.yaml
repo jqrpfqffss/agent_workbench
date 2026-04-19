@@ -1,0 +1,35 @@
+id: interrupt_handler
+mode: feature
+priority: 25
+description: 为中断处理、IRQ 回调和 NVIC 配置类需求生成执行计划。
+keywords:
+  - 中断
+  - irq
+  - interrupt
+  - nvic
+  - callback
+read_files:
+  - file: Core/Src/stm32f1xx_it.c
+    why: 确认中断入口函数和现有回调流程。
+  - file: Core/Inc/stm32f1xx_it.h
+    why: 确认中断声明与头文件结构。
+  - file: Core/Src/main.c
+    why: 确认对应外设初始化和 NVIC 配置位置。
+edit_files:
+  - file: Core/Src/stm32f1xx_it.c
+    instructions: 根据 `{user_request}` 在现有 IRQ 框架中添加最小安全的中断处理逻辑，保持已有 UART CLI 路径不受影响。
+  - file: Core/Src/main.c
+    instructions: 如果需求涉及 NVIC 或外设初始化，只补充与 `{user_request}` 直接相关的配置。
+shell_steps:
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+    on_failure:
+      max_retries: 3
+      retry_strategy: 优先修复第一条中断相关编译错误，再回到当前步骤。
+  - name: UART CLI 回归验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"

@@ -16,6 +16,7 @@ from .utils import ensure_dir, render_template, run_command, write_json
 def generate_tests(cfg: dict, task_path: Path) -> Path:
     task = load_task_spec(task_path)
     out_dir = ensure_dir(cfg["outputs"]["generated_root_path"] / "tasks" / task["id"])
+    impl_cfg = task.get("implementation", {})
     (out_dir / "blackbox_assertions.yaml").write_text(
         yaml.safe_dump({"assertions": task.get("acceptance", {}).get("blackbox", [])}, sort_keys=False, allow_unicode=False),
         encoding="utf-8",
@@ -46,7 +47,11 @@ def generate_tests(cfg: dict, task_path: Path) -> Path:
         f"- goal: {task['goal']}\n"
         f"- include: {', '.join(task.get('scope', {}).get('include', [])) or 'none'}\n"
         f"- exclude: {', '.join(task.get('scope', {}).get('exclude', [])) or 'none'}\n"
-        f"- verify: {', '.join(task.get('verify', {}).get('sequence', []))}\n",
+        f"- verify: {', '.join(task.get('verify', {}).get('sequence', []))}\n"
+        f"- read_candidates: {', '.join(impl_cfg.get('read_candidates', [])) or 'none'}\n"
+        f"- edit_candidates: {', '.join(impl_cfg.get('edit_candidates', [])) or 'none'}\n"
+        f"- stable_strings: {', '.join(impl_cfg.get('stable_strings', [])) or 'none'}\n"
+        f"- max_edit_files: {impl_cfg.get('max_edit_files', 'n/a')}\n",
         encoding="utf-8",
     )
     write_json(out_dir / "task_snapshot.json", task)

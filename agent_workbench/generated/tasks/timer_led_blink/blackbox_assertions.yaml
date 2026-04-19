@@ -1,0 +1,12 @@
+assertions:
+- name: cli_ready_banner_seen
+  type: cli_ready
+  needle: STM32 UART CLI ready.
+- name: cli_prompt_seen
+  type: cli_prompt_seen
+- name: red_led_blinks
+  type: manual_observation
+  notes: RED LED should toggle on/off approximately every 500ms (1 Hz blink)
+- name: cli_still_responsive
+  type: cli_contains
+  needle: 'Available commands:'

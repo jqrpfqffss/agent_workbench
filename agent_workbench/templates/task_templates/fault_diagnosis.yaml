@@ -1,0 +1,40 @@
+id: fault_diagnosis
+mode: debug
+priority: 40
+description: 为 hardfault、panic、断言失败和异常复现类需求生成诊断计划。
+keywords:
+  - hardfault
+  - fault
+  - panic
+  - assert
+  - crash
+  - 异常
+  - 故障
+  - 崩溃
+read_files:
+  - file: Core/Src/main.c
+    why: 确认启动和主循环结构，排查异常进入前的初始化路径。
+  - file: Core/Src/stm32f1xx_it.c
+    why: 查看异常处理和中断入口实现。
+  - file: Core/Src/cli.c
+    why: 排查串口交互或调试输出是否还能提供诊断线索。
+shell_steps:
+  - name: 项目扫描
+    command: ./agent_workbench.bat scan-project --json
+    success_criteria: exit_code == 0
+  - name: 环境检查
+    command: ./agent_workbench.bat doctor --json
+    success_criteria: exit_code == 0
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+  - name: UART CLI 诊断验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"
+forbidden_operations:
+  - 在没有证据前声称异常原因已经定位
+  - 修改 ready banner 或 prompt 字符串
+  - 删除已有 CLI 命令

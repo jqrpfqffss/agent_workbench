@@ -1,0 +1,32 @@
+id: timer_basic
+mode: feature
+description: 为基本定时器、周期任务和节拍逻辑生成执行计划。
+keywords:
+  - timer
+  - 定时器
+  - 定时
+  - 周期
+  - tick
+read_files:
+  - file: Core/Src/main.c
+    why: 确认定时初始化、SysTick 使用和主循环结构。
+  - file: Core/Inc/main.h
+    why: 确认句柄和声明区域。
+edit_files:
+  - file: Core/Src/main.c
+    instructions: 根据 `{user_request}` 在现有时间基准上实现最小安全的定时逻辑，优先复用已有 HAL 初始化流程。
+  - file: Core/Inc/main.h
+    instructions: 如果新增定时相关声明，仅补充实现 `{user_request}` 所需的最小头文件声明。
+shell_steps:
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+    on_failure:
+      max_retries: 3
+      retry_strategy: 按 errors[0] 修复后重试，最多 3 次。
+  - name: UART CLI 回归验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"

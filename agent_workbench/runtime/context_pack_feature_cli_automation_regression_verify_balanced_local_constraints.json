@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-04-08T11:37:05.071+00:00",
+  "mode": "feature",
+  "stage": "verify",
+  "profile": "balanced_local",
+  "task_id": "cli_automation_regression",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml",
+  "session_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation",
+  "max_pack_words": 550,
+  "max_fact_items": 12,
+  "max_cli_tail_lines": 6,
+  "max_failed_assertions_shown": 3,
+  "max_extra_reads": 2,
+  "max_edit_files": 2,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\cli_automation_regression.yaml",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\session_verdict.json",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\session_brief.md",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation\\compare_brief.md"
+  ],
+  "allowed_edits": [],
+  "unknowns": [
+    "No CLI diagnostic file exists for the selected session."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not change code in this round.",
+    "Do not claim pass until new evidence is generated."
+  ],
+  "next_commands": [
+    "agent_workbench.bat doctor",
+    "agent_workbench.bat build",
+    "agent_workbench.bat test generate --task H:/stm32_RAG/code/serial/agent_workbench/tasks/cli_automation_regression.yaml",
+    "agent_workbench.bat test run",
+    "agent_workbench.bat session feature --task H:/stm32_RAG/code/serial/agent_workbench/tasks/cli_automation_regression.yaml",
+    "agent_workbench.bat compare --latest"
+  ]
+}

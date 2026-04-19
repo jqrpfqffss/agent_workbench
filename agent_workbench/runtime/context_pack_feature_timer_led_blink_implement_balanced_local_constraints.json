@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-04-08T14:25:45.856+00:00",
+  "mode": "feature",
+  "stage": "implement",
+  "profile": "balanced_local",
+  "task_id": "timer_led_blink",
+  "task_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\timer_led_blink.yaml",
+  "session_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\evidence\\sessions\\local_model_max_validation",
+  "max_pack_words": 550,
+  "max_fact_items": 12,
+  "max_cli_tail_lines": 6,
+  "max_failed_assertions_shown": 3,
+  "max_extra_reads": 2,
+  "max_edit_files": 3,
+  "require_fact_citations": true,
+  "prefer_ascii_runtime_artifacts": true,
+  "allowed_reads": [
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\tasks\\timer_led_blink.yaml",
+    "H:\\stm32_RAG\\code\\serial\\agent_workbench\\generated\\tasks\\timer_led_blink\\implementation_brief.md",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\main.c",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\stm32f1xx_it.c"
+  ],
+  "allowed_edits": [
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\main.c",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Src\\stm32f1xx_it.c",
+    "H:\\stm32_RAG\\code\\serial\\Core\\Inc\\main.h"
+  ],
+  "unknowns": [
+    "No CLI diagnostic file exists for the selected session."
+  ],
+  "forbidden_assumptions": [
+    "Do not conclude from source inspection alone.",
+    "Do not read the whole repo when the brief already names the next files.",
+    "Do not invent evidence that is not present in facts or session artifacts.",
+    "Do not edit files outside allowed_edits.",
+    "Do not expand scope beyond the task goal."
+  ],
+  "next_commands": [
+    "agent_workbench.bat build",
+    "agent_workbench.bat test run",
+    "agent_workbench.bat context --mode feature --stage verify --task H:/stm32_RAG/code/serial/agent_workbench/tasks/timer_led_blink.yaml --profile balanced_local"
+  ]
+}

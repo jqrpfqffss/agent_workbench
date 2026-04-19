@@ -755,19 +755,46 @@ def execute_uart_commands(
         except TypeError:
             if transcript_path.exists():
                 transcript_path.unlink()
-        result = _powershell_exec_backend(
-            cfg,
-            commands,
-            transcript_path,
-            reset_first=reset_first,
-            require_ready=require_ready,
-            ready_banner=ready_banner,
-            prompt=prompt,
-            startup_drain_sec=startup_drain_sec,
-            line_timeout_sec=line_timeout_sec,
-            ready_timeout_sec=ready_timeout_sec,
-            command_timeout_sec=command_timeout_sec,
-        )
+        try:
+            result = _powershell_exec_backend(
+                cfg,
+                commands,
+                transcript_path,
+                reset_first=reset_first,
+                require_ready=require_ready,
+                ready_banner=ready_banner,
+                prompt=prompt,
+                startup_drain_sec=startup_drain_sec,
+                line_timeout_sec=line_timeout_sec,
+                ready_timeout_sec=ready_timeout_sec,
+                command_timeout_sec=command_timeout_sec,
+            )
+        except RuntimeError as exc:
+            message = str(exc).strip()
+            transcript_path.write_text(
+                f"[{utc_now_iso()}] [cli] start port={uart['port']} baud={uart['baudrate']} "
+                f"expect_ready={int(require_ready)} reset_first={int(reset_first)} backend=powershell\n"
+                f"[{utc_now_iso()}] [cli] backend-error {message}\n"
+                f"[{utc_now_iso()}] [cli] stop\n",
+                encoding="utf-8",
+            )
+            diag_result_path = collect_cli_diag(
+                cfg,
+                diag_target,
+                saw_ready=False,
+                saw_prompt=False,
+                timeout_commands=[],
+            )
+            diag_payload = json.loads(diag_result_path.read_text(encoding="utf-8")) if diag_result_path.exists() else None
+            return UartExecResult(
+                exit_code=35,
+                transcript_lines=[],
+                saw_ready=False,
+                saw_prompt=False,
+                timeout_commands=[],
+                diag_path=diag_result_path,
+                diag=diag_payload,
+            )
         if result.exit_code != 0:
             diag_result_path = collect_cli_diag(
                 cfg,

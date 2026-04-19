@@ -24,8 +24,17 @@ class CompareTests(unittest.TestCase):
         new_dir.mkdir(parents=True)
         (old_dir / "uart.log").write_text("ok\nwarn old\n", encoding="utf-8")
         (new_dir / "uart.log").write_text("ok\nwarn new\nextra\n", encoding="utf-8")
+        (old_dir / "cli_transcript.log").write_text("[ts] < old prompt\n", encoding="utf-8")
+        (new_dir / "cli_transcript.log").write_text("[ts] < old prompt\n[ts] < new line\n", encoding="utf-8")
+        (old_dir / "assertions.jsonl").write_text('{"status":"pass","name":"a"}\n', encoding="utf-8")
+        (new_dir / "assertions.jsonl").write_text('{"status":"pass","name":"a"}\n{"status":"fail","name":"b","detail":"missing"}\n', encoding="utf-8")
+        (old_dir / "session_manifest.json").write_text('{"generated_at":"2026-04-08T10:00:00+00:00","mode":"debug"}', encoding="utf-8")
+        (new_dir / "session_manifest.json").write_text('{"generated_at":"2026-04-08T10:10:00+00:00","mode":"debug"}', encoding="utf-8")
         (old_dir / "monitor_samples.csv").write_text("ts,item,value,ok,message\n1,temp,10,1,\n2,temp,11,1,\n", encoding="utf-8")
         (new_dir / "monitor_samples.csv").write_text("ts,item,value,ok,message\n1,temp,12,1,\n2,temp,13,1,\n", encoding="utf-8")
+        (new_dir / "cli_diag.json").write_text('{"classification":{"code":"parser_no_command"}}', encoding="utf-8")
+        (old_dir / "events.jsonl").write_text('{"event":"cli_probe_done","code":0,"saw_ready":true,"saw_prompt":true}\n', encoding="utf-8")
+        (new_dir / "events.jsonl").write_text('{"event":"cli_probe_done","code":1,"saw_ready":true,"saw_prompt":false}\n', encoding="utf-8")
 
         report = compare_sessions(old_dir, new_dir, new_dir / "compare_vs_old.md")
 
@@ -34,6 +43,8 @@ class CompareTests(unittest.TestCase):
         self.assertIn("Session Compare Report", text)
         self.assertIn("warn_like", text)
         self.assertIn("temp", text)
+        self.assertTrue((new_dir / "compare_delta.json").exists())
+        self.assertTrue((new_dir / "compare_brief.md").exists())
 
     def test_pick_latest_two_sessions(self) -> None:
         (self.temp_dir / "debug_20260404_120000").mkdir()
