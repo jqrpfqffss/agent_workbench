@@ -230,6 +230,24 @@ def _scan_planner_templates(cfg: dict) -> list[str]:
     return [path.name for path in sorted(template_root.glob("*.yaml"))]
 
 
+def _scan_integrations(cfg: dict) -> list[dict[str, Any]]:
+    from .integrations_service import discover_integrations, is_integration_installed
+
+    workbench_root = Path(cfg.get("agent_workbench_root_path", ""))
+    if not workbench_root.exists():
+        return []
+    manifests = discover_integrations(workbench_root)
+    return [
+        {
+            "id": manifest.id,
+            "display_name": manifest.display_name,
+            "installed": is_integration_installed(cfg, manifest),
+            "pack_dir": str(manifest.pack_dir),
+        }
+        for manifest in manifests
+    ]
+
+
 def scan_project(cfg: dict) -> dict[str, Any]:
     project_root = Path(cfg["project_root_path"])
     source_files = _scan_source_files(cfg)
@@ -273,9 +291,7 @@ def scan_project(cfg: dict) -> dict[str, Any]:
         "tasks": _scan_tasks(cfg),
         "planner_templates": planner_templates,
         "planner_template_count": len(planner_templates),
-        "opencode_agents_file": str(cfg.get("opencode", {}).get("agents_file_path", "")),
-        "opencode_agents_dir": str(cfg.get("opencode", {}).get("agents_dir_path", "")),
-        "opencode_commands_dir": str(cfg.get("opencode", {}).get("commands_dir_path", "")),
+        "integrations": _scan_integrations(cfg),
     }
     compile_commands_path = Path(cfg.get("project", {}).get("compile_commands_path", ""))
     if compile_commands_path.exists():

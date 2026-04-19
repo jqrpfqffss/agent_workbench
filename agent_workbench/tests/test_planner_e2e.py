@@ -52,15 +52,6 @@ class PlannerE2ETests(unittest.TestCase):
                 "hardware_knowledge_dir_path": repo_root / "agent_workbench" / "templates" / "hardware_knowledge",
                 "max_total_steps": 15,
             },
-            "opencode": {
-                "agents_file_path": self.temp_dir / "AGENTS.md",
-                "agents_dir_path": self.temp_dir / ".opencode" / "agent",
-                "commands_dir_path": self.temp_dir / ".opencode" / "command",
-                "agents_template_dir_path": self.temp_dir / "agent_workbench" / "templates" / "opencode_agents",
-                "required_agents": [],
-                "required_commands": [],
-                "model_profiles": {},
-            },
             "uart": {
                 "enabled": True,
                 "ready_banner": "STM32 UART CLI ready.",
@@ -76,7 +67,7 @@ class PlannerE2ETests(unittest.TestCase):
         }
 
     def test_pwm_request_extracts_all_parameters_and_hardware_context(self) -> None:
-        plan = Planner(self._cfg()).plan("给STM32添加PWM蜂鸣器，1kHz，PA8，50%占空比")
+        plan = Planner(self._cfg()).plan("Add PWM output on PA8 for STM32, frequency 1kHz, duty 50%")
 
         self.assertEqual(plan["parameter_extractions"]["frequency_hz"], 1000)
         self.assertEqual(plan["parameter_extractions"]["pin"], "PA8")
@@ -91,7 +82,7 @@ class PlannerE2ETests(unittest.TestCase):
         self.assertTrue(any(hint["type"] == "add_function" for hint in edit_steps[0]["code_change_hints"]))
 
     def test_cli_command_request_extracts_command_name(self) -> None:
-        plan = Planner(self._cfg()).plan("添加一个CLI命令uptime显示运行时间")
+        plan = Planner(self._cfg()).plan("Add CLI command name: uptime")
 
         self.assertEqual(plan["template_id"], "uart_cli_command")
         self.assertEqual(plan["parameter_extractions"]["cli_command_name"], "uptime")
@@ -109,6 +100,6 @@ class PlannerE2ETests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        plan = Planner(self._cfg()).plan("给STM32添加PWM蜂鸣器，1kHz，PA8")
+        plan = Planner(self._cfg()).plan("Add PWM output on PA8 for STM32, frequency 1kHz")
 
         self.assertTrue(any("htim1" in note for note in plan.get("notes", [])))

@@ -554,7 +554,7 @@ def _paste_text(
         "resume": "resume from saved state only",
     }.get(stage, "do one stage only")
     lines = [
-        "# Paste To OpenCode",
+        "# Paste To Assistant",
         "",
         "```text",
         "Read only these files first:",

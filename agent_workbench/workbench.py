@@ -41,6 +41,19 @@ def _latest_session_dir(cfg: dict, before: int = -1) -> Path | None:
     return sessions[-1]
 
 
+def _discover_integrations(cfg: dict) -> list:
+    from core.integrations_service import discover_integrations
+
+    return discover_integrations(Path(cfg["agent_workbench_root_path"]))
+
+
+def _find_integration(cfg: dict, name: str):
+    for manifest in _discover_integrations(cfg):
+        if manifest.id == name:
+            return manifest
+    return None
+
+
 def _cmd_doctor(args: argparse.Namespace) -> int:
     from core.doctor import run_doctor
 
@@ -440,24 +453,125 @@ def _cmd_init_vscode(args: argparse.Namespace) -> int:
     return _emit(args, payload, [payload["summary"]])
 
 
-def _cmd_init_opencode_agents(args: argparse.Namespace) -> int:
-    from core.vscode_service import write_opencode_agents
+def _cmd_integration_list(args: argparse.Namespace) -> int:
+    from core.integrations_service import is_integration_installed
 
     cfg = _cfg(args.config)
-    generated = write_opencode_agents(cfg)
+    integrations = [
+        {
+            "id": manifest.id,
+            "display_name": manifest.display_name,
+            "description": manifest.description,
+            "installed": is_integration_installed(cfg, manifest),
+            "pack_dir": str(manifest.pack_dir),
+        }
+        for manifest in _discover_integrations(cfg)
+    ]
     payload = build_result_payload(
-        "init-opencode-agents",
+        "integration list",
         0,
-        summary=f"opencode files written: {len(generated)}",
-        artifacts={
-            "agents_file": str(cfg["opencode"]["agents_file_path"]),
-            "agents_dir": str(cfg["opencode"]["agents_dir_path"]),
-            "commands_dir": str(cfg["opencode"]["commands_dir_path"]),
-            "files": [str(path) for path in generated],
-        },
+        summary=f"integrations available: {len(integrations)}",
+        details={"integrations": integrations},
     )
-    lines = [payload["summary"], *[str(path) for path in generated]]
+    return _emit(args, payload, [payload["summary"]])
+
+
+def _cmd_integration_install(args: argparse.Namespace) -> int:
+    from core.integrations_service import install_integration
+
+    cfg = _cfg(args.config)
+    installed: list[str] = []
+    written: list[str] = []
+    for name in args.names:
+        manifest = _find_integration(cfg, name)
+        if manifest is None:
+            payload = build_result_payload(
+                "integration install",
+                2,
+                summary=f"integration '{name}' not found",
+                details={"installed": installed},
+                artifacts={"files": written},
+            )
+            return _emit(args, payload, [payload["summary"]])
+        generated = install_integration(cfg, manifest)
+        installed.append(manifest.id)
+        written.extend(str(path) for path in generated)
+    payload = build_result_payload(
+        "integration install",
+        0,
+        summary=f"installed integrations: {', '.join(installed)}",
+        details={"installed": installed},
+        artifacts={"files": written},
+    )
+    return _emit(args, payload, [payload["summary"], *written])
+
+
+def _cmd_integration_check(args: argparse.Namespace) -> int:
+    from core.integrations_service import check_integration
+
+    cfg = _cfg(args.config)
+    manifest = _find_integration(cfg, args.name)
+    if manifest is None:
+        payload = build_result_payload(
+            "integration check",
+            2,
+            summary=f"integration '{args.name}' not found",
+        )
+        return _emit(args, payload, [payload["summary"]])
+
+    results = check_integration(cfg, manifest)
+    exit_code = 0 if results and all(item["level"] == "ok" for item in results) else 1
+    payload = build_result_payload(
+        "integration check",
+        exit_code,
+        summary=f"integration check: {manifest.id}",
+        details={"results": results},
+    )
+    lines = [payload["summary"], *[f"{item['level']}: {item['name']}" for item in results]]
     return _emit(args, payload, lines)
+
+
+def _cmd_integration_remove(args: argparse.Namespace) -> int:
+    from core.integrations_service import remove_integration
+
+    cfg = _cfg(args.config)
+    manifest = _find_integration(cfg, args.name)
+    if manifest is None:
+        payload = build_result_payload(
+            "integration remove",
+            2,
+            summary=f"integration '{args.name}' not found",
+        )
+        return _emit(args, payload, [payload["summary"]])
+
+    removed_paths = remove_integration(cfg, manifest)
+    removed = [str(path) for path in removed_paths]
+    payload = build_result_payload(
+        "integration remove",
+        0,
+        summary=f"removed integration: {manifest.id}",
+        details={"removed": [manifest.id]},
+        artifacts={"files": removed},
+    )
+    return _emit(args, payload, [payload["summary"], *removed])
+
+
+def _cmd_init_opencode_agents(args: argparse.Namespace) -> int:
+    new_argv = ["integration", "install", "opencode"]
+    if getattr(args, "json", False):
+        new_argv.append("--json")
+    if args.config != str(DEFAULT_CONFIG):
+        new_argv.extend(["--config", args.config])
+    return dispatch_args(new_argv)
+
+
+def _cmd_init_continue_rules(args: argparse.Namespace) -> int:
+    new_argv = ["integration", "install", "continue"]
+    if getattr(args, "json", False):
+        new_argv.append("--json")
+    if args.config != str(DEFAULT_CONFIG):
+        new_argv.extend(["--config", args.config])
+    return dispatch_args(new_argv)
 
 
 def _cmd_context(args: argparse.Namespace) -> int:
@@ -516,11 +630,7 @@ def _cmd_scan_project(args: argparse.Namespace) -> int:
         0,
         summary=f"scan project: {snapshot['project']['name']} files={snapshot['source_file_count']}",
         details=snapshot,
-        artifacts={
-            "opencode_agents_file": str(cfg.get("opencode", {}).get("agents_file_path", "")),
-            "opencode_agents_dir": str(cfg.get("opencode", {}).get("agents_dir_path", "")),
-            "opencode_commands_dir": str(cfg.get("opencode", {}).get("commands_dir_path", "")),
-        },
+        artifacts={"integrations": snapshot.get("integrations", [])},
     )
     lines = [
         payload["summary"],
@@ -735,10 +845,41 @@ def build_parser() -> argparse.ArgumentParser:
     _add_json_flag(p_vscode)
     p_vscode.set_defaults(func=_cmd_init_vscode)
 
-    p_agents = sub.add_parser("init-opencode-agents", help="generate OpenCode AGENTS.md / agent / command files")
+    p_integration = sub.add_parser("integration", help="manage AI frontend integration packs (opencode, continue, ...)")
+    p_integration_sub = p_integration.add_subparsers(dest="action", required=True)
+
+    p_list = p_integration_sub.add_parser("list", help="list available integrations")
+    p_list.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_list)
+    p_list.set_defaults(func=_cmd_integration_list)
+
+    p_install = p_integration_sub.add_parser("install", help="install one or more integrations")
+    p_install.add_argument("names", nargs="+")
+    p_install.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_install)
+    p_install.set_defaults(func=_cmd_integration_install)
+
+    p_check = p_integration_sub.add_parser("check", help="check install status of one integration")
+    p_check.add_argument("name")
+    p_check.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_check)
+    p_check.set_defaults(func=_cmd_integration_check)
+
+    p_remove = p_integration_sub.add_parser("remove", help="uninstall one integration")
+    p_remove.add_argument("name")
+    p_remove.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_remove)
+    p_remove.set_defaults(func=_cmd_integration_remove)
+
+    p_agents = sub.add_parser("init-opencode-agents", help="generate OpenCode AGENTS.md / agent / command files (deprecated, use `integration install opencode`)")
     p_agents.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_json_flag(p_agents)
     p_agents.set_defaults(func=_cmd_init_opencode_agents)
+
+    p_continue = sub.add_parser("init-continue-rules", help="generate Continue rules (deprecated, use `integration install continue`)")
+    p_continue.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_continue)
+    p_continue.set_defaults(func=_cmd_init_continue_rules)
 
     p_context = sub.add_parser("context", help="generate a compact context pack for low-context models")
     p_context.add_argument("--config", default=str(DEFAULT_CONFIG))

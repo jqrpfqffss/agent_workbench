@@ -3,7 +3,7 @@
     {
       "name": "python",
       "level": "ok",
-      "detail": "D:\\Anaconda1\\python.exe"
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
     },
     {
       "name": "yaml",
@@ -62,8 +62,13 @@
     },
     {
       "name": "uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial."
+      "level": "ok",
+      "detail": "pyserial available"
+    },
+    {
+      "name": "uart_port",
+      "level": "ok",
+      "detail": "COM3"
     },
     {
       "name": "diag_uart_requests",
@@ -72,13 +77,13 @@
     },
     {
       "name": "diag_uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell fallback is available for diag exec."
+      "level": "ok",
+      "detail": "pyserial available"
     },
     {
       "name": "diag_uart_port",
-      "level": "warn",
-      "detail": "port availability not checked without pyserial"
+      "level": "ok",
+      "detail": "COM3"
     },
     {
       "name": "agent_profile",
@@ -116,24 +121,74 @@
       "detail": "read_candidates=3 edit_candidates=3"
     },
     {
-      "name": "continue_rules_dir",
+      "name": "integration::continue::.continue/rules/stm32_auto_workflow.md",
       "level": "ok",
-      "detail": "H:\\stm32_RAG\\code\\serial\\.continue\\rules"
+      "detail": "H:\\stm32_RAG\\code\\serial\\.continue\\rules\\stm32_auto_workflow.md"
     },
     {
-      "name": "continue_rules",
+      "name": "integration::continue::.continue/rules/stm32_weak_model_guard.md",
       "level": "ok",
-      "detail": "all required rules present"
+      "detail": "H:\\stm32_RAG\\code\\serial\\.continue\\rules\\stm32_weak_model_guard.md"
     },
     {
-      "name": "continue_model_rules",
+      "name": "integration::continue::.continue/rules/stm32_task_cookbook.md",
       "level": "ok",
-      "detail": "all model-specific rules present"
+      "detail": "H:\\stm32_RAG\\code\\serial\\.continue\\rules\\stm32_task_cookbook.md"
     },
     {
-      "name": "continue_rules_binding",
+      "name": "integration::opencode::AGENTS.md",
       "level": "ok",
-      "detail": "project name and UART markers injected into rules"
+      "detail": "H:\\stm32_RAG\\code\\serial\\AGENTS.md"
+    },
+    {
+      "name": "integration::opencode::opencode.json",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\opencode.json"
+    },
+    {
+      "name": "integration::opencode::.opencode/agent/stm32_auto.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\agent\\stm32_auto.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/agent/weak_model.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\agent\\weak_model.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/agent/code_planner.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\agent\\code_planner.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/agent/hardware_verifier.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\agent\\hardware_verifier.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/command/plan-stm32.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\command\\plan-stm32.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/command/verify.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\command\\verify.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/command/fix-build.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\command\\fix-build.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/command/uart-smoke.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\command\\uart-smoke.md"
+    },
+    {
+      "name": "integration::opencode::.opencode/command/flash-reset.md",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.opencode\\command\\flash-reset.md"
     },
     {
       "name": "planner_templates",
@@ -148,9 +203,9 @@
     {
       "name": "unit_command",
       "level": "ok",
-      "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
     }
   ],
   "fail_count": 0,
-  "warn_count": 3
+  "warn_count": 0
 }

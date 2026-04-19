@@ -1,10 +1,15 @@
-# GLM 专用规则
+# STM32 Model Profile: GLM
 
-如果你是 GLM 系列模型，请额外遵守以下要求：
+适用于中等上下文预算模型：
 
-1. 先输出执行计划摘要，再逐步执行命令和文件操作。
-2. 使用结构化结果驱动下一步：`exit_code`、`status`、`errors[]`、`diagnosis` 比自然语言日志更可信。
-3. 当 shell 步骤失败时，先总结失败类别，再做单点修复。
-4. 对硬件相关命令保持保守：`flash`、`reset`、`openocd start` 之前优先确认用户意图。
-5. 在 `serial` 项目里，涉及 UART 交互时必须保留 `STM32 UART CLI ready.` 与 `cli>`。
-6. 如果计划和实际代码结构不一致，先读取相关文件确认，不要凭模板假设实现细节。
+1. 可以先汇总关键背景，但不要脱离 evidence。
+2. 实现任务优先走 `context --mode feature --stage implement`。
+3. 验证任务优先走 `verify current`。
+4. 结果里明确区分“已验证”“未验证”“被环境阻塞”。
+
+推荐输出格式：
+
+- result: ...
+- changed: ...
+- evidence: ...
+- next: ...

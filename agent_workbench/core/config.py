@@ -143,40 +143,8 @@ def _defaults() -> dict[str, Any]:
             "max_total_steps": 15,
             "minimum_template_count": 15,
         },
-        "opencode": {
-            "agents_file": "AGENTS.md",
-            "agents_dir": ".opencode/agent",
-            "commands_dir": ".opencode/command",
-            "project_config_file": "opencode.json",
-            "agents_template_dir": "templates/opencode_agents",
-            "required_agents": [
-                "stm32_auto.md",
-                "weak_model.md",
-                "code_planner.md",
-                "hardware_verifier.md",
-            ],
-            "required_commands": [
-                "plan-stm32.md",
-                "verify.md",
-                "fix-build.md",
-                "uart-smoke.md",
-                "flash-reset.md",
-            ],
-            "model_profiles": {
-                "deepseek_r1": {
-                    "profile_file": "model_profiles/deepseek_r1.md",
-                    "min_lines": 5,
-                },
-                "glm": {
-                    "profile_file": "model_profiles/glm.md",
-                    "min_lines": 5,
-                },
-                "qwen7b": {
-                    "profile_file": "model_profiles/qwen7b.md",
-                    "min_lines": 5,
-                },
-            },
-            "also_install_global": False,
+        "integrations": {
+            "auto_install": [],
         },
         "vscode": {
             "tasks_file": ".vscode/tasks.json",
@@ -253,10 +221,10 @@ def _defaults() -> dict[str, Any]:
             },
         },
         "prompts": {
-            "debug": "prompts/opencode_debug.md",
-            "feature": "prompts/opencode_feature.md",
-            "test_author": "prompts/opencode_test_author.md",
-            "report": "prompts/opencode_report.md",
+            "debug": "prompts/legacy_debug.md",
+            "feature": "prompts/legacy_feature.md",
+            "test_author": "prompts/legacy_test_author.md",
+            "report": "prompts/legacy_report.md",
         },
     }
 
@@ -275,7 +243,6 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
-    raw["outputs"]["opencode_runtime_root_path"] = raw["outputs"]["runtime_root_path"] / "opencode"
     raw["monitor"]["symbols"]["elf_path"] = str(_resolve(raw["monitor"]["symbols"]["elf_path"], project_root))
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
         _resolve(raw["tools"]["cmake"]["toolchain_file"], project_root)
@@ -283,13 +250,11 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["vscode"]["tasks_file_path"] = _resolve(raw["vscode"]["tasks_file"], project_root)
     raw["planner"]["templates_dir_path"] = _resolve(raw["planner"]["templates_dir"], workbench_root)
     raw["planner"]["hardware_knowledge_dir_path"] = _resolve(raw["planner"]["hardware_knowledge_dir"], workbench_root)
-    oc = raw.setdefault("opencode", {})
-    oc["agents_file_path"] = _resolve(oc.get("agents_file", "AGENTS.md"), project_root)
-    oc["agents_dir_path"] = _resolve(oc.get("agents_dir", ".opencode/agent"), project_root)
-    oc["commands_dir_path"] = _resolve(oc.get("commands_dir", ".opencode/command"), project_root)
-    oc["project_config_file_path"] = _resolve(oc.get("project_config_file", "opencode.json"), project_root)
-    oc["agents_template_dir_path"] = _resolve(oc.get("agents_template_dir", "templates/opencode_agents"), workbench_root)
-    oc["model_profile_names"] = list((oc.get("model_profiles") or {}).keys())
+    raw["integrations_active"] = [
+        str(item).strip()
+        for item in raw.get("integrations", {}).get("auto_install", [])
+        if str(item).strip()
+    ]
     raw["prompts"]["debug_path"] = _resolve(raw["prompts"]["debug"], workbench_root)
     raw["prompts"]["feature_path"] = _resolve(raw["prompts"]["feature"], workbench_root)
     raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)

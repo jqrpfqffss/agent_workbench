@@ -474,3 +474,193 @@ Ran 38 tests in 2.131s
 
 FAILED (failures=2, skipped=1)
 [2026-04-19T07:13:23.996+00:00] exit=1
+
+[2026-04-19T07:17:50.718+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.......F...................F....
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 150, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 228, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 38 tests in 2.118s
+
+FAILED (failures=2, skipped=1)
+[2026-04-19T07:17:53.087+00:00] exit=1
+
+[2026-04-19T08:28:03.090+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s................FF....FFF...........
+======================================================================
+FAIL: test_install_integration_writes_expected_files_with_rendered_values (test_integrations_service.IntegrationsServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_integrations_service.py", line 59, in test_install_integration_writes_expected_files_with_rendered_values
+    self.assertIn(hello, written)
+AssertionError: WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/awb_integ_e9mpi4r4/project/hello.md') not found in [WindowsPath('C:/Users/Administrator/AppData/Local/Temp/awb_integ_e9mpi4r4/project/hello.md')]
+
+======================================================================
+FAIL: test_remove_integration_deletes_only_manifest_files (test_integrations_service.IntegrationsServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_integrations_service.py", line 91, in test_remove_integration_deletes_only_manifest_files
+    self.assertIn(self.project_root / "hello.md", removed)
+AssertionError: WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/awb_integ_x6dafown/project/hello.md') not found in [WindowsPath('C:/Users/Administrator/AppData/Local/Temp/awb_integ_x6dafown/project/hello.md')]
+
+======================================================================
+FAIL: test_cli_command_request_extracts_command_name (test_planner_e2e.PlannerE2ETests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_planner_e2e.py", line 87, in test_cli_command_request_extracts_command_name
+    self.assertEqual(plan["template_id"], "uart_cli_command")
+AssertionError: 'fallback_feature' != 'uart_cli_command'
+- fallback_feature
++ uart_cli_command
+
+
+======================================================================
+FAIL: test_existing_timer_handle_creates_warning_note (test_planner_e2e.PlannerE2ETests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_planner_e2e.py", line 105, in test_existing_timer_handle_creates_warning_note
+    self.assertTrue(any("htim1" in note for note in plan.get("notes", [])))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_pwm_request_extracts_all_parameters_and_hardware_context (test_planner_e2e.PlannerE2ETests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_planner_e2e.py", line 73, in test_pwm_request_extracts_all_parameters_and_hardware_context
+    self.assertEqual(plan["parameter_extractions"]["pin"], "PA8")
+AssertionError: None != 'PA8'
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.453s
+
+FAILED (failures=5, skipped=1)
+[2026-04-19T08:28:05.893+00:00] exit=1
+
+[2026-04-19T08:28:59.025+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.................F....F.............
+======================================================================
+FAIL: test_remove_integration_deletes_only_manifest_files (test_integrations_service.IntegrationsServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_integrations_service.py", line 91, in test_remove_integration_deletes_only_manifest_files
+    self.assertIn(self.project_root / "hello.md", removed)
+AssertionError: WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/awb_integ_eiju_dsw/project/hello.md') not found in [WindowsPath('C:/Users/Administrator/AppData/Local/Temp/awb_integ_eiju_dsw/project/hello.md')]
+
+======================================================================
+FAIL: test_cli_command_request_extracts_command_name (test_planner_e2e.PlannerE2ETests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_planner_e2e.py", line 88, in test_cli_command_request_extracts_command_name
+    self.assertEqual(plan["parameter_extractions"]["cli_command_name"], "uptime")
+AssertionError: 'd' != 'uptime'
+- d
++ uptime
+
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.500s
+
+FAILED (failures=2, skipped=1)
+[2026-04-19T08:29:01.813+00:00] exit=1
+
+[2026-04-19T08:33:52.943+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...................................F
+======================================================================
+FAIL: test_generated_tasks_expose_integration_install_task (test_vscode_service.VscodeServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_vscode_service.py", line 44, in test_generated_tasks_expose_integration_install_task
+    self.assertIn('cmd /c ".\\agent_workbench.bat integration install opencode"', commands)
+AssertionError: 'cmd /c ".\\agent_workbench.bat integration install opencode"' not found in ['cmd /c ".\\setup_workbench.bat"', 'cmd /c ".\\agent_workbench.bat doctor"', 'cmd /c ".\\agent_workbench.bat build"', 'cmd /c ".\\agent_workbench.bat scan-project --json"', 'cmd /c ".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat report --latest"', 'cmd /c ".\\agent_workbench.bat session debug"', 'cmd /c ".\\agent_workbench.bat compare --latest"', 'cmd /c ".\\agent_workbench.bat test generate --task agent_workbench/tasks/example_feature.yaml"', 'cmd /c ".\\agent_workbench.bat test generate --task agent_workbench/tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat test run"', 'cmd /c ".\\agent_workbench.bat uart console"', 'cmd /c ".\\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status"', 'cmd /c ".\\agent_workbench.bat diag exec"', 'cmd /c ".\\agent_workbench.bat monitor start"', 'cmd /c ".\\agent_workbench.bat monitor stop"', 'cmd /c ".\\agent_workbench.bat openocd start"', 'cmd /c ".\\agent_workbench.bat openocd stop"', 'cmd /c ".\\agent_workbench.bat flash --method stlink_cli"', 'cmd /c ".\\agent_workbench.bat flash --method openocd_cmd"', 'cmd /c ".\\agent_workbench.bat session feature --task agent_workbench/tasks/example_feature.yaml"', 'cmd /c ".\\agent_workbench.bat session feature --task agent_workbench/tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_hardware_smoke.yaml"']
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.401s
+
+FAILED (failures=1, skipped=1)
+[2026-04-19T08:33:55.636+00:00] exit=1
+
+[2026-04-19T08:34:25.905+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...................................F
+======================================================================
+FAIL: test_generated_tasks_expose_integration_install_task (test_vscode_service.VscodeServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_vscode_service.py", line 47, in test_generated_tasks_expose_integration_install_task
+    self.assertIn(
+AssertionError: 'cmd /c ".\\agent_workbench.bat verify current --task agent_workbench/tasks/cli_automation_regression.yaml"' not found in ['cmd /c ".\\setup_workbench.bat"', 'cmd /c ".\\agent_workbench.bat doctor"', 'cmd /c ".\\agent_workbench.bat build"', 'cmd /c ".\\agent_workbench.bat scan-project --json"', 'cmd /c ".\\agent_workbench.bat verify current --task ../../../tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat report --latest"', 'cmd /c ".\\agent_workbench.bat session debug"', 'cmd /c ".\\agent_workbench.bat compare --latest"', 'cmd /c ".\\agent_workbench.bat test generate --task ../../../tasks/example_feature.yaml"', 'cmd /c ".\\agent_workbench.bat test generate --task ../../../tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat test run"', 'cmd /c ".\\agent_workbench.bat uart console"', 'cmd /c ".\\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status"', 'cmd /c ".\\agent_workbench.bat diag exec"', 'cmd /c ".\\agent_workbench.bat monitor start"', 'cmd /c ".\\agent_workbench.bat monitor stop"', 'cmd /c ".\\agent_workbench.bat openocd start"', 'cmd /c ".\\agent_workbench.bat openocd stop"', 'cmd /c ".\\agent_workbench.bat flash --method stlink_cli"', 'cmd /c ".\\agent_workbench.bat flash --method openocd_cmd"', 'cmd /c ".\\agent_workbench.bat session feature --task ../../../tasks/example_feature.yaml"', 'cmd /c ".\\agent_workbench.bat session feature --task ../../../tasks/cli_automation_regression.yaml"', 'cmd /c ".\\agent_workbench.bat verify current --task ../../../tasks/cli_hardware_smoke.yaml"', 'cmd /c ".\\agent_workbench.bat integration install opencode"']
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.498s
+
+FAILED (failures=1, skipped=1)
+[2026-04-19T08:34:28.680+00:00] exit=1
+
+[2026-04-19T08:34:57.380+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s....................................
+----------------------------------------------------------------------
+Ran 42 tests in 2.453s
+
+OK (skipped=1)
+[2026-04-19T08:35:00.110+00:00] exit=0
+
+[2026-04-19T09:02:44.382+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.......F........................F...
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 150, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 228, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.727s
+
+FAILED (failures=2, skipped=1)
+[2026-04-19T09:02:47.379+00:00] exit=1
+
+[2026-04-19T09:04:49.417+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.......F........................F...
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 150, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 228, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 42 tests in 2.340s
+
+FAILED (failures=2, skipped=1)
+[2026-04-19T09:04:52.011+00:00] exit=1

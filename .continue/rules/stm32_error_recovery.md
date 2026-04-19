@@ -1,23 +1,17 @@
-# 错误恢复指引
+# STM32 Error Recovery
 
-## 编译失败
+遇到失败时按下面顺序处理：
 
-1. 先读取 `errors[0]`
-2. 优先修复第一条 `error`，不要同时改很多点
-3. 如果当前 step 提供了 `retry_command`，先运行 `fix-build --json`
-4. 读取 `suggested_fixes[0].fix.action_type`
-5. 按 `target_files`、`target_region`、`code` 落最小修复
-6. 修复后重新运行 `build --json`
-7. 同一步骤最多连续重试 3 次
+1. `doctor` 有 fail：先停下，报告 fail 项，不直接继续。
+2. `build` 失败：运行 `fix-build`，最多修 3 轮，再汇报阻塞点。
+3. `verify current` 失败：先看 `direct_verify_summary.*`，再看 `cli_diag.json` 和 `cli_transcript.log`。
+4. `integration check` 不通过：优先重新执行 `integration install <name>`，再复查生成文件。
+5. 硬件相关动作失败：不要盲目重试超过 1 次，先把证据返回给用户。
 
-## UART CLI 失败
+关键命令：
 
-1. 查看 `diagnosis.summary`
-2. 再看 `cli_transcript.log` 前几行
-3. 优先检查 ready banner `STM32 UART CLI ready.` 与 prompt `cli>` 是否仍然存在
-
-## flash 失败
-
-1. 不要反复重试超过 3 次
-2. 先确认用户是否允许继续操作硬件
-3. 如果是工具链问题，记录阻塞并停止
+```powershell
+cmd /c ".\agent_workbench.bat fix-build --json"
+cmd /c ".\agent_workbench.bat report --latest --json"
+cmd /c ".\agent_workbench.bat integration check continue --json"
+```

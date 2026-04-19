@@ -1,15 +1,15 @@
-# PowerShell 调用速查
+# STM32 PowerShell Syntax
 
-## 正确示例
+Windows PowerShell 下使用本项目时，必须遵守：
 
-- `cmd /c ".\agent_workbench.bat build --json"`
-- `cmd /c ".\agent_workbench.bat plan ""给板子加 1Hz LED 闪烁"" --json"`
-- `cmd /c ".\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json"`
-- `cmd /c ".\agent_workbench.bat ps-exec ""build"""`
+1. 不要自己拼 `cd ... && ...`、`;`、多段复合命令。
+2. 一次只运行一条命令。
+3. 所有 workbench 命令都优先写成：
 
-## 错误示例
+```powershell
+cmd /c ".\agent_workbench.bat <subcommand> --json"
+```
 
-- `agent_workbench.bat build && agent_workbench.bat flash`
-- `cd agent_workbench; python workbench.py build`
-- `agent_workbench\tasks\example.yaml`
-- `powershell ... | ConvertFrom-Json`
+4. 路径包含空格时，用双引号包裹。
+5. 不要把 PowerShell 变量展开和 `cmd /c` 混在一条复杂命令里。
+6. 不要捏造 shell 输出；必须基于真实命令结果总结。

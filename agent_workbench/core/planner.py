@@ -394,7 +394,7 @@ class Planner:
                     "target_region": "end of app_cli_commands.c",
                     "function_name": handler_name,
                     "code_template": command_body,
-                    "reason": "添加命令处理函数骨架，并由 Continue 按需求补充具体逻辑。",
+                    "reason": "添加命令处理函数骨架，并由后续实现步骤按需求补充具体逻辑。",
                 },
             ],
             "Core/Inc/app_cli_commands.h": [

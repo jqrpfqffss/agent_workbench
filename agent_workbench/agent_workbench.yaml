@@ -319,51 +319,9 @@ planner:
   # 第二阶段扩库后建议保持在 15 及以上。
   minimum_template_count: 15
 
-opencode:
-  # OpenCode 主 agent 指令文件（项目根 AGENTS.md）
-  agents_file: AGENTS.md
-
-  # sub-agent 目录（相对 project.root）
-  agents_dir: .opencode/agent
-
-  # 自定义 slash 命令目录
-  commands_dir: .opencode/command
-
-  # OpenCode 项目配置文件
-  project_config_file: opencode.json
-
-  # 模板源目录（相对 agent_workbench/ 根目录）
-  agents_template_dir: templates/opencode_agents
-
-  # 必须生成的 sub-agent 文件
-  required_agents:
-    - stm32_auto.md
-    - weak_model.md
-    - code_planner.md
-    - hardware_verifier.md
-
-  # 必须生成的 slash 命令
-  required_commands:
-    - plan-stm32.md
-    - verify.md
-    - fix-build.md
-    - uart-smoke.md
-    - flash-reset.md
-
-  # 针对不同本地模型的专用 profile
-  model_profiles:
-    deepseek_r1:
-      profile_file: model_profiles/deepseek_r1.md
-      min_lines: 5
-    glm:
-      profile_file: model_profiles/glm.md
-      min_lines: 5
-    qwen7b:
-      profile_file: model_profiles/qwen7b.md
-      min_lines: 5
-
-  # 是否也同步到全局 ~/.config/opencode/
-  also_install_global: false
+integrations:
+  # 可选：doctor 不强制任何集成已安装，保留给用户自行选择。
+  auto_install: []
 
 vscode:
   # VS Code tasks.json 输出路径，相对 project.root。
@@ -467,13 +425,13 @@ agent:
 
 prompts:
   # debug 阶段默认 prompt 模板路径，相对 agent_workbench 根目录。
-  debug: prompts/opencode_debug.md
+  debug: prompts/legacy_debug.md
 
   # feature 实现阶段默认 prompt 模板路径。
-  feature: prompts/opencode_feature.md
+  feature: prompts/legacy_feature.md
 
   # 测试生成/测试分析阶段默认 prompt 模板路径。
-  test_author: prompts/opencode_test_author.md
+  test_author: prompts/legacy_test_author.md
 
   # 报告总结阶段默认 prompt 模板路径。
-  report: prompts/opencode_report.md
+  report: prompts/legacy_report.md

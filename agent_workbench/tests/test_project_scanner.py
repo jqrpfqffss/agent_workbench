@@ -46,11 +46,6 @@ class ProjectScannerTests(unittest.TestCase):
                 "generated_root_path": self.temp_dir / "agent_workbench" / "generated",
             },
             "planner": {"templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates"},
-            "opencode": {
-                "agents_file_path": self.temp_dir / "AGENTS.md",
-                "agents_dir_path": self.temp_dir / ".opencode" / "agent",
-                "commands_dir_path": self.temp_dir / ".opencode" / "command",
-            },
             "uart": {
                 "enabled": True,
                 "ready_banner": "STM32 UART CLI ready.",
@@ -68,3 +63,6 @@ class ProjectScannerTests(unittest.TestCase):
         self.assertTrue(any(item["name"] == "htim1" for item in snapshot["existing_handles"]))
         self.assertTrue(any(item["command"] == "help" for item in snapshot["cli_commands"]))
         self.assertTrue(any(item["name"] == "USER CODE BEGIN PV" for item in snapshot["user_code_regions"]))
+        self.assertIsInstance(snapshot["integrations"], list)
+        if snapshot["integrations"]:
+            self.assertTrue(any(item["id"] == "opencode" for item in snapshot["integrations"]))

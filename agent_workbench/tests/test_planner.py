@@ -39,15 +39,6 @@ class PlannerTests(unittest.TestCase):
                 "hardware_knowledge_dir_path": repo_root / "agent_workbench" / "templates" / "hardware_knowledge",
                 "max_total_steps": 15,
             },
-            "opencode": {
-                "agents_file_path": self.temp_dir / "AGENTS.md",
-                "agents_dir_path": self.temp_dir / ".opencode" / "agent",
-                "commands_dir_path": self.temp_dir / ".opencode" / "command",
-                "agents_template_dir_path": self.temp_dir / "agent_workbench" / "templates" / "opencode_agents",
-                "required_agents": [],
-                "required_commands": [],
-                "model_profiles": {},
-            },
             "uart": {
                 "enabled": True,
                 "ready_banner": "STM32 UART CLI ready.",
@@ -62,7 +53,7 @@ class PlannerTests(unittest.TestCase):
             },
         }
 
-        plan = Planner(cfg).plan("给STM32添加PWM蜂鸣器控制，频率1kHz，PA8引脚")
+        plan = Planner(cfg).plan("Add PWM output on PA8 for STM32, frequency 1kHz")
 
         self.assertEqual(plan["template_id"], "timer_pwm")
         self.assertIn("Core/Src/main.c", plan["constraints"]["allowed_edit_files"])

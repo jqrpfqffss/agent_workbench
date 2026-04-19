@@ -17,42 +17,52 @@ class DoctorTests(unittest.TestCase):
         self.runtime_root = self.temp_dir / "runtime"
         self.evidence_root = self.temp_dir / "evidence"
         self.generated_root = self.temp_dir / "generated"
+        self.workbench_root = self.temp_dir / "agent_workbench"
         self.runtime_root.mkdir(parents=True, exist_ok=True)
         self.evidence_root.mkdir(parents=True, exist_ok=True)
         self.generated_root.mkdir(parents=True, exist_ok=True)
+        self.workbench_root.mkdir(parents=True, exist_ok=True)
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_doctor_reports_local_model_state_and_budget(self) -> None:
-        repo_root = Path(__file__).resolve().parents[2]
+    def test_doctor_reports_integration_status_and_local_model_state(self) -> None:
         brief_path = self.runtime_root / "context_brief.md"
         paste_path = self.runtime_root / "context_paste.md"
         task_path = self.temp_dir / "task.yaml"
         toolchain_path = self.temp_dir / "toolchain.cmake"
 
-        # OpenCode 产物
-        agents_file = self.temp_dir / "AGENTS.md"
-        agents_dir = self.temp_dir / ".opencode" / "agent"
-        commands_dir = self.temp_dir / ".opencode" / "command"
-        agents_dir.mkdir(parents=True, exist_ok=True)
-        commands_dir.mkdir(parents=True, exist_ok=True)
-
-        # AGENTS.md 要包含项目名/ready banner/prompt，否则 binding 检查会 warn
-        agents_file.write_text(
-            "# Test AGENTS\nproject=demo\nready=ready\nprompt=cli>\n",
+        integration_pack = self.workbench_root / "integrations" / "dummy"
+        (integration_pack / "files").mkdir(parents=True, exist_ok=True)
+        (integration_pack / "manifest.yaml").write_text(
+            "id: dummy\n"
+            "display_name: Dummy\n"
+            "description: test pack\n"
+            "files:\n"
+            "  - src: hello.md.tpl\n"
+            "    dst: hello.md\n"
+            "uses_values: [project_name]\n"
+            "doctor:\n"
+            "  required_files:\n"
+            "    - hello.md\n"
+            "  markers:\n"
+            "    hello.md:\n"
+            '      - "{project_name}"\n',
             encoding="utf-8",
         )
-        for name in ("stm32_auto.md", "weak_model.md", "code_planner.md", "hardware_verifier.md"):
-            (agents_dir / name).write_text(f"# {name}\n", encoding="utf-8")
-        for name in ("plan-stm32.md", "verify.md", "fix-build.md", "uart-smoke.md", "flash-reset.md"):
-            (commands_dir / name).write_text(f"# {name}\n", encoding="utf-8")
-        for name in ("deepseek_r1", "glm", "qwen7b"):
-            (agents_dir / f"model_{name}.md").write_text(f"# model {name}\n", encoding="utf-8")
+        (integration_pack / "files" / "hello.md.tpl").write_text("project={project_name}\n", encoding="utf-8")
+        (self.temp_dir / "hello.md").write_text("project=demo\n", encoding="utf-8")
 
-        # 模板目录存在
-        tpl_dir = self.temp_dir / "agent_workbench" / "templates" / "opencode_agents"
-        tpl_dir.mkdir(parents=True, exist_ok=True)
+        (self.workbench_root / "README.md").write_text("# agent_workbench\n\n## Integrations\n", encoding="utf-8")
+        (self.workbench_root / "MIGRATION_GUIDE_ZH.md").write_text(
+            "# agent_workbench 集成包架构迁移指南\n\nintegration install opencode\n",
+            encoding="utf-8",
+        )
+
+        planner_dir = self.workbench_root / "templates" / "task_templates"
+        planner_dir.mkdir(parents=True, exist_ok=True)
+        for index in range(15):
+            (planner_dir / f"template_{index:02d}.yaml").write_text("id: demo\n", encoding="utf-8")
 
         brief_path.write_text("one two three\n", encoding="utf-8")
         paste_path.write_text("paste\n", encoding="utf-8")
@@ -79,7 +89,9 @@ class DoctorTests(unittest.TestCase):
             ),
             encoding="utf-8",
         )
+
         cfg = {
+            "project_root_path": self.temp_dir,
             "project": {
                 "name": "demo",
                 "artifact_elf_path": self.temp_dir / "missing.elf",
@@ -95,7 +107,7 @@ class DoctorTests(unittest.TestCase):
                 "evidence_root_path": self.evidence_root,
                 "generated_root_path": self.generated_root,
             },
-            "agent_workbench_root_path": repo_root / "agent_workbench",
+            "agent_workbench_root_path": self.workbench_root,
             "uart": {
                 "enabled": True,
                 "port": "COM3",
@@ -117,32 +129,8 @@ class DoctorTests(unittest.TestCase):
             "hardware": {"mode": "prefer"},
             "template_values": {},
             "planner": {
-                "templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates",
+                "templates_dir_path": planner_dir,
                 "minimum_template_count": 15,
-            },
-            "opencode": {
-                "agents_file_path": agents_file,
-                "agents_dir_path": agents_dir,
-                "commands_dir_path": commands_dir,
-                "agents_template_dir_path": tpl_dir,
-                "required_agents": [
-                    "stm32_auto.md",
-                    "weak_model.md",
-                    "code_planner.md",
-                    "hardware_verifier.md",
-                ],
-                "required_commands": [
-                    "plan-stm32.md",
-                    "verify.md",
-                    "fix-build.md",
-                    "uart-smoke.md",
-                    "flash-reset.md",
-                ],
-                "model_profiles": {
-                    "deepseek_r1": {"profile_file": "model_profiles/deepseek_r1.md", "min_lines": 5},
-                    "glm": {"profile_file": "model_profiles/glm.md", "min_lines": 5},
-                    "qwen7b": {"profile_file": "model_profiles/qwen7b.md", "min_lines": 5},
-                },
             },
             "agent": {
                 "state_path": state_path,
@@ -172,16 +160,11 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("paste_card", names)
         self.assertIn("diag_uart_backend", names)
         self.assertIn("diag_uart_requests", names)
-        self.assertIn("opencode_agents_file", names)
-        self.assertIn("opencode_agents", names)
-        self.assertIn("opencode_commands", names)
-        self.assertIn("opencode_model_profiles", names)
+        self.assertIn("integration::dummy::hello.md", names)
         self.assertIn("planner_templates", names)
         self.assertIn("migration_docs", names)
         self.assertEqual(names["agent_state"]["level"], "ok")
         self.assertEqual(names["paste_card"]["level"], "ok")
-        self.assertEqual(names["opencode_agents_file"]["level"], "ok")
-        self.assertEqual(names["opencode_agents"]["level"], "ok")
-        self.assertEqual(names["opencode_commands"]["level"], "ok")
-        self.assertEqual(names["opencode_model_profiles"]["level"], "ok")
+        self.assertEqual(names["integration::dummy::hello.md"]["level"], "ok")
         self.assertEqual(names["planner_templates"]["level"], "ok")
+        self.assertEqual(summary["fail_count"], 0)

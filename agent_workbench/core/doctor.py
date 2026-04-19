@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from . import integrations_service
 from .diag_uart_service import SERIAL_IMPORT_ERROR as DIAG_SERIAL_IMPORT_ERROR
 from .diag_uart_service import diag_exec_supported, serial as diag_serial
 from .task_spec import load_task_spec
@@ -41,78 +42,24 @@ def _line_count(path: Path) -> int:
     return len(path.read_text(encoding="utf-8", errors="ignore").splitlines())
 
 
-def _check_opencode_agents(cfg: dict, results: list[dict]) -> None:
-    oc_cfg = cfg.get("opencode", {})
-    if not oc_cfg:
-        _append(results, "opencode_agents", "warn", "opencode config missing")
+def _check_integrations(cfg: dict, results: list[dict]) -> None:
+    workbench_root = Path(cfg.get("agent_workbench_root_path", ""))
+    if not workbench_root.exists():
+        _append(results, "integrations", "warn", "agent_workbench_root_path not configured")
         return
 
-    agents_file = Path(oc_cfg.get("agents_file_path", ""))
-    agents_dir = Path(oc_cfg.get("agents_dir_path", ""))
-    commands_dir = Path(oc_cfg.get("commands_dir_path", ""))
+    manifests = integrations_service.discover_integrations(workbench_root)
+    if not manifests:
+        _append(results, "integrations", "warn", f"no integration packs found under {workbench_root / 'integrations'}")
+        return
 
-    # 检查 AGENTS.md
-    if not agents_file.exists():
-        _append(results, "opencode_agents_file", "warn", f"missing {agents_file} (run init-opencode-agents)")
-    else:
-        _append(results, "opencode_agents_file", "ok", str(agents_file))
-        text = agents_file.read_text(encoding="utf-8", errors="ignore")
-        markers = [
-            str(cfg.get("project", {}).get("name", "")).strip(),
-            str(cfg.get("uart", {}).get("ready_banner", "")).strip(),
-            str(cfg.get("uart", {}).get("prompt", "")).strip(),
-        ]
-        markers = [marker for marker in markers if marker]
-        bound = bool(markers) and all(marker in text for marker in markers)
-        _append(
-            results,
-            "opencode_agents_binding",
-            "ok" if bound else "warn",
-            "project name and UART markers injected into AGENTS.md" if bound else "generated AGENTS.md does not appear to contain current project markers",
-        )
-
-    # 检查 sub-agent 目录
-    required_agents = [str(x).strip() for x in oc_cfg.get("required_agents", []) if str(x).strip()]
-    if not agents_dir.exists():
-        _append(results, "opencode_agents_dir", "warn", f"missing {agents_dir}")
-    else:
-        _append(results, "opencode_agents_dir", "ok", str(agents_dir))
-        missing = [name for name in required_agents if not (agents_dir / name).exists()]
-        level = "ok" if not missing else "warn"
-        detail = "all required agents present" if not missing else f"missing={','.join(missing)}"
-        _append(results, "opencode_agents", level, detail)
-
-    # 检查 slash commands 目录
-    required_commands = [str(x).strip() for x in oc_cfg.get("required_commands", []) if str(x).strip()]
-    if not commands_dir.exists():
-        _append(results, "opencode_commands_dir", "warn", f"missing {commands_dir}")
-    else:
-        _append(results, "opencode_commands_dir", "ok", str(commands_dir))
-        missing = [name for name in required_commands if not (commands_dir / name).exists()]
-        level = "ok" if not missing else "warn"
-        detail = "all required commands present" if not missing else f"missing={','.join(missing)}"
-        _append(results, "opencode_commands", level, detail)
-
-    # 检查模板目录
-    template_dir = Path(oc_cfg.get("agents_template_dir_path", ""))
-    if not template_dir.exists():
-        _append(results, "opencode_templates", "warn", f"missing {template_dir}")
-    else:
-        _append(results, "opencode_templates", "ok", str(template_dir))
-
-    # 检查模型 profile 文件
-    model_profiles = oc_cfg.get("model_profiles") or {}
-    missing_profiles: list[str] = []
-    for profile_name, meta in model_profiles.items():
-        if not isinstance(meta, dict):
+    active = {str(item).strip() for item in cfg.get("integrations_active", []) if str(item).strip()}
+    for manifest in manifests:
+        installed = integrations_service.is_integration_installed(cfg, manifest)
+        if not installed and manifest.id not in active:
             continue
-        target = agents_dir / f"model_{profile_name}.md"
-        if not target.exists():
-            missing_profiles.append(profile_name)
-    if model_profiles:
-        level = "ok" if not missing_profiles else "warn"
-        detail = "all model profile files present" if not missing_profiles else f"missing={','.join(missing_profiles)}"
-        _append(results, "opencode_model_profiles", level, detail)
+        for item in integrations_service.check_integration(cfg, manifest):
+            _append(results, item["name"], item["level"], item["detail"])
 
 
 def _check_planner_templates(cfg: dict, results: list[dict]) -> None:
@@ -136,9 +83,8 @@ def _check_migration_docs(cfg: dict, results: list[dict]) -> None:
         return
     root = Path(cfg.get("agent_workbench_root_path", ""))
     required_docs = {
-        root / "README.md": ["OpenCode Auto Mode", "Local-Model Workflow"],
-        root / "MIGRATION_GUIDE_ZH.md": ["agent_workbench 迁移指南", "init-opencode-agents"],
-        root / "OPENCODE_AUTO_MODE_GUIDE_ZH.md": ["OpenCode", "init-opencode-agents"],
+        root / "README.md": ["Integrations", "agent_workbench"],
+        root / "MIGRATION_GUIDE_ZH.md": ["agent_workbench", "integration"],
     }
     missing = [path.name for path in required_docs if not path.exists()]
     unreadable: list[str] = []
@@ -168,6 +114,7 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
 
     try:
         import yaml  # type: ignore  # noqa: F401
+
         _append(results, "yaml", "ok", "PyYAML available")
     except Exception as exc:
         _append(results, "yaml", "fail", str(exc))
@@ -221,12 +168,7 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
                     f"pyserial unavailable: {SERIAL_IMPORT_ERROR}. "
                     "Re-run setup or set SMARTFARM_PYTHON to a Python with PyYAML and pyserial."
                 )
-            _append(
-                results,
-                "uart_backend",
-                level,
-                detail,
-            )
+            _append(results, "uart_backend", level, detail)
         else:
             _append(results, "uart_backend", "ok", "pyserial available")
             try:
@@ -358,7 +300,7 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
         _append(results, "context_budget", "warn", "no active local-model context has been generated yet")
         _append(results, "paste_card", "warn", "no paste card available until `agent_workbench.bat context ...` runs")
 
-    _check_opencode_agents(cfg, results)
+    _check_integrations(cfg, results)
     _check_planner_templates(cfg, results)
     _check_migration_docs(cfg, results)
 

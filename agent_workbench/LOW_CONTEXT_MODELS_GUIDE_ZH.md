@@ -9,7 +9,7 @@
 正确做法是：
 
 1. 先让 `agent_workbench` 生成当前阶段的上下文卡。
-2. 再把最新生成的 `*_paste.md` 粘给 Continue Agent。
+2. 再把最新生成的 `*_paste.md` 粘给 OpenCode。
 3. 一轮只做一个阶段。
 4. 上下文快满时，不回顾整段历史，直接跑 `context --stage resume`。
 
@@ -49,7 +49,7 @@ VS Code 任务现在默认跟随 `agent.default_profile`，所以迁移到别的
 - `*_resume.md`
   上下文满了以后下一轮直接续接
 - `*_paste.md`
-  直接粘给 Continue Agent 的最短提示
+  直接粘给 OpenCode 的最短提示
 - `agent_state.json`
   当前模式、阶段、profile、最近 session、下一步命令
 
@@ -73,7 +73,7 @@ agent_workbench.bat context --mode debug --stage analyze
 然后：
 
 1. 打开 `agent_workbench/runtime/` 里最新的 `*_paste.md`
-2. 粘给 Continue Agent
+2. 粘给 OpenCode
 3. 让它只分析，不改代码
 4. 分析结束后再决定是否进入实现或验证
 
@@ -86,7 +86,7 @@ agent_workbench.bat context --mode feature --stage implement --task agent_workbe
 然后：
 
 1. 打开最新 `*_paste.md`
-2. 粘给 Continue Agent
+2. 粘给 OpenCode
 3. 让它只做最小修改
 4. 修改后再进入验证阶段
 
@@ -99,7 +99,7 @@ agent_workbench.bat context --mode feature --stage verify --task agent_workbench
 然后：
 
 1. 打开最新 `*_paste.md`
-2. 粘给 Continue Agent
+2. 粘给 OpenCode
 3. 让它只执行 workbench 命令并基于新 evidence 下结论
 
 ### 4.5 上下文满了怎么办
@@ -108,7 +108,7 @@ agent_workbench.bat context --mode feature --stage verify --task agent_workbench
 agent_workbench.bat context --stage resume
 ```
 
-然后把最新 `*_paste.md` 继续粘给 Continue。
+然后把最新 `*_paste.md` 继续粘给 OpenCode。
 
 不要把旧对话一大段回贴给模型，也不要重新让它从 README 开始读。
 
@@ -126,7 +126,7 @@ agent_workbench.bat context --stage resume
 
 1. 在 VS Code 运行对应的 `Context Pack` 任务
 2. 打开 `agent_workbench/runtime/` 下最新 `*_paste.md`
-3. 整段复制到 Continue Agent
+3. 整段复制到 OpenCode
 4. 等它做完当前阶段
 5. 再切下一阶段
 

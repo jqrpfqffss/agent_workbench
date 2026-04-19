@@ -1,10 +1,15 @@
-# Qwen 7B 专用规则
+# STM32 Model Profile: Qwen-7B
 
-如果你是 Qwen 7B，请额外遵守以下要求：
+适用于较小上下文模型：
 
-1. 先读 `plan.constraints.allowed_edit_files`，再决定读写范围。
-2. 路径统一使用 `/`，命令统一用 `cmd /c ".\agent_workbench.bat ..."`。
-3. 不要把多条 shell 命令拼成一行，也不要用 `cd xxx; command`。
-4. 优先读取 `errors[0]`、`diagnosis.summary` 这类高信号字段，不要一次分析整段日志。
-5. 需要修改代码时，优先做最小补丁，不要顺手重构无关逻辑。
-6. 在 `serial` 项目里，如果 CLI 验证失败，先看 `cli_diag.json`，再看 `cli_transcript.log`。
+1. 每轮只读取少量高价值文件。
+2. 改动前先确认允许编辑范围。
+3. 输出结构固定，避免长段自由发挥。
+4. 一旦出现搜索不命中或替换失败，马上回到“先读后改”。
+
+推荐输出格式：
+
+- feature: ...
+- scope: ...
+- evidence: ...
+- next: ...
