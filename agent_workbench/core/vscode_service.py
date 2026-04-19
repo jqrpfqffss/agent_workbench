@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from .utils import ensure_dir
+from .utils import ensure_dir, render_template
 
 
 def _command_paths(cfg: dict) -> dict[str, str]:
@@ -116,6 +116,32 @@ def _write_runtime_continue_prompts(cfg: dict) -> list[Path]:
     return generated
 
 
+def write_continue_rules(cfg: dict) -> list[Path]:
+    rules_dir = Path(cfg["continue"]["rules_dir_path"])
+    template_dir = Path(cfg["continue"]["rules_template_dir_path"])
+    ensure_dir(rules_dir)
+    values = {
+        "project_name": str(cfg["project"]["name"]),
+        "ready_banner": str(cfg["uart"].get("ready_banner", "")),
+        "prompt": str(cfg["uart"].get("prompt", "")),
+        "uart_port": str(cfg["uart"].get("port", "")),
+        "diag_uart_port": str(cfg.get("diag_uart", {}).get("port", "")),
+        "build_dir": str(cfg["project"].get("build_dir_path", "")),
+        "default_profile": str(cfg.get("agent", {}).get("default_profile", "")),
+        "source_dirs_csv": ", ".join(str(item) for item in cfg.get("project", {}).get("source_dirs", [])),
+    }
+    generated: list[Path] = []
+    for name in [str(item).strip() for item in cfg["continue"].get("required_rules", []) if str(item).strip()]:
+        template_path = template_dir / name
+        if not template_path.exists():
+            raise FileNotFoundError(f"continue rule template not found: {template_path}")
+        text = render_template(template_path.read_text(encoding="utf-8"), values)
+        target_path = rules_dir / name
+        target_path.write_text(text, encoding="utf-8")
+        generated.append(target_path)
+    return generated
+
+
 def write_vscode_tasks(cfg: dict) -> Path:
     tasks_path = Path(cfg["vscode"]["tasks_file_path"])
     ensure_dir(tasks_path.parent)
@@ -132,6 +158,8 @@ def write_vscode_tasks(cfg: dict) -> Path:
             {"label": "Agent Workbench: Setup", "type": "shell", "command": _ps_safe("setup_workbench.bat"), "problemMatcher": []},
             {"label": "Agent Workbench: Doctor", "type": "shell", "command": _ps_safe(f"{wrapper} doctor"), "problemMatcher": []},
             {"label": "Agent Workbench: Build", "type": "shell", "command": _ps_safe(f"{wrapper} build"), "group": {"kind": "build", "isDefault": True}, "problemMatcher": []},
+            {"label": "Agent Workbench: Init Continue Rules", "type": "shell", "command": _ps_safe(f"{wrapper} init-continue-rules"), "problemMatcher": []},
+            {"label": "Agent Workbench: Scan Project", "type": "shell", "command": _ps_safe(f"{wrapper} scan-project --json"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Debug Analyze)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode debug --stage analyze"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Feature Implement)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage implement --task {cli_regression_task}"), "problemMatcher": []},
             {"label": "Agent Workbench: Context Pack (Feature Verify)", "type": "shell", "command": _ps_safe(f"{wrapper} context --mode feature --stage verify --task {cli_regression_task}"), "problemMatcher": []},

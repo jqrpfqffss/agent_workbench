@@ -1,0 +1,24 @@
+{
+  "rules": [
+    { "pattern": "unknown type name", "code": "unknown_type_name", "category": "type", "recommended_action": "add_include_or_typedef" },
+    { "pattern": "undeclared|not declared", "code": "undeclared_identifier", "category": "undefined", "recommended_action": "add_or_include_declaration" },
+    { "pattern": "undefined reference to", "code": "undefined_reference", "category": "link", "recommended_action": "add_definition_or_link_source" },
+    { "pattern": "No such file or directory|no such file or directory", "code": "missing_include", "category": "include", "recommended_action": "fix_include_path" },
+    { "pattern": "implicit declaration of function", "code": "implicit_function_declaration", "category": "include", "recommended_action": "add_include_or_prototype" },
+    { "pattern": "conflicting types for", "code": "conflicting_types", "category": "type", "recommended_action": "align_declaration_and_definition" },
+    { "pattern": "incompatible (pointer )?type|incompatible types", "code": "incompatible_type", "category": "type", "recommended_action": "fix_argument_or_assignment_type" },
+    { "pattern": "redefinition of|multiple definition of", "code": "redefinition", "category": "duplicate", "recommended_action": "keep_one_definition_use_extern_elsewhere" },
+    { "pattern": "request for member '.+' in something not a structure or union", "code": "invalid_member_access", "category": "type", "recommended_action": "fix_object_type" },
+    { "pattern": "expected .+ before .+ token|expected expression before|expected declaration", "code": "syntax_error", "category": "syntax", "recommended_action": "fix_syntax_near_reported_line" },
+    { "pattern": "too many arguments to function|too few arguments to function", "code": "wrong_argument_count", "category": "type", "recommended_action": "align_function_signature" },
+    { "pattern": "initializer element is not constant", "code": "initializer_not_constant", "category": "syntax", "recommended_action": "move_runtime_value_out_of_global_initializer" },
+    { "pattern": "control reaches end of non-void function", "code": "missing_return", "category": "warning", "recommended_action": "add_return_statement" },
+    { "pattern": "unused variable", "code": "unused_variable", "category": "warning", "recommended_action": "remove_or_use_variable" },
+    { "pattern": "set but not used", "code": "value_set_not_used", "category": "warning", "recommended_action": "remove_dead_store_or_use_value" }
+  ],
+  "default": {
+    "code": "compiler_error",
+    "category": "build",
+    "recommended_action": "inspect_first_error"
+  }
+}

@@ -41,47 +41,95 @@ def _decode_text(words: list[int], byte_count: int) -> str:
     return data[:byte_count].split(b"\x00", 1)[0].decode("utf-8", errors="replace")
 
 
-def _classify_failure(stats: dict[str, Any] | None, saw_ready: bool, saw_prompt: bool, timeout_commands: list[str]) -> dict[str, str]:
+def _classify_failure(stats: dict[str, Any] | None, saw_ready: bool, saw_prompt: bool, timeout_commands: list[str]) -> dict[str, Any]:
     if stats is None:
         return {
             "code": "diag_unavailable",
+            "category": "diagnostic_unavailable",
             "summary": "CLI diagnostics unavailable",
             "detail": "OpenOCD or DebugCliStats symbol could not be read.",
+            "possible_causes": [
+                "OpenOCD 未启动或无法连接",
+                "ELF 中缺少 DebugCliStats 符号",
+                "当前环境没有可用的硬件调试链路",
+            ],
+            "suggested_next_step": "先检查 openocd 是否可用，再确认 ELF 和符号表是否与当前固件匹配。",
         }
     if int(stats.get("rx_bytes", 0)) == 0:
         return {
             "code": "rx_zero",
+            "category": "host_to_board",
             "summary": "Board did not receive UART bytes",
             "detail": "Check COM port mapping, RX/TX wiring, and whether the configured UART is the active CLI path.",
+            "possible_causes": [
+                "COM 口配置错误",
+                "RX/TX 连线错误或没有共地",
+                "固件当前没有监听配置的 UART 口",
+            ],
+            "suggested_next_step": "先核对 agent_workbench.yaml 中的 uart.port，再检查板端 UART 初始化是否使用同一组引脚。",
         }
     if int(stats.get("rx_bytes", 0)) > 0 and int(stats.get("cmd_ok", 0)) == 0:
         return {
             "code": "parser_no_command",
+            "category": "board_parser",
             "summary": "Board received data but did not execute commands",
             "detail": "Check line endings, command tokenization, and CLI parser state.",
+            "possible_causes": [
+                "命令结尾不符合板端解析器预期",
+                "CLI 命令分发表没有注册目标命令",
+                "解析器状态机被最近改动破坏",
+            ],
+            "suggested_next_step": "优先查看 cli_transcript.log 中命令发送后的原始回显，再检查 CLI 解析和命令注册代码。",
         }
     if int(stats.get("cmd_ok", 0)) > 0 and timeout_commands:
         return {
             "code": "tx_or_host_rx",
+            "category": "board_to_host",
             "summary": "Commands executed but the host did not capture the response",
             "detail": "Check USART3 TX wiring, USB-TTL adapter state, and host receive buffering.",
+            "possible_causes": [
+                "板端 TX 线未接好或串口适配器异常",
+                "Host 侧接收缓存或串口参数不匹配",
+                "命令执行后没有回到提示符",
+            ],
+            "suggested_next_step": "先看 cli_transcript.log 是否至少出现部分输出，再检查板端回复路径和 prompt 恢复逻辑。",
         }
     if not saw_ready:
         return {
             "code": "ready_missing",
+            "category": "boot_handshake",
             "summary": "CLI ready banner missing",
             "detail": "Target did not emit the expected boot handshake after reset.",
+            "possible_causes": [
+                "板子没有真正复位",
+                "ready banner 被修改或提前输出后被 drain 掉",
+                "UART 初始化流程在启动阶段失败",
+            ],
+            "suggested_next_step": "检查 cli_transcript.log 前 10 行，并确认 ready banner 字符串仍然等于配置中的值。",
         }
     if not saw_prompt:
         return {
             "code": "prompt_missing",
+            "category": "interactive_prompt",
             "summary": "CLI prompt missing",
             "detail": "Responses were seen but the CLI prompt was not emitted.",
+            "possible_causes": [
+                "命令处理后没有重新输出 prompt",
+                "输出被截断或串口缓冲未刷新",
+                "最近改动影响了 CLI 主循环或回车处理",
+            ],
+            "suggested_next_step": "先看 cli_transcript.log 中最后一条命令后的输出，再检查 prompt 输出函数或命令返回路径。",
         }
     return {
         "code": "unknown",
+        "category": "manual_review",
         "summary": "CLI failure requires manual review",
         "detail": "Inspect cli_transcript.log and cli_diag.json together for the full timeline.",
+        "possible_causes": [
+            "错误不属于已有分类",
+            "多个问题叠加导致现有诊断不够确定",
+        ],
+        "suggested_next_step": "把 cli_transcript.log、cli_diag.json 和最近一次代码改动一起对照分析。",
     }
 
 

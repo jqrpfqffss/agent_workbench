@@ -116,6 +116,36 @@
       "detail": "read_candidates=3 edit_candidates=3"
     },
     {
+      "name": "continue_rules_dir",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\.continue\\rules"
+    },
+    {
+      "name": "continue_rules",
+      "level": "ok",
+      "detail": "all required rules present"
+    },
+    {
+      "name": "continue_model_rules",
+      "level": "ok",
+      "detail": "all model-specific rules present"
+    },
+    {
+      "name": "continue_rules_binding",
+      "level": "ok",
+      "detail": "project name and UART markers injected into rules"
+    },
+    {
+      "name": "planner_templates",
+      "level": "ok",
+      "detail": "count=16 minimum=15"
+    },
+    {
+      "name": "migration_docs",
+      "level": "ok",
+      "detail": "migration docs ready"
+    },
+    {
       "name": "unit_command",
       "level": "ok",
       "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""

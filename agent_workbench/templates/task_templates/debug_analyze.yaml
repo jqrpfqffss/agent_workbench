@@ -1,0 +1,37 @@
+id: debug_analyze
+mode: debug
+description: 为故障分析、串口异常和硬件回归诊断生成只读优先的调试计划。
+keywords:
+  - debug
+  - 调试
+  - 诊断
+  - 分析
+  - 故障
+  - 异常
+  - error
+  - panic
+read_files:
+  - file: Core/Src/main.c
+    why: 了解初始化和主流程，确认可能受影响的模块。
+  - file: Core/Src/cli.c
+    why: 检查 UART CLI 接收、发送和 ready/prompt 逻辑。
+shell_steps:
+  - name: 项目扫描
+    command: ./agent_workbench.bat scan-project --json
+    success_criteria: exit_code == 0
+  - name: 环境检查
+    command: ./agent_workbench.bat doctor --json
+    success_criteria: exit_code == 0
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+  - name: UART CLI 诊断验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"
+forbidden_operations:
+  - 在没有明确证据前声称问题已经定位
+  - 修改 ready banner 或 prompt 字符串
+  - 删除现有 CLI 命令

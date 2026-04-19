@@ -11,14 +11,20 @@ except ModuleNotFoundError as exc:  # pragma: no cover - env specific
     ) from exc
 
 
-def load_task_spec(task_path: Path) -> dict[str, Any]:
-    if not task_path.exists():
-        raise FileNotFoundError(f"task not found: {task_path}")
-    data = yaml.safe_load(task_path.read_text(encoding="utf-8")) or {}
+def normalize_task_spec(data: dict[str, Any] | None, *, strict: bool = True) -> dict[str, Any]:
+    data = dict(data or {})
     required = ["id", "mode", "goal", "scope", "acceptance", "observability", "verify"]
     missing = [key for key in required if key not in data]
     if missing:
-        raise RuntimeError(f"task missing required fields: {', '.join(missing)}")
+        if strict:
+            raise RuntimeError(f"task missing required fields: {', '.join(missing)}")
+        data.setdefault("id", "ad_hoc_task")
+        data.setdefault("mode", "feature")
+        data.setdefault("goal", "")
+        data.setdefault("scope", {})
+        data.setdefault("acceptance", {})
+        data.setdefault("observability", {})
+        data.setdefault("verify", {})
 
     data.setdefault("scope", {})
     data["scope"].setdefault("include", [])
@@ -44,3 +50,10 @@ def load_task_spec(task_path: Path) -> dict[str, Any]:
     default_max_edit = min(len(impl.get("edit_candidates", [])) or len(include_items) or 2, 2)
     impl.setdefault("max_edit_files", max(default_max_edit, 1))
     return data
+
+
+def load_task_spec(task_path: Path, *, strict: bool = True) -> dict[str, Any]:
+    if not task_path.exists():
+        raise FileNotFoundError(f"task not found: {task_path}")
+    data = yaml.safe_load(task_path.read_text(encoding="utf-8")) or {}
+    return normalize_task_spec(data, strict=strict)

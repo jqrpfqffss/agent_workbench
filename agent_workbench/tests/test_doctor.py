@@ -25,10 +25,25 @@ class DoctorTests(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_doctor_reports_local_model_state_and_budget(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
         brief_path = self.runtime_root / "context_brief.md"
         paste_path = self.runtime_root / "context_paste.md"
         task_path = self.temp_dir / "task.yaml"
         toolchain_path = self.temp_dir / "toolchain.cmake"
+        rules_dir = self.temp_dir / ".continue" / "rules"
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        for name in (
+            "stm32_auto_workflow.md",
+            "stm32_weak_model_guard.md",
+            "stm32_task_cookbook.md",
+            "stm32_powershell_syntax.md",
+            "stm32_error_recovery.md",
+            "stm32_hardware_safety.md",
+            "stm32_model_deepseek_r1.md",
+            "stm32_model_qwen7b.md",
+            "stm32_model_glm.md",
+        ):
+            (rules_dir / name).write_text("demo ready cli>\n", encoding="utf-8")
         brief_path.write_text("one two three\n", encoding="utf-8")
         paste_path.write_text("paste\n", encoding="utf-8")
         toolchain_path.write_text("# toolchain\n", encoding="utf-8")
@@ -56,6 +71,7 @@ class DoctorTests(unittest.TestCase):
         )
         cfg = {
             "project": {
+                "name": "demo",
                 "artifact_elf_path": self.temp_dir / "missing.elf",
                 "compile_commands_path": self.temp_dir / "missing.json",
             },
@@ -69,6 +85,7 @@ class DoctorTests(unittest.TestCase):
                 "evidence_root_path": self.evidence_root,
                 "generated_root_path": self.generated_root,
             },
+            "agent_workbench_root_path": repo_root / "agent_workbench",
             "uart": {
                 "enabled": True,
                 "port": "COM3",
@@ -89,6 +106,25 @@ class DoctorTests(unittest.TestCase):
             "checks": {"unit": {"enabled": False}},
             "hardware": {"mode": "prefer"},
             "template_values": {},
+            "planner": {
+                "templates_dir_path": repo_root / "agent_workbench" / "templates" / "task_templates",
+                "minimum_template_count": 15,
+            },
+            "continue": {
+                "rules_dir_path": rules_dir,
+                "required_rules": [
+                    "stm32_auto_workflow.md",
+                    "stm32_weak_model_guard.md",
+                    "stm32_task_cookbook.md",
+                    "stm32_powershell_syntax.md",
+                    "stm32_error_recovery.md",
+                    "stm32_hardware_safety.md",
+                    "stm32_model_deepseek_r1.md",
+                    "stm32_model_qwen7b.md",
+                    "stm32_model_glm.md",
+                ],
+                "model_rule_names": ["deepseek_r1", "qwen7b", "glm"],
+            },
             "agent": {
                 "state_path": state_path,
                 "default_profile": "balanced_local",
@@ -117,5 +153,13 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("paste_card", names)
         self.assertIn("diag_uart_backend", names)
         self.assertIn("diag_uart_requests", names)
+        self.assertIn("continue_rules", names)
+        self.assertIn("continue_model_rules", names)
+        self.assertIn("planner_templates", names)
+        self.assertIn("migration_docs", names)
         self.assertEqual(names["agent_state"]["level"], "ok")
         self.assertEqual(names["paste_card"]["level"], "ok")
+        self.assertEqual(names["continue_rules"]["level"], "ok")
+        self.assertEqual(names["continue_model_rules"]["level"], "ok")
+        self.assertEqual(names["planner_templates"]["level"], "ok")
+        self.assertEqual(names["migration_docs"]["level"], "ok")

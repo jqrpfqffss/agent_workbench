@@ -1,0 +1,25 @@
+user_code_regions:
+  - name: "USER CODE BEGIN Includes"
+    file: Core/Src/main.c
+    purpose: "add extra includes that CubeMX should preserve"
+  - name: "USER CODE BEGIN PV"
+    file: Core/Src/main.c
+    purpose: "add private variables and handles"
+  - name: "USER CODE BEGIN PFP"
+    file: Core/Src/main.c
+    purpose: "add private function prototypes"
+  - name: "USER CODE BEGIN 0"
+    file: Core/Src/main.c
+    purpose: "add early helper callbacks and support code"
+  - name: "USER CODE BEGIN 2"
+    file: Core/Src/main.c
+    purpose: "add initialization calls after CubeMX peripheral init"
+  - name: "USER CODE BEGIN MX_GPIO_Init_2"
+    file: Core/Src/main.c
+    purpose: "add extra GPIO setup without breaking CubeMX output"
+  - name: "USER CODE BEGIN 4"
+    file: Core/Src/main.c
+    purpose: "add helper functions and peripheral init helpers"
+  - name: "USER CODE BEGIN EFP"
+    file: Core/Inc/main.h
+    purpose: "add extern declarations and extra function declarations"

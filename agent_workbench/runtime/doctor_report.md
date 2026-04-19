@@ -25,4 +25,10 @@
 | paste_card | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\context_pack_feature_timer_led_blink_implement_balanced_local_paste.md |
 | task_scope | ok | include=3 max_edit_files=3 |
 | task_candidates | ok | read_candidates=3 edit_candidates=3 |
+| continue_rules_dir | ok | H:\stm32_RAG\code\serial\.continue\rules |
+| continue_rules | ok | all required rules present |
+| continue_model_rules | ok | all model-specific rules present |
+| continue_rules_binding | ok | project name and UART markers injected into rules |
+| planner_templates | ok | count=16 minimum=15 |
+| migration_docs | ok | migration docs ready |
 | unit_command | ok | D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |

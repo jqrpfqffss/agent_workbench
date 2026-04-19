@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
+from core.cli_output import build_result_payload, print_result_payload, status_from_exit_code
 from core.config import load_config
 
 
@@ -14,40 +16,112 @@ def _cfg(path_text: str) -> dict:
     return load_config(Path(path_text).resolve())
 
 
+def _emit(args: argparse.Namespace, payload: dict, text_lines: list[str]) -> int:
+    if getattr(args, "json", False):
+        print_result_payload(payload)
+    else:
+        for line in text_lines:
+            if line:
+                print(line)
+    return int(payload["exit_code"])
+
+
+def _add_json_flag(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--json", action="store_true")
+
+
+def _latest_session_dir(cfg: dict, before: int = -1) -> Path | None:
+    from core.compare_service import list_session_dirs
+
+    sessions = list_session_dirs(Path(cfg["outputs"]["evidence_root_path"]))
+    if not sessions:
+        return None
+    if before >= 0 and len(sessions) <= before:
+        return sessions[-1]
+    return sessions[-1]
+
+
 def _cmd_doctor(args: argparse.Namespace) -> int:
     from core.doctor import run_doctor
 
     cfg = _cfg(args.config)
     code, summary = run_doctor(cfg, cfg["outputs"]["runtime_root_path"])
-    print(f"doctor fail={summary['fail_count']} warn={summary['warn_count']}")
-    return int(code)
+    payload = build_result_payload(
+        "doctor",
+        code,
+        summary=f"doctor fail={summary['fail_count']} warn={summary['warn_count']}",
+        details={
+            "fail_count": summary["fail_count"],
+            "warn_count": summary["warn_count"],
+            "results": summary["results"],
+        },
+        artifacts={
+            "report_json": str(cfg["outputs"]["runtime_root_path"] / "doctor_report.json"),
+            "report_md": str(cfg["outputs"]["runtime_root_path"] / "doctor_report.md"),
+        },
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_build(args: argparse.Namespace) -> int:
+    from core.build_errors import parse_build_log
     from core.build_service import run_build
 
     cfg = _cfg(args.config)
-    code = run_build(cfg, cfg["outputs"]["runtime_root_path"] / "build.log")
-    print(f"build exit={code}")
-    return int(code)
+    log_path = cfg["outputs"]["runtime_root_path"] / "build.log"
+    code = run_build(cfg, log_path)
+    parsed = parse_build_log(log_path, Path(cfg["project_root_path"]))
+    errors = [item.to_dict() for item in parsed if item.level == "error"]
+    warnings = [item.to_dict() for item in parsed if item.level == "warning"]
+    payload = build_result_payload(
+        "build",
+        code,
+        summary=f"build exit={code} errors={len(errors)} warnings={len(warnings)}",
+        details={
+            "error_count": len(errors),
+            "warning_count": len(warnings),
+        },
+        artifacts={"log_path": str(log_path)},
+        errors=errors,
+        warnings=warnings,
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_flash(args: argparse.Namespace) -> int:
     from core.flash_service import run_flash
 
     cfg = _cfg(args.config)
-    code = run_flash(cfg, method=args.method.strip() if args.method else None, log_path=cfg["outputs"]["runtime_root_path"] / "flash.log")
-    print(f"flash exit={code}")
-    return int(code)
+    method = args.method.strip() if args.method else None
+    log_path = cfg["outputs"]["runtime_root_path"] / "flash.log"
+    code = run_flash(cfg, method=method, log_path=log_path)
+    selected = method or cfg["tools"]["flash"].get("default_method", "stlink_cli")
+    payload = build_result_payload(
+        "flash",
+        code,
+        summary=f"flash exit={code} method={selected}",
+        details={"method": selected},
+        artifacts={"log_path": str(log_path)},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_reset(args: argparse.Namespace) -> int:
     from core.flash_service import run_reset
 
     cfg = _cfg(args.config)
-    code = run_reset(cfg, method=args.method.strip() if args.method else None, log_path=cfg["outputs"]["runtime_root_path"] / "reset.log")
-    print(f"reset exit={code}")
-    return int(code)
+    method = args.method.strip() if args.method else None
+    log_path = cfg["outputs"]["runtime_root_path"] / "reset.log"
+    code = run_reset(cfg, method=method, log_path=log_path)
+    selected = method or cfg["tools"]["flash"].get("default_method", "stlink_cli")
+    payload = build_result_payload(
+        "reset",
+        code,
+        summary=f"reset exit={code} method={selected}",
+        details={"method": selected},
+        artifacts={"log_path": str(log_path)},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_uart(args: argparse.Namespace) -> int:
@@ -55,17 +129,29 @@ def _cmd_uart(args: argparse.Namespace) -> int:
     from core.utils import ensure_dir
 
     cfg = _cfg(args.config)
+    runtime_root = cfg["outputs"]["runtime_root_path"]
     if args.action == "console":
-        return run_uart_console(cfg, cfg["outputs"]["runtime_root_path"] / "uart_console.log")
+        log_path = runtime_root / "uart_console.log"
+        code = run_uart_console(cfg, log_path)
+        payload = build_result_payload(
+            "uart console",
+            code,
+            summary=f"uart console exit={code}",
+            artifacts={"log_path": str(log_path)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     if args.action == "start":
-        print(start_uart_daemon(cfg, Path(args.config), Path(__file__).resolve()))
-        return 0
+        message = start_uart_daemon(cfg, Path(args.config), Path(__file__).resolve())
+        payload = build_result_payload("uart start", 0, summary=message, details={"action": "start"})
+        return _emit(args, payload, [message])
     if args.action == "stop":
-        print(stop_uart_daemon(cfg))
-        return 0
+        message = stop_uart_daemon(cfg)
+        payload = build_result_payload("uart stop", 0, summary=message, details={"action": "stop"})
+        return _emit(args, payload, [message])
     if args.action == "status":
-        print(uart_status(cfg))
-        return 0
+        message = uart_status(cfg)
+        payload = build_result_payload("uart status", 0, summary=message, details={"action": "status"})
+        return _emit(args, payload, [message])
     if args.action == "exec":
         commands = list(args.command or [])
         if args.script:
@@ -76,9 +162,13 @@ def _cmd_uart(args: argparse.Namespace) -> int:
                 if line.strip() and not line.strip().startswith("#")
             )
         if not commands:
-            print("uart exec requires --command or --script", file=sys.stderr)
-            return 2
-        transcript_path = Path(args.transcript) if args.transcript else cfg["outputs"]["runtime_root_path"] / "cli_transcript.log"
+            payload = build_result_payload(
+                "uart exec",
+                2,
+                summary="uart exec requires --command or --script",
+            )
+            return _emit(args, payload, [payload["summary"]])
+        transcript_path = Path(args.transcript) if args.transcript else runtime_root / "cli_transcript.log"
         diag_path = Path(args.diag_path) if args.diag_path else transcript_path.with_name("cli_diag.json")
         result = execute_uart_commands(
             cfg,
@@ -88,15 +178,34 @@ def _cmd_uart(args: argparse.Namespace) -> int:
             expect_ready=(True if args.expect_ready else None),
             diag_path=diag_path,
         )
-        extra = f" diag={result.diag_path}" if result.diag_path else ""
-        print(f"uart exec exit={result.exit_code} transcript={transcript_path}{extra}")
-        if result.diag and result.diag.get("classification"):
-            summary = result.diag["classification"].get("summary", "")
-            detail = result.diag["classification"].get("detail", "")
-            print(f"uart exec diagnosis: {summary} | {detail}")
-        return int(result.exit_code)
+        diagnosis = None
+        if result.diag and isinstance(result.diag.get("classification"), dict):
+            diagnosis = result.diag.get("classification")
+        status = status_from_exit_code(result.exit_code, blocked=result.exit_code in {35, 36})
+        payload = build_result_payload(
+            "uart exec",
+            result.exit_code,
+            status=status,
+            summary=f"uart exec exit={result.exit_code} commands={len(commands)}",
+            details={
+                "saw_ready": result.saw_ready,
+                "saw_prompt": result.saw_prompt,
+                "timeout_commands": result.timeout_commands,
+                "command_count": len(commands),
+            },
+            artifacts={
+                "transcript_path": str(transcript_path),
+                "diag_path": str(result.diag_path or diag_path),
+            },
+            transcript=result.transcript_lines,
+            diagnosis=diagnosis,
+        )
+        lines = [payload["summary"]]
+        if diagnosis:
+            lines.append(f"uart exec diagnosis: {diagnosis.get('summary', '')} | {diagnosis.get('detail', '')}")
+        return _emit(args, payload, lines)
     if args.action == "run":
-        log_path = Path(args.log_path) if args.log_path else cfg["outputs"]["runtime_root_path"] / "uart_live" / "uart.log"
+        log_path = Path(args.log_path) if args.log_path else runtime_root / "uart_live" / "uart.log"
         ensure_dir(log_path.parent)
         logger = UartLogger(
             port=cfg["uart"]["port"],
@@ -105,7 +214,14 @@ def _cmd_uart(args: argparse.Namespace) -> int:
             timeout_sec=float(cfg["uart"].get("line_timeout_sec", 0.2)),
             log_path=log_path,
         )
-        return logger.run(echo_stdout=False)
+        code = logger.run(echo_stdout=False)
+        payload = build_result_payload(
+            "uart run",
+            code,
+            summary=f"uart run exit={code}",
+            artifacts={"log_path": str(log_path)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     raise ValueError(f"unknown uart action: {args.action}")
 
 
@@ -123,13 +239,19 @@ def _cmd_diag(args: argparse.Namespace) -> int:
         result_path,
         script_path=script_path,
     )
-    print(
-        f"diag exec exit={result.exit_code} "
-        f"log={result.log_path} result={result.result_path} exchanges={result.payload.get('exchange_count', 0)}"
+    status = status_from_exit_code(result.exit_code, blocked=result.exit_code in {40, 42})
+    payload = build_result_payload(
+        "diag exec",
+        result.exit_code,
+        status=status,
+        summary=f"diag exec exit={result.exit_code} exchanges={result.payload.get('exchange_count', 0)}",
+        details=result.payload,
+        artifacts={"log_path": str(result.log_path), "result_path": str(result.result_path)},
     )
+    lines = [payload["summary"]]
     if result.payload.get("error"):
-        print(f"diag exec error: {result.payload['error']}")
-    return int(result.exit_code)
+        lines.append(f"diag exec error: {result.payload['error']}")
+    return _emit(args, payload, lines)
 
 
 def _cmd_monitor(args: argparse.Namespace) -> int:
@@ -138,21 +260,37 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
 
     cfg = _cfg(args.config)
     if args.action == "start":
-        print(start_monitor_daemon(cfg, Path(args.config), Path(__file__).resolve()))
-        return 0
+        message = start_monitor_daemon(cfg, Path(args.config), Path(__file__).resolve())
+        payload = build_result_payload("monitor start", 0, summary=message, details={"action": "start"})
+        return _emit(args, payload, [message])
     if args.action == "stop":
-        print(stop_monitor_daemon(cfg))
-        return 0
+        message = stop_monitor_daemon(cfg)
+        payload = build_result_payload("monitor stop", 0, summary=message, details={"action": "stop"})
+        return _emit(args, payload, [message])
     if args.action == "status":
-        print(monitor_status(cfg))
-        return 0
+        message = monitor_status(cfg)
+        payload = build_result_payload("monitor status", 0, summary=message, details={"action": "status"})
+        return _emit(args, payload, [message])
     if args.action == "run":
         out_dir = Path(args.out_dir) if args.out_dir else cfg["outputs"]["runtime_root_path"] / "monitor_live"
         ensure_dir(out_dir)
-        return MonitorEngine(cfg, out_dir).run()
+        code = MonitorEngine(cfg, out_dir).run()
+        payload = build_result_payload(
+            "monitor run",
+            code,
+            summary=f"monitor run exit={code}",
+            artifacts={"out_dir": str(out_dir)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     if args.action == "export":
-        print(export_monitor_table(Path(args.source), Path(args.dest)))
-        return 0
+        message = export_monitor_table(Path(args.source), Path(args.dest))
+        payload = build_result_payload(
+            "monitor export",
+            0,
+            summary=message,
+            artifacts={"source": args.source, "dest": args.dest},
+        )
+        return _emit(args, payload, [message])
     raise ValueError(f"unknown monitor action: {args.action}")
 
 
@@ -161,24 +299,42 @@ def _cmd_openocd(args: argparse.Namespace) -> int:
 
     cfg = _cfg(args.config)
     if args.action == "start":
-        print(start_openocd_daemon(cfg))
-        return 0
+        message = start_openocd_daemon(cfg)
+        payload = build_result_payload("openocd start", 0, summary=message, details={"action": "start"})
+        return _emit(args, payload, [message])
     if args.action == "stop":
-        print(stop_openocd_daemon(cfg))
-        return 0
+        message = stop_openocd_daemon(cfg)
+        payload = build_result_payload("openocd stop", 0, summary=message, details={"action": "stop"})
+        return _emit(args, payload, [message])
     if args.action == "status":
-        print(openocd_status(cfg))
-        return 0
+        message = openocd_status(cfg)
+        payload = build_result_payload("openocd status", 0, summary=message, details={"action": "status"})
+        return _emit(args, payload, [message])
     raise ValueError(f"unknown openocd action: {args.action}")
 
 
 def _cmd_session(args: argparse.Namespace) -> int:
+    from core.compare_service import list_session_dirs
     from core.session_service import run_debug_session, run_feature_session
 
     cfg = _cfg(args.config)
+    before = len(list_session_dirs(Path(cfg["outputs"]["evidence_root_path"])))
     if args.mode == "debug":
-        return run_debug_session(cfg, session_name=args.name)
-    return run_feature_session(cfg, task_path=Path(args.task), session_name=args.name)
+        code = run_debug_session(cfg, session_name=args.name)
+    else:
+        code = run_feature_session(cfg, task_path=Path(args.task), session_name=args.name)
+    session_dir = _latest_session_dir(cfg, before=before)
+    payload = build_result_payload(
+        f"session {args.mode}",
+        code,
+        summary=f"session {args.mode} exit={code}",
+        details={"mode": args.mode, "task": args.task if args.mode == "feature" else ""},
+        artifacts={
+            "session_dir": str(session_dir) if session_dir else "",
+            "summary_path": str(session_dir / "session_summary.md") if session_dir else "",
+        },
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_test(args: argparse.Namespace) -> int:
@@ -187,11 +343,21 @@ def _cmd_test(args: argparse.Namespace) -> int:
     cfg = _cfg(args.config)
     if args.action == "generate":
         out_dir = generate_tests(cfg, Path(args.task))
-        print(f"generated tests: {out_dir}")
-        return 0
+        payload = build_result_payload(
+            "test generate",
+            0,
+            summary=f"generated tests: {out_dir}",
+            artifacts={"out_dir": str(out_dir)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     code, log_path = run_tests(cfg)
-    print(f"tests exit={code} log={log_path}")
-    return int(code)
+    payload = build_result_payload(
+        "test run",
+        code,
+        summary=f"tests exit={code} log={log_path}",
+        artifacts={"log_path": str(log_path)},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_compare(args: argparse.Namespace) -> int:
@@ -201,15 +367,25 @@ def _cmd_compare(args: argparse.Namespace) -> int:
     cfg = _cfg(args.config)
     if args.latest:
         out_path = compare_latest(cfg)
-        print(f"compare report: {out_path}")
-        return 0
+        payload = build_result_payload(
+            "compare",
+            0,
+            summary=f"compare report: {out_path}",
+            artifacts={"report_path": str(out_path), "delta_path": str(out_path.with_name("compare_delta.json"))},
+        )
+        return _emit(args, payload, [payload["summary"]])
     if not args.old or not args.new:
-        print("compare requires --latest or both --old and --new", file=sys.stderr)
-        return 2
+        payload = build_result_payload("compare", 2, summary="compare requires --latest or both --old and --new")
+        return _emit(args, payload, [payload["summary"]])
     out_path = Path(args.out) if args.out else Path(args.new) / f"compare_vs_{Path(args.old).name}.md"
     result = compare_sessions(Path(args.old), Path(args.new), out_path)
-    print(f"compare report: {result}")
-    return 0
+    payload = build_result_payload(
+        "compare",
+        0,
+        summary=f"compare report: {result}",
+        artifacts={"report_path": str(result), "delta_path": str(result.with_name("compare_delta.json"))},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_report(args: argparse.Namespace) -> int:
@@ -217,23 +393,37 @@ def _cmd_report(args: argparse.Namespace) -> int:
     from core.session_service import rebuild_report
     from core.utils import read_text
 
+    cfg = _cfg(args.config)
+    summary_line = ""
     if args.latest:
-        cfg = _cfg(args.config)
         sessions = list_session_dirs(Path(cfg["outputs"]["evidence_root_path"]))
         if not sessions:
-            print("report requires --session or an existing latest session", file=sys.stderr)
-            return 2
-        result = rebuild_report(sessions[-1])
-        print(f"report generated: {result}")
-        brief_path = sessions[-1] / "session_brief.md"
+            payload = build_result_payload("report", 2, summary="report requires --session or an existing latest session")
+            return _emit(args, payload, [payload["summary"]])
+        session_dir = sessions[-1]
+        result = rebuild_report(session_dir)
+        brief_path = session_dir / "session_brief.md"
         if brief_path.exists():
-            first_line = next((line for line in read_text(brief_path).splitlines() if line.startswith("- summary: ")), "")
-            if first_line:
-                print(first_line.replace("- summary: ", "report summary: ", 1))
-        return 0
+            summary_line = next((line for line in read_text(brief_path).splitlines() if line.startswith("- summary: ")), "")
+        payload = build_result_payload(
+            "report",
+            0,
+            summary=f"report generated: {result}",
+            details={"summary_line": summary_line.replace("- summary: ", "", 1)},
+            artifacts={"report_path": str(result), "session_dir": str(session_dir)},
+        )
+        lines = [payload["summary"]]
+        if summary_line:
+            lines.append(summary_line.replace("- summary: ", "report summary: ", 1))
+        return _emit(args, payload, lines)
     result = rebuild_report(Path(args.session))
-    print(f"report generated: {result}")
-    return 0
+    payload = build_result_payload(
+        "report",
+        0,
+        summary=f"report generated: {result}",
+        artifacts={"report_path": str(result), "session_dir": str(Path(args.session))},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_init_vscode(args: argparse.Namespace) -> int:
@@ -241,8 +431,28 @@ def _cmd_init_vscode(args: argparse.Namespace) -> int:
 
     cfg = _cfg(args.config)
     tasks_path = write_vscode_tasks(cfg)
-    print(f"vscode tasks written: {tasks_path}")
-    return 0
+    payload = build_result_payload(
+        "init-vscode",
+        0,
+        summary=f"vscode tasks written: {tasks_path}",
+        artifacts={"tasks_path": str(tasks_path)},
+    )
+    return _emit(args, payload, [payload["summary"]])
+
+
+def _cmd_init_continue_rules(args: argparse.Namespace) -> int:
+    from core.vscode_service import write_continue_rules
+
+    cfg = _cfg(args.config)
+    generated = write_continue_rules(cfg)
+    payload = build_result_payload(
+        "init-continue-rules",
+        0,
+        summary=f"continue rules written: {len(generated)}",
+        artifacts={"rules_dir": str(cfg["continue"]["rules_dir_path"]), "files": [str(path) for path in generated]},
+    )
+    lines = [payload["summary"], *[str(path) for path in generated]]
+    return _emit(args, payload, lines)
 
 
 def _cmd_context(args: argparse.Namespace) -> int:
@@ -261,8 +471,14 @@ def _cmd_context(args: argparse.Namespace) -> int:
         session_dir=session_path,
         out_path=out_path,
     )
-    print(f"context pack: {result}")
-    return 0
+    payload = build_result_payload(
+        "context",
+        0,
+        summary=f"context pack: {result}",
+        details={"mode": args.mode, "stage": args.stage, "profile": args.profile},
+        artifacts={"context_path": str(result)},
+    )
+    return _emit(args, payload, [payload["summary"]])
 
 
 def _cmd_verify(args: argparse.Namespace) -> int:
@@ -272,13 +488,142 @@ def _cmd_verify(args: argparse.Namespace) -> int:
     cfg = _cfg(args.config)
     if args.mode == "current":
         code, summary_path = run_current_verify(cfg, Path(args.task))
-        print(f"verify summary: {summary_path}")
         first_lines = read_text(summary_path).splitlines()[:8]
-        for line in first_lines:
-            print(line)
-        return int(code)
-    print(f"unknown verify mode: {args.mode}", file=sys.stderr)
-    return 2
+        payload = build_result_payload(
+            "verify current",
+            code,
+            summary=f"verify summary: {summary_path}",
+            details={"preview_lines": first_lines},
+            artifacts={"summary_path": str(summary_path)},
+        )
+        return _emit(args, payload, [payload["summary"], *first_lines])
+    payload = build_result_payload("verify", 2, summary=f"unknown verify mode: {args.mode}")
+    return _emit(args, payload, [payload["summary"]])
+
+
+def _cmd_scan_project(args: argparse.Namespace) -> int:
+    from core.project_scanner import scan_project
+
+    cfg = _cfg(args.config)
+    snapshot = scan_project(cfg)
+    payload = build_result_payload(
+        "scan-project",
+        0,
+        summary=f"scan project: {snapshot['project']['name']} files={snapshot['source_file_count']}",
+        details=snapshot,
+        artifacts={"rules_dir": str(cfg["continue"]["rules_dir_path"])},
+    )
+    lines = [
+        payload["summary"],
+        f"source_dirs: {', '.join(snapshot.get('source_dirs', []))}",
+        f"init_functions: {', '.join(snapshot.get('detected_init_functions', []))}",
+    ]
+    return _emit(args, payload, lines)
+
+
+def _cmd_parse_errors(args: argparse.Namespace) -> int:
+    from core.build_errors import parse_build_log
+
+    cfg = _cfg(args.config)
+    log_path = Path(args.log) if args.log else cfg["outputs"]["runtime_root_path"] / "build.log"
+    if not log_path.exists():
+        payload = build_result_payload(
+            "parse-errors",
+            2,
+            summary=f"build log not found: {log_path}",
+            artifacts={"log_path": str(log_path)},
+            errors=[],
+            warnings=[],
+        )
+        return _emit(args, payload, [payload["summary"]])
+    parsed = parse_build_log(log_path, Path(cfg["project_root_path"]))
+    errors = [item.to_dict() for item in parsed if item.level == "error"]
+    warnings = [item.to_dict() for item in parsed if item.level == "warning"]
+    payload = build_result_payload(
+        "parse-errors",
+        0,
+        summary=f"parsed build log: errors={len(errors)} warnings={len(warnings)}",
+        artifacts={"log_path": str(log_path)},
+        errors=errors,
+        warnings=warnings,
+    )
+    lines = [payload["summary"]]
+    if errors:
+        lines.append(f"first error: {errors[0].get('message', '')}")
+    return _emit(args, payload, lines)
+
+
+def _cmd_fix_build(args: argparse.Namespace) -> int:
+    from core.build_errors import parse_build_log
+
+    cfg = _cfg(args.config)
+    log_path = Path(args.log) if args.log else cfg["outputs"]["runtime_root_path"] / "build.log"
+    if not log_path.exists():
+        payload = build_result_payload(
+            "fix-build",
+            2,
+            summary=f"build log not found: {log_path}",
+            artifacts={"log_path": str(log_path)},
+            suggested_fixes=[],
+        )
+        return _emit(args, payload, [payload["summary"]])
+
+    parsed = [item for item in parse_build_log(log_path, Path(cfg["project_root_path"])) if item.level == "error"]
+    suggested_fixes = [
+        {
+            "file": item.file,
+            "line": item.line,
+            "message": item.message,
+            "error_code": item.error_code,
+            "fix": item.suggested_fix,
+        }
+        for item in parsed
+    ]
+    payload = build_result_payload(
+        "fix-build",
+        0,
+        summary=f"structured fixes ready: count={len(suggested_fixes)}",
+        artifacts={"log_path": str(log_path)},
+        suggested_fixes=suggested_fixes,
+    )
+    lines = [payload["summary"]]
+    if suggested_fixes:
+        first = suggested_fixes[0]
+        lines.append(f"first fix: {first['error_code']} -> {first['fix'].get('action_type', '')}")
+    return _emit(args, payload, lines)
+
+
+def _cmd_plan(args: argparse.Namespace) -> int:
+    from core.planner import Planner
+
+    cfg = _cfg(args.config)
+    user_request = " ".join(args.request).strip()
+    payload = Planner(cfg).plan(user_request)
+    payload["command"] = "plan"
+    payload["exit_code"] = 0
+    payload["status"] = "pass"
+    payload["summary"] = f"plan generated: {payload['template_id']} steps={len(payload['steps'])}"
+    payload["timestamp"] = payload.get("timestamp") or build_result_payload("plan", 0)["timestamp"]
+    if getattr(args, "json", False):
+        print_result_payload(payload)
+        return 0
+    print(payload["summary"])
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _cmd_ps_exec(args: argparse.Namespace) -> int:
+    from core.ps_exec import normalize_ps_exec_command
+
+    command_text = " ".join(args.command_text).strip()
+    try:
+        normalized = normalize_ps_exec_command(command_text)
+    except Exception as exc:
+        payload = build_result_payload("ps-exec", 2, summary=str(exc))
+        return _emit(args, payload, [payload["summary"]])
+    if "--config" not in normalized.argv and args.config != str(DEFAULT_CONFIG):
+        normalized.argv.extend(["--config", args.config])
+    return dispatch_args(normalized.argv)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -287,20 +632,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_doctor = sub.add_parser("doctor", help="run environment and configuration checks")
     p_doctor.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_doctor)
     p_doctor.set_defaults(func=_cmd_doctor)
 
     p_build = sub.add_parser("build", help="configure and build the project")
     p_build.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_build)
     p_build.set_defaults(func=_cmd_build)
 
     p_flash = sub.add_parser("flash", help="flash firmware")
     p_flash.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_flash.add_argument("--method", default="")
+    _add_json_flag(p_flash)
     p_flash.set_defaults(func=_cmd_flash)
 
     p_reset = sub.add_parser("reset", help="reset target")
     p_reset.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_reset.add_argument("--method", default="")
+    _add_json_flag(p_reset)
     p_reset.set_defaults(func=_cmd_reset)
 
     p_uart = sub.add_parser("uart", help="UART console, logger, and CLI execution")
@@ -313,6 +662,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_uart.add_argument("--diag-path", default="")
     p_uart.add_argument("--reset-first", action="store_true")
     p_uart.add_argument("--expect-ready", action="store_true")
+    _add_json_flag(p_uart)
     p_uart.set_defaults(func=_cmd_uart)
 
     p_diag = sub.add_parser("diag", help="run raw hex request/reply exchanges on the diagnostic UART")
@@ -322,6 +672,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_diag.add_argument("--script", default="")
     p_diag.add_argument("--log-path", default="")
     p_diag.add_argument("--result-path", default="")
+    _add_json_flag(p_diag)
     p_diag.set_defaults(func=_cmd_diag)
 
     p_monitor = sub.add_parser("monitor", help="monitor variables/registers/memory")
@@ -330,11 +681,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_monitor.add_argument("--out-dir", default="")
     p_monitor.add_argument("--source", default="")
     p_monitor.add_argument("--dest", default="")
+    _add_json_flag(p_monitor)
     p_monitor.set_defaults(func=_cmd_monitor)
 
     p_openocd = sub.add_parser("openocd", help="manage openocd daemon")
     p_openocd.add_argument("action", choices=["start", "stop", "status"])
     p_openocd.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_openocd)
     p_openocd.set_defaults(func=_cmd_openocd)
 
     p_session = sub.add_parser("session", help="run debug or feature session")
@@ -342,12 +695,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_session.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_session.add_argument("--task", default="")
     p_session.add_argument("--name", default="")
+    _add_json_flag(p_session)
     p_session.set_defaults(func=_cmd_session)
 
     p_test = sub.add_parser("test", help="generate or run tests")
     p_test.add_argument("action", choices=["generate", "run"])
     p_test.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_test.add_argument("--task", default="")
+    _add_json_flag(p_test)
     p_test.set_defaults(func=_cmd_test)
 
     p_compare = sub.add_parser("compare", help="compare session outputs")
@@ -356,17 +711,25 @@ def build_parser() -> argparse.ArgumentParser:
     p_compare.add_argument("--old", default="")
     p_compare.add_argument("--new", default="")
     p_compare.add_argument("--out", default="")
+    _add_json_flag(p_compare)
     p_compare.set_defaults(func=_cmd_compare)
 
     p_report = sub.add_parser("report", help="rebuild session summary or the latest verdict set")
     p_report.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_report.add_argument("--session", default="")
     p_report.add_argument("--latest", action="store_true")
+    _add_json_flag(p_report)
     p_report.set_defaults(func=_cmd_report)
 
     p_vscode = sub.add_parser("init-vscode", help="generate VS Code tasks.json")
     p_vscode.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_vscode)
     p_vscode.set_defaults(func=_cmd_init_vscode)
+
+    p_rules = sub.add_parser("init-continue-rules", help="generate Continue auto-mode rules under .continue/rules")
+    p_rules.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_rules)
+    p_rules.set_defaults(func=_cmd_init_continue_rules)
 
     p_context = sub.add_parser("context", help="generate a compact context pack for low-context models")
     p_context.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -376,24 +739,53 @@ def build_parser() -> argparse.ArgumentParser:
     p_context.add_argument("--task", default="")
     p_context.add_argument("--session", default="")
     p_context.add_argument("--out", default="")
+    _add_json_flag(p_context)
     p_context.set_defaults(func=_cmd_context)
 
     p_verify = sub.add_parser("verify", help="run a one-command verification flow")
     p_verify.add_argument("mode", choices=["current"])
     p_verify.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_verify.add_argument("--task", default="")
+    _add_json_flag(p_verify)
     p_verify.set_defaults(func=_cmd_verify)
+
+    p_scan = sub.add_parser("scan-project", help="scan project structure for planner and migration workflows")
+    p_scan.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_scan)
+    p_scan.set_defaults(func=_cmd_scan_project)
+
+    p_parse = sub.add_parser("parse-errors", help="parse a build log into structured compiler errors")
+    p_parse.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_parse.add_argument("--log", default="")
+    _add_json_flag(p_parse)
+    p_parse.set_defaults(func=_cmd_parse_errors)
+
+    p_fix_build = sub.add_parser("fix-build", help="turn the latest build log into structured suggested fixes")
+    p_fix_build.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_fix_build.add_argument("--log", default="")
+    _add_json_flag(p_fix_build)
+    p_fix_build.set_defaults(func=_cmd_fix_build)
+
+    p_plan = sub.add_parser("plan", help="turn a natural-language request into an executable playbook")
+    p_plan.add_argument("request", nargs="+")
+    p_plan.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_plan)
+    p_plan.set_defaults(func=_cmd_plan)
+
+    p_ps_exec = sub.add_parser("ps-exec", help="normalize a simplified command and dispatch the matching JSON-enabled workbench command")
+    p_ps_exec.add_argument("command_text", nargs="+")
+    p_ps_exec.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_ps_exec)
+    p_ps_exec.set_defaults(func=_cmd_ps_exec)
 
     return parser
 
 
-def main() -> int:
-    parser = build_parser()
-    args = parser.parse_args()
-    if hasattr(args, "mode") and args.mode == "feature" and not args.task:
+def _validate_args(args: argparse.Namespace) -> int | None:
+    if hasattr(args, "mode") and args.mode == "feature" and getattr(args, "command", "") == "session" and not args.task:
         print("session feature requires --task <task.yaml>", file=sys.stderr)
         return 2
-    if hasattr(args, "action") and args.action == "generate" and hasattr(args, "task") and not args.task:
+    if getattr(args, "command", "") == "test" and getattr(args, "action", "") == "generate" and not getattr(args, "task", ""):
         print("test generate requires --task <task.yaml>", file=sys.stderr)
         return 2
     if getattr(args, "command", "") == "verify" and getattr(args, "mode", "") == "current" and not getattr(args, "task", ""):
@@ -402,7 +794,20 @@ def main() -> int:
     if getattr(args, "command", "") == "report" and not getattr(args, "latest", False) and not getattr(args, "session", ""):
         print("report requires --session <session_dir> or --latest", file=sys.stderr)
         return 2
+    return None
+
+
+def dispatch_args(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    validation = _validate_args(args)
+    if validation is not None:
+        return int(validation)
     return int(args.func(args))
+
+
+def main() -> int:
+    return dispatch_args()
 
 
 if __name__ == "__main__":

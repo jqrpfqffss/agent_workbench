@@ -1,0 +1,31 @@
+id: sensor_polling
+mode: feature
+priority: 12
+description: 为周期采样、传感器轮询和状态聚合类需求生成执行计划。
+keywords:
+  - polling
+  - 轮询
+  - 周期采样
+  - 传感器读取
+  - 状态采集
+read_files:
+  - file: Core/Src/main.c
+    why: 确认主循环、采样节拍和现有状态更新位置。
+  - file: Core/Inc/main.h
+    why: 确认状态变量、函数声明和用户代码区。
+edit_files:
+  - file: Core/Src/main.c
+    instructions: 根据 `{user_request}` 在主循环或定时路径中增加最小安全的轮询/采样逻辑，不要破坏已有 CLI 行为。
+shell_steps:
+  - name: 编译验证
+    command: ./agent_workbench.bat build --json
+    success_criteria: exit_code == 0
+    on_failure:
+      max_retries: 3
+      retry_strategy: 先修复第一条构建错误，再继续验证。
+  - name: UART CLI 回归验证
+    command: ./agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+    success_criteria: transcript 包含 ready banner 和 cli> prompt
+stable_strings:
+  - "{ready_banner}"
+  - "{prompt}"

@@ -303,6 +303,52 @@ workflow:
     - observe
     - report
 
+planner:
+  # 任务模板目录，相对 agent_workbench 根目录。
+  # `plan` 命令会从这里读取自然语言需求模板库。
+  templates_dir: templates/task_templates
+
+  # 静态硬件知识库目录，相对 agent_workbench 根目录。
+  hardware_knowledge_dir: templates/hardware_knowledge
+
+  # plan 输出允许的总步骤上限。
+  # 用于避免弱模型在自动流程里无限扩展步骤。
+  max_total_steps: 15
+
+  # doctor 检查时要求的最小模板数量。
+  # 第二阶段扩库后建议保持在 15 及以上。
+  minimum_template_count: 15
+
+continue:
+  # Continue 自动模式 rules 生成目录，相对 project.root。
+  # `agent_workbench.bat init-continue-rules` 会把项目专属 rules 写到这里。
+  rules_dir: .continue/rules
+
+  # rules 模板目录，相对 agent_workbench 根目录。
+  rules_template_dir: templates/continue_rules
+
+  # 必须生成的 rules 文件列表。
+  required_rules:
+    - stm32_auto_workflow.md
+    - stm32_weak_model_guard.md
+    - stm32_task_cookbook.md
+    - stm32_powershell_syntax.md
+    - stm32_error_recovery.md
+    - stm32_hardware_safety.md
+    - stm32_model_deepseek_r1.md
+    - stm32_model_qwen7b.md
+    - stm32_model_glm.md
+
+  # 多模型专用 rules 映射。
+  # doctor 会检查这些模型对应的 rules 是否都已生成。
+  model_rules:
+    deepseek_r1:
+      display_name: DeepSeek-R1
+    qwen7b:
+      display_name: Qwen 7B
+    glm:
+      display_name: GLM
+
 vscode:
   # VS Code tasks.json 输出路径，相对 project.root。
   # 执行 `agent_workbench.bat init-vscode` 时会写入这里。
@@ -360,6 +406,42 @@ agent:
       max_pack_words: 520
       max_fact_items: 12
       max_cli_tail_lines: 6
+      max_failed_assertions_shown: 3
+      max_extra_reads: 2
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    deepseek_r1:
+      # DeepSeek-R1 自动模式推荐 profile。
+      max_pack_words: 380
+      max_fact_items: 9
+      max_cli_tail_lines: 5
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 2
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    qwen7b:
+      # Qwen 7B 更适合更短的阶段卡和更小的编辑半径。
+      max_pack_words: 320
+      max_fact_items: 8
+      max_cli_tail_lines: 4
+      max_failed_assertions_shown: 2
+      max_extra_reads: 1
+      max_edit_files: 1
+      require_fact_citations: true
+      prefer_ascii_runtime_artifacts: true
+      session_pick_strategy: latest_failed_then_latest_pass
+
+    glm:
+      # GLM 系列默认放在中等上下文预算。
+      max_pack_words: 460
+      max_fact_items: 10
+      max_cli_tail_lines: 5
       max_failed_assertions_shown: 3
       max_extra_reads: 2
       max_edit_files: 2

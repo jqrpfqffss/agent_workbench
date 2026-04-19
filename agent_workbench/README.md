@@ -53,14 +53,26 @@ agent_workbench.bat build
 - `setup_workbench.bat`
 - `.vscode/tasks.json`
 
+To enable the new Continue auto-mode rules, also run:
+
+```powershell
+agent_workbench.bat init-continue-rules
+```
+
 ## Main Commands
 
 ```powershell
 agent_workbench.bat doctor
+agent_workbench.bat doctor --json
 agent_workbench.bat build
+agent_workbench.bat build --json
 agent_workbench.bat flash --method stlink_cli
 agent_workbench.bat flash --method openocd_cmd
 agent_workbench.bat reset --method stlink_cli
+agent_workbench.bat scan-project --json
+agent_workbench.bat plan "give the board a 1Hz LED blink" --json
+agent_workbench.bat parse-errors --json
+agent_workbench.bat ps-exec "build"
 agent_workbench.bat context --mode debug --stage analyze
 agent_workbench.bat context --mode feature --stage implement --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat context --mode feature --stage verify --task agent_workbench\tasks\cli_automation_regression.yaml
@@ -79,7 +91,38 @@ agent_workbench.bat report --session agent_workbench\evidence\sessions\<session_
 agent_workbench.bat report --latest
 agent_workbench.bat verify current --task agent_workbench\tasks\cli_automation_regression.yaml
 agent_workbench.bat init-vscode
+agent_workbench.bat init-continue-rules
 ```
+
+## Continue Auto Mode
+
+The workbench now supports a plan-first auto workflow for Continue:
+
+1. Generate repo rules with `agent_workbench.bat init-continue-rules`.
+2. In Continue Agent, ask for a feature or debug task in one sentence.
+3. Continue should start from `agent_workbench.bat plan "<request>" --json`.
+4. It then reads the returned `steps[]`, edits only allowed files, and uses JSON command outputs for build/flash/UART verification.
+
+The generated rules are written to `.continue/rules/`:
+
+- `stm32_auto_workflow.md`
+- `stm32_weak_model_guard.md`
+- `stm32_powershell_syntax.md`
+- `stm32_error_recovery.md`
+- `stm32_hardware_safety.md`
+- `stm32_model_deepseek_r1.md`
+- `stm32_model_qwen7b.md`
+- `stm32_model_glm.md`
+
+The auto-mode planner is backed by:
+
+- `agent_workbench/templates/task_templates/`
+- `agent_workbench.bat plan`
+- `agent_workbench.bat scan-project`
+- `agent_workbench.bat parse-errors`
+- `agent_workbench.bat ps-exec`
+
+The current template catalog covers 16 common STM32 task shapes, including GPIO, timer, PWM, ADC, EXTI, interrupt handler, DMA, I2C, SPI, UART echo, CLI command, sensor polling, fault diagnosis, and monitor/watch workflows.
 
 ## Local-Model Workflow
 
@@ -97,8 +140,30 @@ Profiles are configured under `agent.profiles` in [agent_workbench.yaml](agent_w
 - `balanced_local`
 - `deepseek16k`
 - `qwen32k`
+- `deepseek_r1`
+- `qwen7b`
+- `glm`
 
 The staged VS Code tasks and `context` flow use `agent.default_profile` by default. You only need `--profile ...` when you want to temporarily override the configured default.
+
+## Regression And Validation
+
+Second-stage stability work now includes:
+
+- template-library regression coverage under `agent_workbench/tests/test_planner_regression_suite.py`
+- project scanner regression coverage under `agent_workbench/tests/test_project_scanner.py`
+- structured compiler fix rules in `agent_workbench/templates/build_error_rules.json`
+- richer UART failure classification in `cli_diag.json`
+
+Recommended smoke checks after migration or rule updates:
+
+```powershell
+agent_workbench.bat scan-project --json
+agent_workbench.bat plan "增加 I2C 传感器寄存器读取" --json
+agent_workbench.bat init-continue-rules --json
+agent_workbench.bat doctor --json
+py -3.8 -m unittest discover -s agent_workbench/tests -p "test_*.py"
+```
 
 ## Board CLI Commands
 
@@ -177,6 +242,7 @@ cmd /c ".\agent_workbench.bat verify current --task agent_workbench/tasks/cli_au
 A repo-specific English guide is available at [VS_CODE_CONTINUE_GUIDE.md](VS_CODE_CONTINUE_GUIDE.md).
 A repo-specific Chinese guide is available at [VS_CODE_CONTINUE_GUIDE_ZH.md](VS_CODE_CONTINUE_GUIDE_ZH.md).
 For migration into another project, read [MIGRATION_GUIDE_ZH.md](MIGRATION_GUIDE_ZH.md).
+For the new Chinese auto-mode walkthrough, read [CONTINUE_AUTO_MODE_GUIDE_ZH.md](CONTINUE_AUTO_MODE_GUIDE_ZH.md).
 For a ready-to-paste Chinese Continue prompt, use [prompts/continue_agent_zh.md](prompts/continue_agent_zh.md).
 For the current project's one-command verification prompt, use [prompts/continue_verify_current_zh.md](prompts/continue_verify_current_zh.md).
 For low-context local models, read [LOW_CONTEXT_MODELS_GUIDE_ZH.md](LOW_CONTEXT_MODELS_GUIDE_ZH.md) and use [prompts/continue_low_context_zh.md](prompts/continue_low_context_zh.md).
