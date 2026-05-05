@@ -322,6 +322,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["config_path"] = str(config_path.resolve())
     raw["agent_workbench_root_path"] = workbench_root
     raw["project_root_path"] = project_root
+    raw["project"]["cmake_source_dir_path"] = _resolve(raw["project"].get("cmake_source_dir", "."), project_root)
     raw["project"]["build_dir_path"] = _resolve(raw["project"]["build_dir"], project_root)
     raw["project"]["artifact_file_path"] = _resolve(raw["project"]["artifact_file"], project_root)
     raw["project"]["artifact_elf_path"] = raw["project"]["artifact_file_path"]

@@ -7,7 +7,7 @@ from .utils import render_template, run_command
 
 def _configure_command(cfg: dict) -> str:
     cmake_cfg = cfg["tools"]["cmake"]
-    parts = ["cmake", "-S", ".", "-B", str(cfg["project"]["build_dir_path"])]
+    parts = ["cmake", "-S", str(cfg["project"]["cmake_source_dir_path"]), "-B", str(cfg["project"]["build_dir_path"])]
     generator = cmake_cfg.get("generator", "")
     if generator:
         parts.extend(["-G", f'"{generator}"'])

@@ -16,6 +16,11 @@ project:
   # 当前写成 `..`，表示项目根目录就是 agent_workbench 的上一级目录，也就是当前仓库根目录。
   root: ..
 
+  # CMake 源码目录（包含 CMakeLists.txt 的目录），相对 project.root。
+  # 默认 "." 表示 project.root 本身。
+  # 如果你的 CMakeLists.txt 不在 project.root 下，可以改成子目录，例如 "firmware"。
+  cmake_source_dir: .
+
   # 构建目录，相对 project.root。
   # CMake / 构建日志 / 编译产物路径都会围绕这个目录展开。
   build_dir: build/cmake-debug

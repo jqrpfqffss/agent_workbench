@@ -33,7 +33,7 @@ class BuildServiceTests(unittest.TestCase):
         try:
             cfg = {
                 "project_root_path": self.temp_dir,
-                "project": {"build_dir_path": self.temp_dir / "build"},
+                "project": {"cmake_source_dir_path": self.temp_dir, "build_dir_path": self.temp_dir / "build"},
                 "tools": {
                     "cmake": {
                         "generator": "",

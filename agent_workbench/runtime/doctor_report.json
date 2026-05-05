@@ -98,7 +98,7 @@
     {
       "name": "diag_uart_requests",
       "level": "ok",
-      "detail": "count=2 port=COM3 format=7O1.5"
+      "detail": "count=2 port=COM3 format=8N1"
     },
     {
       "name": "diag_uart_backend",
