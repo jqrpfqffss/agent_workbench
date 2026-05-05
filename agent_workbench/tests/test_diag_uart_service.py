@@ -15,7 +15,7 @@ class _FakeSerial:
     next_reads: list[bytes] = []
     last_instance: "_FakeSerial | None" = None
 
-    def __init__(self, port: str, baudrate: int, timeout: float):
+    def __init__(self, port: str, baudrate: int, timeout: float, **kwargs):
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
@@ -66,6 +66,9 @@ class DiagUartServiceTests(unittest.TestCase):
                 "enabled": True,
                 "port": "COM3",
                 "baudrate": 115200,
+                "data_bits": 8,
+                "stop_bits": 1,
+                "parity": "none",
                 "encoding": "utf-8",
                 "startup_drain_sec": 0.0,
                 "read_timeout_sec": 0.01,

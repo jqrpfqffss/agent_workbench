@@ -1,14 +1,30 @@
-[2026-05-05T03:04:12.844+00:00] [cli] start port=COM3 baud=115200 expect_ready=1 reset_first=0 backend=powershell
-[2026-05-05T03:04:18.948+00:00] [cli] prompt-sync send-empty-line
-[2026-05-05T03:04:18.977+00:00] < cli>
-[2026-05-05T03:04:18.981+00:00] [cli] prompt-sync acquired
-[2026-05-05T03:04:18.985+00:00] > status
-[2026-05-05T03:04:18.994+00:00] < status
-[2026-05-05T03:04:18.995+00:00] < System status:
-[2026-05-05T03:04:18.996+00:00] <   UART: USART2 @ 115200 8N1
-[2026-05-05T03:04:18.996+00:00] <   Pins: TX=PA2, RX=PA3
-[2026-05-05T03:04:18.997+00:00] <   LED RED  : off
-[2026-05-05T03:04:18.998+00:00] <   LED GREEN: off
-[2026-05-05T03:04:19.001+00:00] <   LED BLUE : off
-[2026-05-05T03:04:19.002+00:00] < cli>
-[2026-05-05T03:04:19.026+00:00] [cli] stop
+[2026-05-05T04:38:38.537+00:00] [cli] start port=COM3 baud=115200 format=8N1 expect_ready=1 reset_first=1
+[2026-05-05T04:38:39.610+00:00] [cli] reset-first start
+[2026-05-05T04:38:39.871+00:00] [cli] reset-first exit=0
+[2026-05-05T04:38:39.877+00:00] < STM32 UART CLI ready.
+[2026-05-05T04:38:39.877+00:00] < Console: USART2 @ 115200 8N1, TX=PA2, RX=PA3
+[2026-05-05T04:38:39.877+00:00] < Type 'help' to list commands.
+[2026-05-05T04:38:39.877+00:00] < cli>
+[2026-05-05T04:38:39.877+00:00] > help
+[2026-05-05T04:38:39.918+00:00] < help
+[2026-05-05T04:38:39.918+00:00] < Available commands:
+[2026-05-05T04:38:39.918+00:00] <   help     List commands or show help for one command.
+[2026-05-05T04:38:39.918+00:00] <   status   Show UART and LED status.
+[2026-05-05T04:38:39.918+00:00] <   led      Control one LED or all LEDs.
+[2026-05-05T04:38:39.918+00:00] <   red      Shortcut for 'led red ...'.
+[2026-05-05T04:38:39.918+00:00] <   green    Shortcut for 'led green ...'.
+[2026-05-05T04:38:39.918+00:00] <   blue     Shortcut for 'led blue ...'.
+[2026-05-05T04:38:39.918+00:00] <   all      Shortcut for 'led all ...'.
+[2026-05-05T04:38:39.918+00:00] <   led_status Print the on/off state of all LEDs.
+[2026-05-05T04:38:39.918+00:00] < Use 'help <command>' for details.
+[2026-05-05T04:38:39.918+00:00] < cli>
+[2026-05-05T04:38:39.918+00:00] > status
+[2026-05-05T04:38:39.932+00:00] < status
+[2026-05-05T04:38:39.932+00:00] < System status:
+[2026-05-05T04:38:39.932+00:00] <   UART: USART2 @ 115200 8N1
+[2026-05-05T04:38:39.932+00:00] <   Pins: TX=PA2, RX=PA3
+[2026-05-05T04:38:39.932+00:00] <   LED RED  : off
+[2026-05-05T04:38:39.932+00:00] <   LED GREEN: off
+[2026-05-05T04:38:39.932+00:00] <   LED BLUE : off
+[2026-05-05T04:38:39.932+00:00] < cli>
+[2026-05-05T04:38:39.932+00:00] [cli] stop

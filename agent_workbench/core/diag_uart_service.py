@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .serial_settings import powershell_serial_params, pyserial_open_kwargs, serial_format_code
 from .utils import command_exists, ensure_dir, utc_now_iso, write_json
 
 try:
@@ -152,6 +153,10 @@ def _build_payload(
         "backend": backend,
         "port": str(diag_cfg.get("port", "")),
         "baudrate": int(diag_cfg.get("baudrate", 0)),
+        "data_bits": int(diag_cfg.get("data_bits", 8)),
+        "stop_bits": float(diag_cfg.get("stop_bits", 1.0)),
+        "parity": str(diag_cfg.get("parity", "none")),
+        "format": serial_format_code(diag_cfg),
         "encoding": str(diag_cfg.get("encoding", "utf-8")),
         "log_path": str(log_path),
         "result_path": str(result_path),
@@ -209,7 +214,8 @@ def _write_backend_error(
     ensure_dir(log_path.parent)
     log_path.write_text(
         f"[{utc_now_iso()}] [diag] start port={cfg.get('diag_uart', {}).get('port', '')} "
-        f"baud={cfg.get('diag_uart', {}).get('baudrate', '')} backend={backend}\n"
+        f"baud={cfg.get('diag_uart', {}).get('baudrate', '')} "
+        f"format={serial_format_code(cfg.get('diag_uart', {}))} backend={backend}\n"
         f"[{utc_now_iso()}] [diag] backend-error {error}\n"
         f"[{utc_now_iso()}] [diag] stop\n",
         encoding="utf-8",
@@ -286,6 +292,7 @@ def _powershell_exec_backend(
     result_path: Path,
 ) -> DiagExecResult:
     diag_cfg = cfg["diag_uart"]
+    serial_params = powershell_serial_params(diag_cfg)
     runtime_dir = _powershell_runtime_dir(cfg)
     request_path = runtime_dir / "diag_exec_requests.json"
     script_path = runtime_dir / "diag_exec_backend.ps1"
@@ -295,6 +302,10 @@ def _powershell_exec_backend(
 param(
   [string]$Port,
   [int]$Baudrate,
+  [int]$DataBits,
+  [string]$ParityName,
+  [string]$StopBitsName,
+  [string]$FormatCode,
   [string]$LogPath,
   [string]$RequestFile,
   [string]$ResultFile,
@@ -307,7 +318,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $requests = Get-Content -Raw -Path $RequestFile -Encoding UTF8 | ConvertFrom-Json
-$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::None), 8, ([System.IO.Ports.StopBits]::One)
+$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::$ParityName), $DataBits, ([System.IO.Ports.StopBits]::$StopBitsName)
 $serial.ReadTimeout = $ReadTimeoutMs
 $serial.WriteTimeout = [Math]::Max($ReadTimeoutMs, 100)
 $script:exitCode = 0
@@ -460,7 +471,7 @@ function To-ByteArray($data) {
 }
 
 try {
-  Write-Log ("[{0}] [diag] start port={1} baud={2} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate)
+  Write-Log ("[{0}] [diag] start port={1} baud={2} format={3} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $FormatCode)
   $serial.Open()
   $serial.DiscardInBuffer()
   $serial.DiscardOutBuffer()
@@ -551,9 +562,17 @@ $payload | ConvertTo-Json -Depth 6 | Set-Content -Path $ResultFile -Encoding UTF
             "-File",
             str(script_path),
             "-Port",
-            str(diag_cfg["port"]),
+            serial_params["port"],
             "-Baudrate",
-            str(int(diag_cfg["baudrate"])),
+            str(serial_params["baudrate"]),
+            "-DataBits",
+            str(serial_params["data_bits"]),
+            "-ParityName",
+            serial_params["parity_name"],
+            "-StopBitsName",
+            serial_params["stop_bits_name"],
+            "-FormatCode",
+            serial_params["format_code"],
             "-LogPath",
             str(log_path),
             "-RequestFile",
@@ -661,14 +680,17 @@ def execute_diag_requests(
     with log_path.open("w", encoding="utf-8") as fp:
         fp.write(
             f"[{utc_now_iso()}] [diag] start port={diag_cfg['port']} "
-            f"baud={diag_cfg['baudrate']} backend=pyserial\n"
+            f"baud={diag_cfg['baudrate']} format={serial_format_code(diag_cfg)} backend=pyserial\n"
         )
         fp.flush()
         try:
             with serial.Serial(
-                diag_cfg["port"],
-                int(diag_cfg["baudrate"]),
-                timeout=float(diag_cfg.get("read_timeout_sec", 0.05)),
+                **pyserial_open_kwargs(
+                    diag_cfg,
+                    serial,
+                    timeout=float(diag_cfg.get("read_timeout_sec", 0.05)),
+                    write_timeout=max(float(diag_cfg.get("read_timeout_sec", 0.05)), 0.1),
+                )
             ) as ser:
                 for method_name in ("reset_input_buffer", "reset_output_buffer"):
                     method = getattr(ser, method_name, None)

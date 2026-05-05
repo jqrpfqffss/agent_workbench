@@ -784,3 +784,265 @@ Ran 58 tests in 3.125s
 
 OK (skipped=1)
 [2026-05-05T03:08:53.787+00:00] exit=0
+
+[2026-05-05T03:59:52.317+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........FF................................EEEEEEE..
+======================================================================
+ERROR: test_uart_exec_handles_prompt_without_newline (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 154, in test_uart_exec_handles_prompt_without_newline
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 269, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_powershell_reset_failure_returns_reset_diag (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 297, in test_uart_exec_powershell_reset_failure_returns_reset_diag
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_recovers_running_cli_without_reset_banner (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 177, in test_uart_exec_recovers_running_cli_without_reset_banner
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_reset_failure_returns_reset_diag (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 233, in test_uart_exec_reset_failure_returns_reset_diag
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_timeout_generates_diag (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 215, in test_uart_exec_timeout_generates_diag
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+ERROR: test_uart_exec_waits_for_ready_and_prompt (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 126, in test_uart_exec_waits_for_ready_and_prompt
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\serial_settings.py", line 118, in pyserial_open_kwargs
+    }[int(section["data_bits"])],
+KeyError: 'data_bits'
+
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 156, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertIn("COM3", payload["error"])
+AssertionError: 'COM3' not found in "'data_bits'"
+
+======================================================================
+FAIL: test_execute_diag_requests_writes_log_and_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 121, in test_execute_diag_requests_writes_log_and_result
+    self.assertEqual(result.exit_code, 0)
+AssertionError: 42 != 0
+
+----------------------------------------------------------------------
+Ran 58 tests in 2.337s
+
+FAILED (failures=2, errors=7, skipped=1)
+[2026-05-05T03:59:55.021+00:00] exit=1
+
+[2026-05-05T04:02:14.594+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........FF................................EF.EEEE..
+======================================================================
+ERROR: test_uart_exec_handles_prompt_without_newline (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 157, in test_uart_exec_handles_prompt_without_newline
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+TypeError: __init__() got an unexpected keyword argument 'bytesize'
+
+======================================================================
+ERROR: test_uart_exec_recovers_running_cli_without_reset_banner (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 180, in test_uart_exec_recovers_running_cli_without_reset_banner
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+TypeError: __init__() got an unexpected keyword argument 'bytesize'
+
+======================================================================
+ERROR: test_uart_exec_reset_failure_returns_reset_diag (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 236, in test_uart_exec_reset_failure_returns_reset_diag
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+TypeError: __init__() got an unexpected keyword argument 'bytesize'
+
+======================================================================
+ERROR: test_uart_exec_timeout_generates_diag (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 218, in test_uart_exec_timeout_generates_diag
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+TypeError: __init__() got an unexpected keyword argument 'bytesize'
+
+======================================================================
+ERROR: test_uart_exec_waits_for_ready_and_prompt (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 129, in test_uart_exec_waits_for_ready_and_prompt
+    result = uart_service.execute_uart_commands(
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\uart_service.py", line 967, in execute_uart_commands
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+TypeError: __init__() got an unexpected keyword argument 'bytesize'
+
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 153, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_execute_diag_requests_writes_log_and_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 124, in test_execute_diag_requests_writes_log_and_result
+    self.assertEqual(result.exit_code, 0)
+AssertionError: 42 != 0
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 279, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 58 tests in 2.637s
+
+FAILED (failures=3, errors=5, skipped=1)
+[2026-05-05T04:02:17.508+00:00] exit=1
+
+[2026-05-05T04:03:36.407+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........F..................................F.......
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 153, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 279, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 58 tests in 2.817s
+
+FAILED (failures=2, skipped=1)
+[2026-05-05T04:03:39.504+00:00] exit=1
+
+[2026-05-05T04:05:48.263+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........F..................................F.......
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 153, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 279, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 58 tests in 2.860s
+
+FAILED (failures=2, skipped=1)
+[2026-05-05T04:05:51.391+00:00] exit=1
+
+[2026-05-05T04:36:37.989+00:00] $ C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........F..................................F.......
+======================================================================
+FAIL: test_execute_diag_requests_powershell_backend_error_returns_result (test_diag_uart_service.DiagUartServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_diag_uart_service.py", line 153, in test_execute_diag_requests_powershell_backend_error_returns_result
+    self.assertEqual(result.exit_code, diag_uart_service.DIAG_EXIT_BACKEND_ERROR)
+AssertionError: 0 != 42
+
+======================================================================
+FAIL: test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback (test_uart_service.UartExecTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_uart_service.py", line 279, in test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback
+    self.assertEqual(result.exit_code, 35)
+AssertionError: 31 != 35
+
+----------------------------------------------------------------------
+Ran 58 tests in 2.735s
+
+FAILED (failures=2, skipped=1)
+[2026-05-05T04:36:40.991+00:00] exit=1

@@ -3,7 +3,7 @@
     {
       "name": "python",
       "level": "ok",
-      "detail": "D:\\Anaconda1\\python.exe"
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
     },
     {
       "name": "yaml",
@@ -68,7 +68,7 @@
     {
       "name": "monitor_items",
       "level": "ok",
-      "detail": "count=2"
+      "detail": "count=5"
     },
     {
       "name": "monitor_symbol_items",
@@ -83,27 +83,32 @@
     {
       "name": "uart_protocol",
       "level": "ok",
-      "detail": "ready_banner=STM32 UART CLI ready. prompt=cli>"
+      "detail": "ready_banner=STM32 UART CLI ready. prompt=cli> format=8N1"
     },
     {
       "name": "uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial."
+      "level": "ok",
+      "detail": "pyserial available"
+    },
+    {
+      "name": "uart_port",
+      "level": "ok",
+      "detail": "COM3"
     },
     {
       "name": "diag_uart_requests",
       "level": "ok",
-      "detail": "count=2 port=COM3"
+      "detail": "count=2 port=COM3 format=7O1.5"
     },
     {
       "name": "diag_uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell fallback is available for diag exec."
+      "level": "ok",
+      "detail": "pyserial available"
     },
     {
       "name": "diag_uart_port",
-      "level": "warn",
-      "detail": "port availability not checked without pyserial"
+      "level": "ok",
+      "detail": "COM3"
     },
     {
       "name": "agent_profile",
@@ -223,9 +228,9 @@
     {
       "name": "unit_command",
       "level": "ok",
-      "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
     }
   ],
   "fail_count": 0,
-  "warn_count": 3
+  "warn_count": 0
 }

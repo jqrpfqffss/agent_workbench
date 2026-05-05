@@ -177,6 +177,9 @@ def _run_debug_steps(
                     encoding=cfg["uart"].get("encoding", "utf-8"),
                     timeout_sec=float(cfg["uart"].get("line_timeout_sec", 0.2)),
                     log_path=session_dir / "uart.log",
+                    data_bits=int(cfg["uart"].get("data_bits", 8)),
+                    stop_bits=float(cfg["uart"].get("stop_bits", 1.0)),
+                    parity=str(cfg["uart"].get("parity", "none")),
                 )
 
                 def _uart_run() -> None:

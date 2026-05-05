@@ -128,6 +128,9 @@ def _defaults() -> dict[str, Any]:
             "enabled": True,
             "port": "COM5",
             "baudrate": 9600,
+            "data_bits": 8,
+            "stop_bits": 1,
+            "parity": "none",
             "encoding": "utf-8",
             "line_timeout_sec": 0.2,
             "startup_drain_sec": 1.0,
@@ -144,6 +147,9 @@ def _defaults() -> dict[str, Any]:
             "enabled": True,
             "port": "COM5",
             "baudrate": 9600,
+            "data_bits": 8,
+            "stop_bits": 1,
+            "parity": "none",
             "encoding": "utf-8",
             "startup_drain_sec": 0.0,
             "read_timeout_sec": 0.05,
@@ -272,6 +278,8 @@ def _defaults() -> dict[str, Any]:
 
 
 def load_config(config_path: Path) -> dict[str, Any]:
+    from .serial_settings import normalize_serial_section, serial_format_code
+
     loaded = _load_yaml(config_path)
     raw = _deep_merge(_defaults(), loaded)
     workbench_root = config_path.parent.resolve()
@@ -303,6 +311,8 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["project"]["artifact_elf"] = artifact_text
     raw["monitor"]["symbols"]["path"] = symbol_path_text
     raw["monitor"]["symbols"]["elf_path"] = symbol_path_text
+    raw["uart"] = normalize_serial_section(raw.get("uart", {}), section_name="uart")
+    raw["diag_uart"] = normalize_serial_section(raw.get("diag_uart", {}), section_name="diag_uart")
     raw["tools"]["openocd"]["config_files"] = _normalize_str_list(raw["tools"]["openocd"].get("config_files", []))
     raw["tools"]["openocd"]["extra_commands"] = _normalize_str_list(raw["tools"]["openocd"].get("extra_commands", []))
     raw["monitor"]["openocd"]["connect_commands"] = _normalize_str_list(
@@ -383,9 +393,11 @@ def load_config(config_path: Path) -> dict[str, Any]:
         "openocd_live_log_posix": str(raw["outputs"]["runtime_root_path"] / "openocd_live" / "openocd.log").replace("\\", "/"),
         "project_name": str(raw["project"]["name"]),
         "uart_port": str(raw["uart"].get("port", "")),
+        "uart_format": serial_format_code(raw["uart"]),
         "uart_ready_banner": str(raw["uart"].get("ready_banner", "")),
         "uart_prompt": str(raw["uart"].get("prompt", "")),
         "diag_uart_port": str(raw["diag_uart"].get("port", "")),
+        "diag_uart_format": serial_format_code(raw["diag_uart"]),
         "source_dirs_csv": ", ".join(str(item) for item in raw["project"].get("source_dirs", [])),
         "default_profile": str(raw["agent"].get("default_profile", "")),
     }

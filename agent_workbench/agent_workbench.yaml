@@ -138,6 +138,15 @@ uart:
   # 调试口波特率。
   baudrate: 115200
 
+  # CLI 串口数据位。常见值: 5 / 6 / 7 / 8
+  data_bits: 8
+
+  # CLI 串口停止位。可选: 1 / 1.5 / 2
+  stop_bits: 1
+
+  # CLI 串口奇偶校验。可选: none / even / odd / mark / space
+  parity: none
+
   # 串口文本编码。
   # 目前 CLI 为纯英文文本，utf-8 是安全默认值。
   encoding: utf-8
@@ -212,6 +221,15 @@ diag_uart:
 
   # 诊断口波特率。
   baudrate: 115200
+
+  # 诊断口数据位。常见值: 5 / 6 / 7 / 8
+  data_bits: 8
+
+  # 诊断口停止位。可选: 1 / 1.5 / 2
+  stop_bits: 1
+
+  # 诊断口奇偶校验。可选: none / even / odd / mark / space
+  parity: none
 
   # 诊断口回复预览使用的文本编码。
   # 即使收的是二进制，也只影响“preview”显示，不影响原始 hex 记录。

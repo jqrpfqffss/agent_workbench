@@ -381,7 +381,11 @@ def _fact_items(
         {
             "fact_id": "F03",
             "name": "uart_contract",
-            "value": f"{uart.get('port', 'n/a')} @ {uart.get('baudrate', 'n/a')} ready={uart.get('ready_banner', '')} prompt={uart.get('prompt', '')}",
+            "value": (
+                f"{uart.get('port', 'n/a')} @ {uart.get('baudrate', 'n/a')} "
+                f"fmt={uart.get('data_bits', 'n/a')}{str(uart.get('parity', 'none')).strip()[:1].upper()}"
+                f"{uart.get('stop_bits', 'n/a')} ready={uart.get('ready_banner', '')} prompt={uart.get('prompt', '')}"
+            ),
             "source": "config",
             "evidence": cfg["config_path"],
         },

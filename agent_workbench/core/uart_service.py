@@ -10,6 +10,7 @@ from typing import Any
 
 from .cli_diag_service import collect_cli_diag
 from .flash_service import run_reset
+from .serial_settings import powershell_serial_params, pyserial_open_kwargs, serial_format_code
 from .utils import (
     clear_pid_file,
     command_exists,
@@ -225,6 +226,7 @@ def _powershell_exec_backend(
     command_timeout_sec: float,
 ) -> UartExecResult:
     runtime_dir = _powershell_runtime_dir(cfg)
+    serial_params = powershell_serial_params(cfg["uart"])
     commands_path = runtime_dir / "uart_exec_commands.json"
     result_path = runtime_dir / "uart_exec_result.json"
     script_path = runtime_dir / "uart_exec_backend.ps1"
@@ -239,6 +241,10 @@ def _powershell_exec_backend(
 param(
   [string]$Port,
   [int]$Baudrate,
+  [int]$DataBits,
+  [string]$ParityName,
+  [string]$StopBitsName,
+  [string]$FormatCode,
   [string]$TranscriptPath,
   [string]$CommandFile,
   [string]$ResultFile,
@@ -256,7 +262,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $commands = Get-Content -Raw -Path $CommandFile -Encoding UTF8 | ConvertFrom-Json
-$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::None), 8, ([System.IO.Ports.StopBits]::One)
+$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::$ParityName), $DataBits, ([System.IO.Ports.StopBits]::$StopBitsName)
 $serial.Encoding = [System.Text.Encoding]::UTF8
 $serial.NewLine = "`n"
 $serial.ReadTimeout = $ReadTimeoutMs
@@ -465,7 +471,7 @@ try {
   $serial.Open()
   $serial.DiscardInBuffer()
   $serial.DiscardOutBuffer()
-  Write-TranscriptLine ("[{0}] [cli] start port={1} baud={2} expect_ready={3} reset_first={4} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $RequireReady, $ResetFirst)
+  Write-TranscriptLine ("[{0}] [cli] start port={1} baud={2} format={3} expect_ready={4} reset_first={5} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $FormatCode, $RequireReady, $ResetFirst)
   Drain-ForMs $StartupDrainMs
   if ($ResetFirst -eq 1) {
     $script:sawReady = $false
@@ -513,9 +519,17 @@ try {
             "-File",
             str(script_path),
             "-Port",
-            str(cfg["uart"]["port"]),
+            serial_params["port"],
             "-Baudrate",
-            str(int(cfg["uart"]["baudrate"])),
+            str(serial_params["baudrate"]),
+            "-DataBits",
+            str(serial_params["data_bits"]),
+            "-ParityName",
+            serial_params["parity_name"],
+            "-StopBitsName",
+            serial_params["stop_bits_name"],
+            "-FormatCode",
+            serial_params["format_code"],
             "-TranscriptPath",
             str(transcript_path),
             "-CommandFile",
@@ -604,19 +618,36 @@ def _powershell_logger_backend(
     timeout_sec: float,
     log_path: Path,
     stop_event: threading.Event,
+    *,
+    data_bits: int,
+    stop_bits: float,
+    parity: str,
 ) -> int:
     runtime_dir = ensure_dir(log_path.parent.parent / "tmp")
+    serial_params = powershell_serial_params(
+        {
+            "port": port,
+            "baudrate": baudrate,
+            "data_bits": data_bits,
+            "stop_bits": stop_bits,
+            "parity": parity,
+        }
+    )
     script_path = runtime_dir / "uart_logger_backend.ps1"
     script_path.write_text(
         r"""
 param(
   [string]$Port,
   [int]$Baudrate,
+  [int]$DataBits,
+  [string]$ParityName,
+  [string]$StopBitsName,
+  [string]$FormatCode,
   [string]$LogPath,
   [int]$ReadTimeoutMs
 )
 $ErrorActionPreference = "Stop"
-$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::None), 8, ([System.IO.Ports.StopBits]::One)
+$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::$ParityName), $DataBits, ([System.IO.Ports.StopBits]::$StopBitsName)
 $serial.Encoding = [System.Text.Encoding]::UTF8
 $serial.NewLine = "`n"
 $serial.ReadTimeout = $ReadTimeoutMs
@@ -633,7 +664,7 @@ function Append-Utf8([string]$path, [string]$line) {
 }
 try {
   $serial.Open()
-  Append-Utf8 $LogPath ("[{0}] [uart] start port={1} baud={2} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate)
+  Append-Utf8 $LogPath ("[{0}] [uart] start port={1} baud={2} format={3} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $FormatCode)
   while ($true) {
     try {
       $line = $serial.ReadLine().TrimEnd("`r", "`n")
@@ -663,6 +694,14 @@ try {
             str(port),
             "-Baudrate",
             str(baudrate),
+            "-DataBits",
+            str(serial_params["data_bits"]),
+            "-ParityName",
+            serial_params["parity_name"],
+            "-StopBitsName",
+            serial_params["stop_bits_name"],
+            "-FormatCode",
+            serial_params["format_code"],
             "-LogPath",
             str(log_path),
             "-ReadTimeoutMs",
@@ -688,15 +727,36 @@ try {
 
 
 class UartLogger:
-    def __init__(self, port: str, baudrate: int, encoding: str, timeout_sec: float, log_path: Path):
+    def __init__(
+        self,
+        port: str,
+        baudrate: int,
+        encoding: str,
+        timeout_sec: float,
+        log_path: Path,
+        *,
+        data_bits: int = 8,
+        stop_bits: float = 1.0,
+        parity: str = "none",
+    ):
         self.port = port
         self.baudrate = baudrate
         self.encoding = encoding
         self.timeout_sec = timeout_sec
         self.log_path = log_path
         self.stop_event = threading.Event()
+        self.data_bits = int(data_bits)
+        self.stop_bits = float(stop_bits)
+        self.parity = str(parity)
 
     def run(self, echo_stdout: bool = False) -> int:
+        serial_cfg = {
+            "port": self.port,
+            "baudrate": self.baudrate,
+            "data_bits": self.data_bits,
+            "stop_bits": self.stop_bits,
+            "parity": self.parity,
+        }
         if serial is None:
             if echo_stdout:
                 raise RuntimeError("UART console echo requires pyserial; PowerShell fallback supports log capture only.")
@@ -710,11 +770,17 @@ class UartLogger:
                 self.timeout_sec,
                 self.log_path,
                 self.stop_event,
+                data_bits=self.data_bits,
+                stop_bits=self.stop_bits,
+                parity=self.parity,
             )
         ensure_dir(self.log_path.parent)
-        with serial.Serial(self.port, self.baudrate, timeout=self.timeout_sec) as ser:
+        with serial.Serial(**pyserial_open_kwargs(serial_cfg, serial, timeout=self.timeout_sec)) as ser:
             with self.log_path.open("a", encoding="utf-8") as fp:
-                fp.write(f"[{utc_now_iso()}] [uart] start port={self.port} baud={self.baudrate}\n")
+                fp.write(
+                    f"[{utc_now_iso()}] [uart] start port={self.port} baud={self.baudrate} "
+                    f"format={serial_format_code(serial_cfg)}\n"
+                )
                 while not self.stop_event.is_set():
                     raw = ser.readline()
                     if not raw:
@@ -744,11 +810,16 @@ def run_uart_console(cfg: dict, log_path: Path) -> int:
     ensure_dir(log_path.parent)
     stop_event = threading.Event()
     with serial.Serial(
-        uart["port"],
-        int(uart["baudrate"]),
-        timeout=float(uart.get("line_timeout_sec", 0.2)),
+        **pyserial_open_kwargs(
+            uart,
+            serial,
+            timeout=float(uart.get("line_timeout_sec", 0.2)),
+        )
     ) as ser, log_path.open("a", encoding="utf-8") as fp:
-        fp.write(f"[{utc_now_iso()}] [uart-console] start port={uart['port']} baud={uart['baudrate']}\n")
+        fp.write(
+            f"[{utc_now_iso()}] [uart-console] start port={uart['port']} baud={uart['baudrate']} "
+            f"format={serial_format_code(uart)}\n"
+        )
 
         def reader() -> None:
             while not stop_event.is_set():
@@ -852,7 +923,8 @@ def execute_uart_commands(
             message = str(exc).strip()
             transcript_path.write_text(
                 f"[{utc_now_iso()}] [cli] start port={uart['port']} baud={uart['baudrate']} "
-                f"expect_ready={int(require_ready)} reset_first={int(reset_first)} backend=powershell\n"
+                f"format={serial_format_code(uart)} expect_ready={int(require_ready)} "
+                f"reset_first={int(reset_first)} backend=powershell\n"
                 f"[{utc_now_iso()}] [cli] backend-error {message}\n"
                 f"[{utc_now_iso()}] [cli] stop\n",
                 encoding="utf-8",
@@ -892,14 +964,12 @@ def execute_uart_commands(
                     result.diag = json.loads(diag_result_path.read_text(encoding="utf-8"))
         return result
 
-    with serial.Serial(
-        uart["port"],
-        int(uart["baudrate"]),
-        timeout=line_timeout_sec,
-    ) as ser, transcript_path.open("w", encoding="utf-8") as fp:
+    with serial.Serial(**pyserial_open_kwargs(uart, serial, timeout=line_timeout_sec)) as ser, transcript_path.open(
+        "w", encoding="utf-8"
+    ) as fp:
         fp.write(
             f"[{utc_now_iso()}] [cli] start port={uart['port']} baud={uart['baudrate']} "
-            f"expect_ready={int(require_ready)} reset_first={int(reset_first)}\n"
+            f"format={serial_format_code(uart)} expect_ready={int(require_ready)} reset_first={int(reset_first)}\n"
         )
         for method_name in ("reset_input_buffer", "reset_output_buffer"):
             method = getattr(ser, method_name, None)
