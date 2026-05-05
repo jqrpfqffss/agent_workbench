@@ -22,6 +22,7 @@ project:
 
   # 最终 ELF 文件路径，相对 project.root。
   # 烧录、符号解析、监控符号定位都会用到它。
+  artifact_file: build/cmake-debug/serial.elf
   artifact_elf: build/cmake-debug/serial.elf
 
   # compile_commands.json 路径，相对 project.root。
@@ -93,6 +94,10 @@ tools:
 
     # 启动 OpenOCD 守护进程的完整命令模板。
     # 支持使用 `{...}` 模板变量，运行时会替换成真实路径。
+    config_files:
+      - interface/stlink.cfg
+      - target/stm32f1x.cfg
+    extra_commands: []
     daemon_cmd: openocd -l "{openocd_live_log_posix}" -f interface/stlink.cfg -f target/stm32f1x.cfg -c "gdb_port 3333; tcl_port 6666; telnet_port 4444"
 
   flash:
@@ -231,8 +236,8 @@ diag_uart:
   # 默认十六进制请求列表。
   # 当执行 `agent_workbench.bat diag exec` 且没有传 `--hex / --script` 时，就按这里依次发送。
   # 当前样例中：
-  # - 第一帧是 `help\r\n`
-  # - 第二帧是 `status\r\n`
+  # - 第一帧是 `help\r\n`：.\agent_workbench.bat diag exec --hex "68 65 6C 70 0D 0A"
+  # - 第二帧是 `status\r\n`：.\agent_workbench.bat diag exec --hex "73 74 61 74 75 73 0D 0A"
   # 目的是用调试 CLI 口验证新的诊断口 host 工具链。
   default_hex_requests:
     - 68 65 6C 70 0D 0A
@@ -241,7 +246,7 @@ diag_uart:
 monitor:
   # 是否启用变量/寄存器监控功能。
   # 当前项目关闭；开启后需要 OpenOCD、符号和监控项配置完整。
-  enabled: false
+  enabled: true
 
   # 监控采样频率，单位 Hz。
   sample_hz: 10
@@ -262,16 +267,42 @@ monitor:
 
     # monitor 子系统每次 OpenOCD 读操作的超时，单位秒。
     timeout_sec: 2.0
+    connect_commands: []
 
   symbols:
+    path: build/cmake-debug/serial.elf
     # 监控时用于查符号地址的 ELF 路径，相对 project.root。
     elf_path: build/cmake-debug/serial.elf
 
   # 监控项列表。
   # 每个元素通常描述一个需要观察的变量/寄存器/地址。
   # 当前为空列表，表示不监控任何项目。
-  items: []
+  items:
+      # 1) 监控全局变量：从 ELF 符号表解析地址，然后读内存
+      - name: g_data
+        source: symbol
+        symbol: g_data
+        value_type: u32
 
+      - name: g_data1
+        source: symbol
+        symbol: g_data1
+        value_type: float
+      # 2) 监控指定内存地址：适合外设寄存器 / 固定 RAM 地址
+      - name: g_data000
+        source: memory
+        target: 0x200001b0
+        value_type: u32
+
+      - name: g_data111
+        source: memory
+        target: 0x200001b4
+        value_type: float
+
+      - name: PC
+        source: register
+        target: pc
+        value_type: u32
 checks:
   unit:
     # 是否启用单元测试检查。

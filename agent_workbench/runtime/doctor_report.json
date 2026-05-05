@@ -36,7 +36,7 @@
       "detail": "H:\\stm32_RAG\\code\\serial\\cmake\\arm-none-eabi-toolchain.cmake"
     },
     {
-      "name": "artifact_elf",
+      "name": "artifact_file",
       "level": "ok",
       "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\serial.elf"
     },
@@ -44,6 +44,16 @@
       "name": "compile_commands",
       "level": "ok",
       "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\compile_commands.json"
+    },
+    {
+      "name": "artifact_symbols",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\serial.elf"
+    },
+    {
+      "name": "monitor_symbol_image",
+      "level": "ok",
+      "detail": "H:\\stm32_RAG\\code\\serial\\build\\cmake-debug\\serial.elf"
     },
     {
       "name": "openocd",
@@ -54,6 +64,21 @@
       "name": "flash_method",
       "level": "ok",
       "detail": "openocd_cmd: openocd"
+    },
+    {
+      "name": "monitor_items",
+      "level": "ok",
+      "detail": "count=2"
+    },
+    {
+      "name": "monitor_symbol_items",
+      "level": "ok",
+      "detail": "symbol items=2"
+    },
+    {
+      "name": "monitor_target_selection",
+      "level": "ok",
+      "detail": "not required by current config"
     },
     {
       "name": "uart_protocol",

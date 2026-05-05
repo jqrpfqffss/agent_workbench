@@ -5,6 +5,7 @@ param(
   [string]$CommandFile,
   [string]$ResultFile,
   [string]$ResetCommand,
+  [string]$ResetLogPath,
   [string]$ReadyBanner,
   [string]$Prompt,
   [int]$ReadTimeoutMs,
@@ -24,6 +25,7 @@ $serial.ReadTimeout = $ReadTimeoutMs
 $transcript = New-Object System.Collections.Generic.List[string]
 $timeoutCommands = New-Object System.Collections.Generic.List[string]
 $script:exitCode = 0
+$script:resetExitCode = 0
 $script:sawReady = $false
 $script:sawPrompt = $false
 $script:promptCount = 0
@@ -139,8 +141,23 @@ function Invoke-ResetCommand {
   if ([string]::IsNullOrWhiteSpace($ResetCommand)) {
     return 0
   }
-  $proc = Start-Process -FilePath "cmd.exe" -ArgumentList "/d", "/c", $ResetCommand -Wait -NoNewWindow -PassThru
-  return [int]$proc.ExitCode
+  Append-Utf8 $ResetLogPath ("[{0}] $ {1}" -f (Get-Timestamp), $ResetCommand)
+  $stdoutPath = [System.IO.Path]::GetTempFileName()
+  $stderrPath = [System.IO.Path]::GetTempFileName()
+  try {
+    $proc = Start-Process -FilePath "cmd.exe" -ArgumentList "/d", "/c", $ResetCommand -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+    if (Test-Path $stdoutPath) {
+      Get-Content -Path $stdoutPath | ForEach-Object { Append-Utf8 $ResetLogPath $_ }
+    }
+    if (Test-Path $stderrPath) {
+      Get-Content -Path $stderrPath | ForEach-Object { Append-Utf8 $ResetLogPath $_ }
+    }
+    Append-Utf8 $ResetLogPath ("[{0}] exit={1}" -f (Get-Timestamp), [int]$proc.ExitCode)
+    return [int]$proc.ExitCode
+  } finally {
+    Remove-Item -LiteralPath $stdoutPath -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrPath -ErrorAction SilentlyContinue
+  }
 }
 
 function Wait-Ready {
@@ -152,6 +169,20 @@ function Wait-Ready {
     }
   }
   Flush-PendingText
+  if (($ResetFirst -ne 1) -and (-not [string]::IsNullOrWhiteSpace($Prompt))) {
+    Write-TranscriptLine ("[{0}] [cli] prompt-sync send-empty-line" -f (Get-Timestamp))
+    $serial.Write("`r`n")
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($CommandTimeoutMs)
+    $startPromptCount = $script:promptCount
+    while ([DateTime]::UtcNow -lt $deadline) {
+      [void](Pump-Serial)
+      if ($script:promptCount -gt $startPromptCount) {
+        Write-TranscriptLine ("[{0}] [cli] prompt-sync acquired" -f (Get-Timestamp))
+        return
+      }
+    }
+    Flush-PendingText
+  }
   if (-not $script:sawReady) {
     $script:exitCode = 31
     Write-TranscriptLine ("[{0}] [cli] ready-missing expected={1}" -f (Get-Timestamp), $ReadyBanner)
@@ -204,6 +235,7 @@ try {
     $script:promptCount = 0
     $script:pendingText = ""
     $resetExit = Invoke-ResetCommand
+    $script:resetExitCode = [int]$resetExit
     Write-TranscriptLine ("[{0}] [cli] reset-first exit={1}" -f (Get-Timestamp), $resetExit)
     if ($resetExit -ne 0) {
       $script:exitCode = if ($resetExit -eq 0) { 30 } else { [int]$resetExit }
@@ -228,4 +260,5 @@ try {
   saw_ready = $script:sawReady
   saw_prompt = $script:sawPrompt
   timeout_commands = @($timeoutCommands)
+  reset_exit_code = $script:resetExitCode
 } | ConvertTo-Json -Depth 4 | Set-Content -Path $ResultFile -Encoding UTF8

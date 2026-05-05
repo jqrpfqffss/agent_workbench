@@ -1,21 +1,6 @@
 ﻿{
     "exit_code":  0,
     "transcript_lines":  [
-                             "STM32 UART CLI ready.",
-                             "Console: USART2 @ 115200 8N1, TX=PA2, RX=PA3",
-                             "Type \u0027help\u0027 to list commands.",
-                             "cli\u003e",
-                             "help",
-                             "Available commands:",
-                             "  help     List commands or show help for one command.",
-                             "  status   Show UART and LED status.",
-                             "  led      Control one LED or all LEDs.",
-                             "  red      Shortcut for \u0027led red ...\u0027.",
-                             "  green    Shortcut for \u0027led green ...\u0027.",
-                             "  blue     Shortcut for \u0027led blue ...\u0027.",
-                             "  all      Shortcut for \u0027led all ...\u0027.",
-                             "  led_status Print the on/off state of all LEDs.",
-                             "Use \u0027help \u003ccommand\u003e\u0027 for details.",
                              "cli\u003e",
                              "status",
                              "System status:",
@@ -26,9 +11,10 @@
                              "  LED BLUE : off",
                              "cli\u003e"
                          ],
-    "saw_ready":  true,
+    "saw_ready":  false,
     "saw_prompt":  true,
     "timeout_commands":  [
 
-                         ]
+                         ],
+    "reset_exit_code":  0
 }

@@ -672,3 +672,115 @@ Ran 42 tests in 2.594s
 
 OK (skipped=1)
 [2026-04-19T13:20:51.818+00:00] exit=0
+
+[2026-04-29T13:46:01.476+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........................................
+----------------------------------------------------------------------
+Ran 47 tests in 2.645s
+
+OK (skipped=1)
+[2026-04-29T13:46:04.434+00:00] exit=0
+
+[2026-04-29T14:00:55.191+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........................................
+----------------------------------------------------------------------
+Ran 47 tests in 2.491s
+
+OK (skipped=1)
+[2026-04-29T14:00:57.948+00:00] exit=0
+
+[2026-04-29T14:02:18.467+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........................................
+----------------------------------------------------------------------
+Ran 47 tests in 2.487s
+
+OK (skipped=1)
+[2026-04-29T14:02:21.219+00:00] exit=0
+
+[2026-05-05T01:15:24.996+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.........................................
+----------------------------------------------------------------------
+Ran 47 tests in 2.560s
+
+OK (skipped=1)
+[2026-05-05T01:15:28.467+00:00] exit=0
+
+[2026-05-05T01:40:58.081+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s.............F................................E
+======================================================================
+ERROR: test_workbench (unittest.loader._FailedTest)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_workbench
+Traceback (most recent call last):
+  File "D:\Anaconda1\lib\unittest\loader.py", line 436, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "D:\Anaconda1\lib\unittest\loader.py", line 377, in _get_module_from_name
+    __import__(name)
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_workbench.py", line 10, in <module>
+    from agent_workbench import workbench
+  File "H:\stm32_RAG\code\serial\agent_workbench\workbench.py", line 8, in <module>
+    from core.cli_output import build_result_payload, print_result_payload, status_from_exit_code
+ModuleNotFoundError: No module named 'core'
+
+
+======================================================================
+FAIL: test_doctor_accepts_axf_symbol_image_when_nm_can_parse_it (test_doctor.DoctorTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_doctor.py", line 252, in test_doctor_accepts_axf_symbol_image_when_nm_can_parse_it
+    self.assertEqual(code, 0)
+AssertionError: 1 != 0
+
+----------------------------------------------------------------------
+Ran 53 tests in 2.655s
+
+FAILED (failures=1, errors=1, skipped=1)
+[2026-05-05T01:41:01.036+00:00] exit=1
+
+[2026-05-05T01:41:59.046+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...............................................
+----------------------------------------------------------------------
+Ran 53 tests in 2.659s
+
+OK (skipped=1)
+[2026-05-05T01:42:01.983+00:00] exit=0
+
+[2026-05-05T01:43:47.553+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...............................................
+----------------------------------------------------------------------
+Ran 53 tests in 2.671s
+
+OK (skipped=1)
+[2026-05-05T01:43:50.523+00:00] exit=0
+
+[2026-05-05T02:14:02.882+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s................................................
+----------------------------------------------------------------------
+Ran 54 tests in 2.680s
+
+OK (skipped=1)
+[2026-05-05T02:14:05.839+00:00] exit=0
+
+[2026-05-05T02:26:27.340+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s..................................................
+----------------------------------------------------------------------
+Ran 56 tests in 2.706s
+
+OK (skipped=1)
+[2026-05-05T02:26:30.325+00:00] exit=0
+
+[2026-05-05T02:58:27.195+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s..................................................
+----------------------------------------------------------------------
+Ran 56 tests in 2.657s
+
+OK (skipped=1)
+[2026-05-05T02:58:30.128+00:00] exit=0
+
+[2026-05-05T03:08:50.316+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s....................................................
+----------------------------------------------------------------------
+Ran 58 tests in 3.125s
+
+OK (skipped=1)
+[2026-05-05T03:08:53.787+00:00] exit=0

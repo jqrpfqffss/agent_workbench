@@ -36,12 +36,51 @@ def _resolve(path_text: str, root: Path) -> Path:
     return path if path.is_absolute() else (root / path).resolve()
 
 
+def _first_explicit(*values: Any) -> Any:
+    for value in values:
+        if value is not None:
+            return value
+    return None
+
+
+def _normalize_str_list(items: Any) -> list[str]:
+    if items is None:
+        return []
+    if isinstance(items, (str, Path)):
+        text = str(items).strip()
+        return [text] if text else []
+    normalized: list[str] = []
+    for item in items:
+        text = str(item).strip()
+        if text:
+            normalized.append(text)
+    return normalized
+
+
+def _openocd_script_args(config_files: list[str]) -> str:
+    return " ".join(f"-f {item}" for item in config_files)
+
+
+def _openocd_command_template(config_files: list[str], commands: list[str], *, log_to_runtime: bool) -> str:
+    script_args = _openocd_script_args(config_files)
+    prefix = "openocd"
+    if log_to_runtime:
+        prefix += ' -l "{openocd_live_log_posix}"'
+    if script_args:
+        prefix += f" {script_args}"
+    if commands:
+        joined = "; ".join(commands)
+        prefix += f' -c "{joined}"'
+    return prefix
+
+
 def _defaults() -> dict[str, Any]:
     return {
         "project": {
             "name": "STM32Project",
             "root": "..",
             "build_dir": "build",
+            "artifact_file": "build/SmartFarm.elf",
             "artifact_elf": "build/SmartFarm.elf",
             "compile_commands": "build/compile_commands.json",
             "source_dirs": ["Core", "Drivers", "Middlewares", "cmake"],
@@ -66,7 +105,9 @@ def _defaults() -> dict[str, Any]:
                 "host": "127.0.0.1",
                 "telnet_port": 4444,
                 "startup_wait_sec": 3.0,
-                "daemon_cmd": 'openocd -l "{openocd_live_log_posix}" -f interface/stlink.cfg -f target/stm32f1x.cfg -c "gdb_port 3333; tcl_port 6666; telnet_port 4444"',
+                "config_files": ["interface/stlink.cfg", "target/stm32f1x.cfg"],
+                "extra_commands": [],
+                "daemon_cmd": "",
             },
             "flash": {
                 "default_method": "openocd_cmd",
@@ -76,8 +117,8 @@ def _defaults() -> dict[str, Any]:
                         "reset": "STM32_Programmer_CLI -c port=SWD -rst",
                     },
                     "openocd_cmd": {
-                        "flash": 'openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program {artifact_elf_posix} verify reset exit"',
-                        "reset": 'openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"',
+                        "flash": "",
+                        "reset": "",
                     },
                 },
             },
@@ -121,6 +162,7 @@ def _defaults() -> dict[str, Any]:
                 "timeout_sec": 2.0,
             },
             "symbols": {
+                "path": "build/SmartFarm.elf",
                 "elf_path": "build/SmartFarm.elf",
             },
             "items": [],
@@ -230,20 +272,55 @@ def _defaults() -> dict[str, Any]:
 
 
 def load_config(config_path: Path) -> dict[str, Any]:
-    raw = _deep_merge(_defaults(), _load_yaml(config_path))
+    loaded = _load_yaml(config_path)
+    raw = _deep_merge(_defaults(), loaded)
     workbench_root = config_path.parent.resolve()
     project_root = _resolve(raw["project"]["root"], workbench_root)
+
+    project_loaded = loaded.get("project", {}) if isinstance(loaded.get("project", {}), dict) else {}
+    monitor_loaded = loaded.get("monitor", {}) if isinstance(loaded.get("monitor", {}), dict) else {}
+    monitor_symbols_loaded = monitor_loaded.get("symbols", {}) if isinstance(monitor_loaded.get("symbols", {}), dict) else {}
+
+    artifact_text = str(
+        _first_explicit(
+            project_loaded.get("artifact_file"),
+            project_loaded.get("artifact_elf"),
+            raw["project"].get("artifact_file"),
+            raw["project"].get("artifact_elf"),
+        )
+    )
+    symbol_path_text = str(
+        _first_explicit(
+            monitor_symbols_loaded.get("path"),
+            monitor_symbols_loaded.get("elf_path"),
+            raw["monitor"]["symbols"].get("path"),
+            raw["monitor"]["symbols"].get("elf_path"),
+            artifact_text,
+        )
+    )
+
+    raw["project"]["artifact_file"] = artifact_text
+    raw["project"]["artifact_elf"] = artifact_text
+    raw["monitor"]["symbols"]["path"] = symbol_path_text
+    raw["monitor"]["symbols"]["elf_path"] = symbol_path_text
+    raw["tools"]["openocd"]["config_files"] = _normalize_str_list(raw["tools"]["openocd"].get("config_files", []))
+    raw["tools"]["openocd"]["extra_commands"] = _normalize_str_list(raw["tools"]["openocd"].get("extra_commands", []))
+    raw["monitor"]["openocd"]["connect_commands"] = _normalize_str_list(
+        raw["monitor"]["openocd"].get("connect_commands", [])
+    )
 
     raw["config_path"] = str(config_path.resolve())
     raw["agent_workbench_root_path"] = workbench_root
     raw["project_root_path"] = project_root
     raw["project"]["build_dir_path"] = _resolve(raw["project"]["build_dir"], project_root)
-    raw["project"]["artifact_elf_path"] = _resolve(raw["project"]["artifact_elf"], project_root)
+    raw["project"]["artifact_file_path"] = _resolve(raw["project"]["artifact_file"], project_root)
+    raw["project"]["artifact_elf_path"] = raw["project"]["artifact_file_path"]
     raw["project"]["compile_commands_path"] = _resolve(raw["project"]["compile_commands"], project_root)
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
-    raw["monitor"]["symbols"]["elf_path"] = str(_resolve(raw["monitor"]["symbols"]["elf_path"], project_root))
+    raw["monitor"]["symbols"]["path"] = str(_resolve(raw["monitor"]["symbols"]["path"], project_root))
+    raw["monitor"]["symbols"]["elf_path"] = raw["monitor"]["symbols"]["path"]
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
         _resolve(raw["tools"]["cmake"]["toolchain_file"], project_root)
     )
@@ -260,12 +337,44 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)
     raw["prompts"]["report_path"] = _resolve(raw["prompts"]["report"], workbench_root)
     raw["agent"]["state_path"] = raw["outputs"]["runtime_root_path"] / "agent_state.json"
+
+    openocd_cfg = raw["tools"]["openocd"]
+    daemon_commands = [
+        "gdb_port 3333",
+        "tcl_port 6666",
+        f"telnet_port {int(openocd_cfg.get('telnet_port', 4444))}",
+        *openocd_cfg.get("extra_commands", []),
+    ]
+    if not str(openocd_cfg.get("daemon_cmd", "")).strip():
+        openocd_cfg["daemon_cmd"] = _openocd_command_template(
+            openocd_cfg.get("config_files", []),
+            daemon_commands,
+            log_to_runtime=True,
+        )
+    flash_methods = raw["tools"]["flash"].get("methods", {})
+    openocd_method = flash_methods.get("openocd_cmd")
+    if isinstance(openocd_method, dict):
+        if not str(openocd_method.get("flash", "")).strip():
+            openocd_method["flash"] = _openocd_command_template(
+                openocd_cfg.get("config_files", []),
+                ["program {artifact_file_posix} verify reset exit"],
+                log_to_runtime=False,
+            )
+        if not str(openocd_method.get("reset", "")).strip():
+            openocd_method["reset"] = _openocd_command_template(
+                openocd_cfg.get("config_files", []),
+                ["init", "reset run", "shutdown"],
+                log_to_runtime=False,
+            )
+
     raw["template_values"] = {
         "python": sys.executable,
         "project_root": str(project_root),
         "workbench_root": str(workbench_root),
         "build_dir": str(raw["project"]["build_dir_path"]),
         "build_dir_posix": str(raw["project"]["build_dir_path"]).replace("\\", "/"),
+        "artifact_file": str(raw["project"]["artifact_file_path"]),
+        "artifact_file_posix": str(raw["project"]["artifact_file_path"]).replace("\\", "/"),
         "artifact_elf": str(raw["project"]["artifact_elf_path"]),
         "artifact_elf_posix": str(raw["project"]["artifact_elf_path"]).replace("\\", "/"),
         "toolchain_file": str(raw["tools"]["cmake"]["toolchain_file_path"]),

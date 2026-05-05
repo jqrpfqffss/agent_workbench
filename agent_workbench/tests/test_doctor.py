@@ -94,13 +94,18 @@ class DoctorTests(unittest.TestCase):
             "project_root_path": self.temp_dir,
             "project": {
                 "name": "demo",
+                "artifact_file_path": self.temp_dir / "missing.axf",
                 "artifact_elf_path": self.temp_dir / "missing.elf",
                 "compile_commands_path": self.temp_dir / "missing.json",
             },
             "tools": {
                 "cmake": {"toolchain_file_path": str(toolchain_path)},
-                "openocd": {"daemon_cmd": "openocd"},
+                "openocd": {
+                    "daemon_cmd": "openocd",
+                    "config_files": ["interface/stlink.cfg", "target/stm32h7x.cfg"],
+                },
                 "flash": {"default_method": "openocd_cmd", "methods": {"openocd_cmd": {"flash": "openocd"}}},
+                "symbols_nm": "arm-none-eabi-nm",
             },
             "outputs": {
                 "runtime_root_path": self.runtime_root,
@@ -128,6 +133,15 @@ class DoctorTests(unittest.TestCase):
             "checks": {"unit": {"enabled": False}},
             "hardware": {"mode": "prefer"},
             "template_values": {},
+            "monitor": {
+                "enabled": True,
+                "items": [{"name": "g_data", "source": "symbol", "symbol": "g_data", "value_type": "u32"}],
+                "symbols": {
+                    "path": str(self.temp_dir / "missing.axf"),
+                    "elf_path": str(self.temp_dir / "missing.axf"),
+                },
+                "openocd": {"connect_commands": []},
+            },
             "planner": {
                 "templates_dir_path": planner_dir,
                 "minimum_template_count": 15,
@@ -163,8 +177,87 @@ class DoctorTests(unittest.TestCase):
         self.assertIn("integration::dummy::hello.md", names)
         self.assertIn("planner_templates", names)
         self.assertIn("migration_docs", names)
+        self.assertIn("artifact_file", names)
+        self.assertIn("monitor_symbol_image", names)
+        self.assertIn("monitor_target_selection", names)
         self.assertEqual(names["agent_state"]["level"], "ok")
         self.assertEqual(names["paste_card"]["level"], "ok")
         self.assertEqual(names["integration::dummy::hello.md"]["level"], "ok")
         self.assertEqual(names["planner_templates"]["level"], "ok")
+        self.assertEqual(names["monitor_target_selection"]["level"], "warn")
         self.assertEqual(summary["fail_count"], 0)
+
+    def test_doctor_accepts_axf_symbol_image_when_nm_can_parse_it(self) -> None:
+        sample_elf = Path(__file__).resolve().parents[2] / "build" / "cmake-debug" / "serial.elf"
+        if not sample_elf.exists():
+            self.skipTest("serial.elf sample not available")
+        sample_axf = self.temp_dir / "demo.axf"
+        shutil.copyfile(sample_elf, sample_axf)
+        toolchain_path = self.temp_dir / "toolchain.cmake"
+        toolchain_path.write_text("# toolchain\n", encoding="utf-8")
+        planner_dir = self.workbench_root / "templates" / "task_templates"
+        planner_dir.mkdir(parents=True, exist_ok=True)
+        (planner_dir / "demo.yaml").write_text("id: demo\n", encoding="utf-8")
+        (self.workbench_root / "README.md").write_text("# agent_workbench\n\n## Integrations\n", encoding="utf-8")
+        (self.workbench_root / "MIGRATION_GUIDE_ZH.md").write_text(
+            "# agent_workbench integration\n\nintegration install opencode\n",
+            encoding="utf-8",
+        )
+
+        cfg = {
+            "project_root_path": self.temp_dir,
+            "project": {
+                "name": "demo",
+                "artifact_file_path": sample_axf,
+                "artifact_elf_path": sample_axf,
+                "compile_commands_path": self.temp_dir / "missing.json",
+            },
+            "tools": {
+                "cmake": {"toolchain_file_path": str(toolchain_path)},
+                "openocd": {"daemon_cmd": "openocd", "config_files": ["interface/stlink.cfg", "target/stm32h7x.cfg"]},
+                "flash": {"default_method": "openocd_cmd", "methods": {"openocd_cmd": {"flash": "openocd"}}},
+                "symbols_nm": "arm-none-eabi-nm",
+            },
+            "outputs": {
+                "runtime_root_path": self.runtime_root,
+                "evidence_root_path": self.evidence_root,
+                "generated_root_path": self.generated_root,
+            },
+            "agent_workbench_root_path": self.workbench_root,
+            "uart": {"enabled": False, "probe_commands": []},
+            "diag_uart": {"enabled": False},
+            "checks": {"unit": {"enabled": False}},
+            "hardware": {"mode": "prefer"},
+            "template_values": {},
+            "monitor": {
+                "enabled": True,
+                "items": [{"name": "g_data", "source": "symbol", "symbol": "g_data", "value_type": "u32"}],
+                "symbols": {"path": str(sample_axf), "elf_path": str(sample_axf)},
+                "openocd": {"connect_commands": ["targets stm32h7x.cpu0"]},
+            },
+            "planner": {"templates_dir_path": planner_dir, "minimum_template_count": 0},
+            "agent": {
+                "state_path": self.runtime_root / "missing.json",
+                "default_profile": "balanced_local",
+                "profiles": {
+                    "balanced_local": {
+                        "max_pack_words": 50,
+                        "max_fact_items": 10,
+                        "max_cli_tail_lines": 4,
+                        "max_failed_assertions_shown": 2,
+                        "max_extra_reads": 2,
+                        "max_edit_files": 2,
+                        "require_fact_citations": True,
+                        "prefer_ascii_runtime_artifacts": True,
+                        "session_pick_strategy": "latest_failed_then_latest_pass",
+                    }
+                },
+            },
+        }
+
+        code, summary = run_doctor(cfg, self.runtime_root)
+
+        self.assertEqual(code, 0)
+        names = {item["name"]: item for item in summary["results"]}
+        self.assertEqual(names["artifact_symbols"]["level"], "ok")
+        self.assertEqual(names["monitor_symbol_image"]["level"], "ok")

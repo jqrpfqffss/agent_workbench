@@ -1,0 +1,10 @@
+/* USER CODE BEGIN PV */
+/* USER CODE END PV */
+/* USER CODE BEGIN PFP */
+/* USER CODE END PFP */
+void MX_GPIO_Init(void) {}
+void MX_USART2_UART_Init(void) {}
+/* USER CODE BEGIN 2 */
+/* USER CODE END 2 */
+/* USER CODE BEGIN 4 */
+/* USER CODE END 4 */

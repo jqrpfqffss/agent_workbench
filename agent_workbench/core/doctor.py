@@ -6,6 +6,7 @@ from pathlib import Path
 from . import integrations_service
 from .diag_uart_service import SERIAL_IMPORT_ERROR as DIAG_SERIAL_IMPORT_ERROR
 from .diag_uart_service import diag_exec_supported, serial as diag_serial
+from .symbols import probe_symbols
 from .task_spec import load_task_spec
 from .uart_service import SERIAL_IMPORT_ERROR, serial, uart_exec_supported
 from .utils import can_write_directory, command_exists, command_head, render_template, write_json
@@ -40,6 +41,13 @@ def _line_count(path: Path) -> int:
     if not path.exists():
         return 0
     return len(path.read_text(encoding="utf-8", errors="ignore").splitlines())
+
+
+def _needs_explicit_target_selection(config_files: list[str], connect_commands: list[str]) -> bool:
+    if connect_commands:
+        return False
+    markers = ("h7x", "dual", "cpu1", "wlx")
+    return any(any(marker in item.lower() for marker in markers) for item in config_files)
 
 
 def _check_integrations(cfg: dict, results: list[dict]) -> None:
@@ -132,11 +140,17 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
     toolchain = Path(cfg["tools"]["cmake"]["toolchain_file_path"])
     _append(results, "toolchain_file", "ok" if toolchain.exists() else "fail", str(toolchain))
 
-    artifact = Path(cfg["project"]["artifact_elf_path"])
-    _append(results, "artifact_elf", "ok" if artifact.exists() else "warn", str(artifact))
+    artifact = Path(cfg["project"]["artifact_file_path"])
+    _append(results, "artifact_file", "ok" if artifact.exists() else "warn", str(artifact))
 
     compile_commands = Path(cfg["project"]["compile_commands_path"])
     _append(results, "compile_commands", "ok" if compile_commands.exists() else "warn", str(compile_commands))
+
+    symbols_ok, symbols_detail = probe_symbols(cfg)
+    _append(results, "artifact_symbols", "ok" if symbols_ok else "warn", symbols_detail)
+
+    monitor_symbols_ok, monitor_symbols_detail = probe_symbols(cfg, monitor=True)
+    _append(results, "monitor_symbol_image", "ok" if monitor_symbols_ok else "warn", monitor_symbols_detail)
 
     openocd_command = render_template(cfg["tools"]["openocd"].get("daemon_cmd", ""), cfg["template_values"])
     openocd_level = "ok" if command_exists(openocd_command) else ("fail" if required_hardware else "warn")
@@ -147,6 +161,29 @@ def run_doctor(cfg: dict, output_dir: Path) -> tuple[int, dict]:
     flash_command = render_template(flash_cfg.get("flash", ""), cfg["template_values"])
     flash_level = "ok" if command_exists(flash_command) else ("fail" if required_hardware else "warn")
     _append(results, "flash_method", flash_level, f"{flash_method}: {command_head(flash_command) or 'missing'}")
+
+    monitor_cfg = cfg.get("monitor", {})
+    monitor_items = monitor_cfg.get("items", [])
+    if monitor_cfg.get("enabled", True):
+        _append(results, "monitor_items", "ok" if monitor_items else "warn", f"count={len(monitor_items)}")
+        symbol_items = [item for item in monitor_items if str(item.get("source", "")).lower() == "symbol"]
+        if symbol_items and not monitor_symbols_ok:
+            _append(results, "monitor_symbol_items", "warn", f"symbol items={len(symbol_items)} but symbol image is not readable")
+        else:
+            _append(results, "monitor_symbol_items", "ok", f"symbol items={len(symbol_items)}")
+        config_files = [str(item) for item in cfg["tools"]["openocd"].get("config_files", [])]
+        connect_commands = [str(item) for item in monitor_cfg.get("openocd", {}).get("connect_commands", [])]
+        if _needs_explicit_target_selection(config_files, connect_commands):
+            _append(results, "monitor_target_selection", "warn", "monitor.openocd.connect_commands is empty; target selection may be required")
+        else:
+            _append(
+                results,
+                "monitor_target_selection",
+                "ok",
+                ",".join(connect_commands) if connect_commands else "not required by current config",
+            )
+    else:
+        _append(results, "monitor_items", "warn", "monitor disabled by config")
 
     if cfg["uart"].get("enabled", True):
         _append(

@@ -284,6 +284,19 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
         message = monitor_status(cfg)
         payload = build_result_payload("monitor status", 0, summary=message, details={"action": "status"})
         return _emit(args, payload, [message])
+    if args.action == "probe":
+        out_dir = Path(args.out_dir) if args.out_dir else cfg["outputs"]["runtime_root_path"] / "monitor_live"
+        ensure_dir(out_dir)
+        engine = MonitorEngine(cfg, out_dir)
+        code, details = engine.probe_once()
+        payload = build_result_payload(
+            "monitor probe",
+            code,
+            summary=f"monitor probe exit={code} items={len(details.get('items', []))}",
+            details=details,
+            artifacts={"out_dir": str(out_dir)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     if args.action == "run":
         out_dir = Path(args.out_dir) if args.out_dir else cfg["outputs"]["runtime_root_path"] / "monitor_live"
         ensure_dir(out_dir)
@@ -795,7 +808,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_diag.set_defaults(func=_cmd_diag)
 
     p_monitor = sub.add_parser("monitor", help="monitor variables/registers/memory")
-    p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export"])
+    p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export", "probe"])
     p_monitor.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_monitor.add_argument("--out-dir", default="")
     p_monitor.add_argument("--source", default="")

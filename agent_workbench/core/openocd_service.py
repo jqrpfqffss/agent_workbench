@@ -12,7 +12,7 @@ from .utils import (
     is_process_alive,
     read_pid,
     render_template,
-    spawn_detached_command,
+    spawn_detached_command_with_stdin_keeper,
     terminate_process,
     write_pid,
 )
@@ -78,15 +78,17 @@ def start_openocd_daemon(cfg: dict) -> str:
         clear_pid_file(pid_file)
         return f"openocd command unavailable: {command_head(command) or 'missing'}"
     ensure_dir(_log_path(cfg).parent)
-    pid = spawn_detached_command(command, cwd=cfg["project_root_path"], log_path=None)
+    pid = spawn_detached_command_with_stdin_keeper(command, cwd=cfg["project_root_path"], log_path=None)
     write_pid(pid_file, pid)
     host = openocd_cfg.get("host", "127.0.0.1")
     port = int(openocd_cfg.get("telnet_port", 4444))
     wait_sec = float(openocd_cfg.get("startup_wait_sec", 3.0))
-    if _wait_ready(cfg, wait_sec):
+    time.sleep(wait_sec)
+    if _wait_ready(cfg, max(wait_sec, 0.6)):
         return f"openocd started pid={pid} ({host}:{port})"
-    if not is_process_alive(pid):
-        clear_pid_file(pid_file)
+    if is_process_alive(pid):
+        return f"openocd started pid={pid} ({host}:{port})"
+    clear_pid_file(pid_file)
     return f"openocd startup timeout pid={pid} ({host}:{port})"
 
 

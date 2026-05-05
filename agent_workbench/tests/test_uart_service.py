@@ -13,6 +13,7 @@ from agent_workbench.core import uart_service
 
 class _FakeSerial:
     next_reads: list[bytes] = []
+    write_hooks: dict[bytes, list[bytes]] = {}
     last_instance: "_FakeSerial | None" = None
 
     def __init__(self, port: str, baudrate: int, timeout: float):
@@ -47,6 +48,9 @@ class _FakeSerial:
 
     def write(self, data: bytes) -> int:
         self.writes.append(data)
+        extra = type(self).write_hooks.get(data)
+        if extra:
+            self._reads.extend(extra)
         return len(data)
 
     def flush(self) -> None:
@@ -64,6 +68,7 @@ class UartExecTests(unittest.TestCase):
         temp_root = Path(__file__).resolve().parents[1] / "runtime" / "test_tmp"
         temp_root.mkdir(parents=True, exist_ok=True)
         self.temp_dir = Path(tempfile.mkdtemp(prefix="awb_uart_", dir=temp_root))
+        _FakeSerial.write_hooks = {}
         self.cfg = {
             "uart": {
                 "enabled": True,
@@ -162,6 +167,30 @@ class UartExecTests(unittest.TestCase):
         self.assertIn("Available commands:", transcript)
         self.assertIn("cli>", transcript)
 
+    def test_uart_exec_recovers_running_cli_without_reset_banner(self) -> None:
+        _FakeSerial.next_reads = []
+        _FakeSerial.write_hooks = {
+            b"\r\n": [b"cli> "],
+            b"help\r\n": [b"Available commands:\r\n", b"cli> "],
+        }
+
+        result = uart_service.execute_uart_commands(
+            self.cfg,
+            ["help"],
+            self.temp_dir / "cli_transcript.log",
+            reset_first=False,
+            expect_ready=True,
+        )
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertFalse(result.saw_ready)
+        self.assertTrue(result.saw_prompt)
+        self.assertEqual(_FakeSerial.last_instance.writes[:2], [b"\r\n", b"help\r\n"])
+        transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
+        self.assertIn("prompt-sync send-empty-line", transcript)
+        self.assertIn("prompt-sync acquired", transcript)
+        self.assertIn("Available commands:", transcript)
+
     def test_uart_exec_timeout_generates_diag(self) -> None:
         _FakeSerial.next_reads = [
             b"cli ready fw=1.2.3 profile=debug\r\n",
@@ -197,6 +226,25 @@ class UartExecTests(unittest.TestCase):
         transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
         self.assertIn("[timeout]", transcript)
 
+    def test_uart_exec_reset_failure_returns_reset_diag(self) -> None:
+        _FakeSerial.next_reads = []
+
+        with mock.patch.object(uart_service, "run_reset", return_value=1):
+            result = uart_service.execute_uart_commands(
+                self.cfg,
+                ["help"],
+                self.temp_dir / "cli_transcript.log",
+                reset_first=True,
+                expect_ready=True,
+            )
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.reset_exit_code, 1)
+        self.assertEqual(result.diag["classification"]["code"], "reset_failed")
+        self.assertEqual(result.diag["reset_exit_code"], 1)
+        transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
+        self.assertIn("reset-first exit=1", transcript)
+
     def test_uart_exec_powershell_backend_error_returns_diag_instead_of_traceback(self) -> None:
         self.serial_patch.stop()
         diag_path = self.temp_dir / "cli_diag.json"
@@ -230,4 +278,31 @@ class UartExecTests(unittest.TestCase):
         self.assertEqual(result.diag["classification"]["code"], "rx_zero")
         transcript = (self.temp_dir / "cli_transcript.log").read_text(encoding="utf-8")
         self.assertIn("backend-error", transcript)
+        self.serial_patch.start()
+
+    def test_uart_exec_powershell_reset_failure_returns_reset_diag(self) -> None:
+        self.serial_patch.stop()
+        with mock.patch.object(uart_service, "_powershell_available", return_value=True), mock.patch.object(
+            uart_service,
+            "_powershell_exec_backend",
+            return_value=uart_service.UartExecResult(
+                exit_code=1,
+                transcript_lines=[],
+                saw_ready=False,
+                saw_prompt=False,
+                timeout_commands=[],
+                reset_exit_code=1,
+            ),
+        ):
+            result = uart_service.execute_uart_commands(
+                self.cfg,
+                ["help"],
+                self.temp_dir / "cli_transcript.log",
+                reset_first=True,
+                expect_ready=True,
+            )
+
+        self.assertEqual(result.exit_code, 1)
+        self.assertEqual(result.diag["classification"]["code"], "reset_failed")
+        self.assertEqual(result.diag["reset_exit_code"], 1)
         self.serial_patch.start()

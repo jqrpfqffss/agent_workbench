@@ -73,6 +73,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
   * @brief  The application entry point.
   * @retval int
   */
+volatile uint32_t g_data = 0;
+volatile float g_data1 = 0;
 int main(void)
 {
 
@@ -114,8 +116,21 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint32_t last_data_tick = HAL_GetTick();
   while (1)
   {
+    /* Increment g_data every 100 ms so that the monitor (10 Hz) can
+       observe meaningful changes instead of a random snapshot of a
+       counter that wraps millions of times per second. */
+    if (HAL_GetTick() - last_data_tick >= 100U) {
+      g_data += 2;
+      g_data1 += 0.5;
+      if (g_data >= 100000U) {
+        g_data = 0;
+        g_data1 = 0;
+      }
+      last_data_tick = HAL_GetTick();
+    }
     Cli_Process(&cli);
     /* USER CODE END WHILE */
 
