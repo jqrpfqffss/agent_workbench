@@ -9,7 +9,7 @@ description: STM32 主 agent，负责端到端需求落地
 如果 OpenCode 需要在一个会话里显式切换到本 agent，用户输入：
 
 ```
-@stm32_auto 给 PA8 加 1kHz PWM
+@stm32_auto <描述当前 STM32 项目的功能、调试或测试任务>
 ```
 
 即进入本 agent 上下文。

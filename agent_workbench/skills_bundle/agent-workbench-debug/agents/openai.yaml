@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench Debug"
+  short_description: "Debug STM32 failures with evidence-first routing"
+  default_prompt: "Use $agent-workbench-debug with $agent-workbench-toolbox to diagnose this STM32 failure from verdict, UART, diag, monitor, and compare evidence."

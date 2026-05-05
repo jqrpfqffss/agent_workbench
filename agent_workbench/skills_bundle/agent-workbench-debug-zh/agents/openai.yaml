@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench 自动调试（中文）"
+  short_description: "中文说明的 STM32 evidence-first 自动调试和根因分析"
+  default_prompt: "使用 $agent-workbench-debug-zh 和 $agent-workbench-toolbox-zh，从 verdict、UART、diag、monitor 和 compare 证据诊断当前 STM32 问题。"

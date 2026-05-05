@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench Test"
+  short_description: "Design and validate STM32 runtime tests"
+  default_prompt: "Use $agent-workbench-test with $agent-workbench-toolbox to design STM32 runtime tests, execute UART/diag/monitor verification, and triage failures."

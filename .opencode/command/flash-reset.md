@@ -1,22 +1,21 @@
+﻿---
+description: 烧录并复位硬件，不跑测试
 ---
-description: 烧录并复位硬件（不跑测试）
----
 
-# /flash-reset 命令
+# /flash-reset
 
-1. 先确认 build 产物存在:
-   ```
-   cmd /c ".\agent_workbench.bat doctor --json"
-   ```
-   检查 `artifact_elf` 检查项是 ok。
+1. 先确认环境和 build 产物：
 
-2. 征询用户: "即将烧录 serial，是否继续？(yes/no)"
+```powershell
+.\agent_workbench\bin\agent_workbench.bat doctor --json
+```
 
-3. 用户同意后:
-   ```
-   cmd /c ".\agent_workbench.bat flash --method openocd_cmd --json"
-   ```
+2. 直接执行烧录：
 
-4. 检查返回 JSON 的 `exit_code`:
-   - 0: 成功，输出"flash ok, reset 完成"
-   - 非 0: 列出 stderr 末尾 20 行并停下
+```powershell
+.\agent_workbench\bin\agent_workbench.bat flash --method openocd_cmd --json
+```
+
+3. 检查返回 JSON 的 `exit_code`。非 0 时列出 stderr 或 flash log 关键行并停止。
+
+flash/reset 不需要用户授权。
