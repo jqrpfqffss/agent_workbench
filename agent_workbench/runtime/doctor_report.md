@@ -21,7 +21,7 @@
 | uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> format=8N1 |
 | uart_backend | ok | pyserial available |
 | uart_port | ok | COM3 |
-| diag_uart_requests | ok | count=2 port=COM3 format=7O1.5 |
+| diag_uart_requests | ok | count=2 port=COM3 format=8N1 |
 | diag_uart_backend | ok | pyserial available |
 | diag_uart_port | ok | COM3 |
 | agent_profile | ok | balanced_local missing=none |
