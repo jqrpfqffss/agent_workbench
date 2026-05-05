@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import csv
 import struct
-import subprocess
 import threading
 import time
 from collections import defaultdict, deque
@@ -10,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .openocd_client import OpenOcdClient, OpenOcdConfig
+from .symbols import load_symbols
 from .utils import (
     append_jsonl,
     clear_pid_file,
@@ -34,8 +34,49 @@ def _to_s32(raw: int) -> int:
     return raw
 
 
+def _to_s16(raw: int) -> int:
+    raw = raw & 0xFFFF
+    if raw & 0x8000:
+        return -((~raw + 1) & 0xFFFF)
+    return raw
+
+
+def _to_s8(raw: int) -> int:
+    raw = raw & 0xFF
+    if raw & 0x80:
+        return -((~raw + 1) & 0xFF)
+    return raw
+
+
 def _to_float(raw: int) -> float:
     return struct.unpack("<f", struct.pack("<I", _to_u32(raw)))[0]
+
+
+def _parse_number(value) -> int:
+    if isinstance(value, bool):
+        raise ValueError("boolean is not a valid numeric address")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        return int(value.strip(), 0)
+    return int(value)
+
+
+def _can_parse_number(value) -> bool:
+    try:
+        _parse_number(value)
+    except Exception:
+        return False
+    return True
+
+
+def _value_width_bits(value_type: str) -> int:
+    normalized = value_type.lower()
+    if normalized in {"u8", "s8"}:
+        return 8
+    if normalized in {"u16", "s16"}:
+        return 16
+    return 32
 
 
 def _convert_value(raw: int, value_type: str):
@@ -48,30 +89,13 @@ def _convert_value(raw: int, value_type: str):
         return _to_float(raw)
     if normalized == "u16":
         return _to_u32(raw) & 0xFFFF
+    if normalized == "s16":
+        return _to_s16(raw)
     if normalized == "u8":
         return _to_u32(raw) & 0xFF
+    if normalized == "s8":
+        return _to_s8(raw)
     return _to_u32(raw)
-
-
-def _load_symbols(cfg: dict) -> dict[str, int]:
-    elf_path = Path(cfg["monitor"]["symbols"]["elf_path"])
-    nm_command = cfg["tools"].get("symbols_nm", "arm-none-eabi-nm")
-    if not elf_path.exists():
-        return {}
-    try:
-        output = subprocess.check_output([nm_command, "-n", str(elf_path)], stderr=subprocess.STDOUT, text=True)
-    except Exception:
-        return {}
-    symbols: dict[str, int] = {}
-    for line in output.splitlines():
-        parts = line.strip().split()
-        if len(parts) < 3:
-            continue
-        try:
-            symbols[parts[2]] = int(parts[0], 16)
-        except ValueError:
-            continue
-    return symbols
 
 
 @dataclass
@@ -108,32 +132,83 @@ class MonitorEngine:
         self.ring: dict[str, deque[tuple[str, object, bool, str]]] = defaultdict(
             lambda: deque(maxlen=self.ring_size)
         )
-        self.symbols = _load_symbols(cfg)
+        self.symbols = load_symbols(cfg, monitor=True)
+
+    def _apply_connect_commands(self) -> list[str]:
+        commands = self.cfg["monitor"]["openocd"].get("connect_commands", [])
+        return self.openocd.run_commands(commands)
 
     def _resolve_address(self, item: dict) -> int:
         source = item.get("source", "").lower()
-        if source == "memory":
-            target = item["target"]
-            return int(target, 0) if isinstance(target, str) else int(target)
+        if source in {"memory", "address", "register"}:
+            if "address" in item:
+                return _parse_number(item["address"])
+            if "target" in item and _can_parse_number(item["target"]):
+                return _parse_number(item["target"])
+            if "symbol" in item:
+                symbol = item["symbol"]
+                if symbol not in self.symbols:
+                    raise RuntimeError(f"symbol not found in symbol image: {symbol}")
+                return self.symbols[symbol] + _parse_number(item.get("offset", 0))
+            if source == "register":
+                raise RuntimeError("register item needs a CPU register target or a numeric address")
+            raise RuntimeError("memory/address item needs target, address, or symbol")
         if source == "symbol":
             symbol = item["symbol"]
             if symbol not in self.symbols:
-                raise RuntimeError(f"symbol not found in ELF: {symbol}")
-            return self.symbols[symbol] + int(item.get("offset", 0))
+                raise RuntimeError(f"symbol not found in symbol image: {symbol}")
+            return self.symbols[symbol] + _parse_number(item.get("offset", 0))
         raise RuntimeError(f"unsupported source for address resolving: {source}")
 
     def _read_item(self, item: dict):
         source = item.get("source", "").lower()
-        if source == "register":
+        value_type = item.get("value_type", "u32")
+        if source in {"register", "cpu_register"} and "address" not in item and not _can_parse_number(item.get("target", "")):
             raw = self.openocd.read_register(item["target"])
         else:
-            raw = self.openocd.read_mem_word(self._resolve_address(item))
-        return _convert_value(raw, item.get("value_type", "u32"))
+            raw = self.openocd.read_mem_value(self._resolve_address(item), width_bits=_value_width_bits(value_type))
+        return raw, _convert_value(raw, value_type)
+
+    def _describe_items(self) -> list[dict[str, object]]:
+        described: list[dict[str, object]] = []
+        for item in self.items:
+            entry: dict[str, object] = {
+                "name": item.get("name", "unnamed"),
+                "source": item.get("source", ""),
+                "value_type": item.get("value_type", "u32"),
+                "width_bits": _value_width_bits(item.get("value_type", "u32")),
+            }
+            source = str(item.get("source", "")).lower()
+            if source in {"register", "cpu_register"} and "address" not in item and not _can_parse_number(item.get("target", "")):
+                entry["target"] = item.get("target", "")
+            else:
+                try:
+                    entry["resolved_address"] = f"0x{self._resolve_address(item):08x}"
+                except Exception as exc:
+                    entry["resolve_error"] = str(exc)
+            if "symbol" in item:
+                entry["symbol"] = item.get("symbol", "")
+            if "offset" in item:
+                entry["offset"] = item.get("offset", 0)
+            described.append(entry)
+        return described
 
     def _init_files(self) -> None:
         with self.paths.csv_path.open("w", encoding="utf-8", newline="") as fp:
             csv.writer(fp).writerow(["ts", "item", "value", "ok", "message"])
-        append_jsonl(self.paths.meta_path, {"ts": utc_now_iso(), "event": "monitor_start"})
+        self.paths.jsonl_path.write_text("", encoding="utf-8")
+        self.paths.meta_path.write_text("", encoding="utf-8")
+        append_jsonl(
+            self.paths.meta_path,
+            {
+                "ts": utc_now_iso(),
+                "event": "monitor_start",
+                "items": self._describe_items(),
+                "symbol_image": str(self.cfg["monitor"]["symbols"]["path"]),
+                "connect_commands": list(self.cfg["monitor"]["openocd"].get("connect_commands", [])),
+                "note": "symbol addresses are resolved from monitor.symbols.path; flash the same symbol image before monitoring",
+            },
+        )
 
     def _append_sample(self, ts: str, item_name: str, value, ok: bool, message: str) -> None:
         with self.paths.csv_path.open("a", encoding="utf-8", newline="") as fp:
@@ -149,6 +224,95 @@ class MonitorEngine:
                 for index, (ts, value, ok, message) in enumerate(samples):
                     writer.writerow([item_name, index, ts, value, int(ok), message])
 
+    def _sample_items(self, *, persist: bool = True) -> list[dict[str, object]]:
+        ts = utc_now_iso()
+        halted = False
+        sample_rows: list[dict[str, object]] = []
+        try:
+            self.openocd.halt()
+            halted = True
+        except Exception:
+            pass
+
+        for item in self.items:
+            item_name = item.get("name", "unnamed")
+            try:
+                raw, value = self._read_item(item)
+                if persist:
+                    self._append_sample(ts, item_name, value, True, "")
+                entry: dict[str, object] = {
+                    "name": item_name,
+                    "source": item.get("source", ""),
+                    "value": value,
+                    "raw_value_hex": f"0x{_to_u32(raw):08x}",
+                    "ok": True,
+                    "error": "",
+                    "value_type": item.get("value_type", "u32"),
+                    "width_bits": _value_width_bits(item.get("value_type", "u32")),
+                }
+            except Exception as exc:
+                if persist:
+                    self._append_sample(ts, item_name, "", False, str(exc))
+                entry = {
+                    "name": item_name,
+                    "source": item.get("source", ""),
+                    "value": "",
+                    "ok": False,
+                    "error": str(exc),
+                    "value_type": item.get("value_type", "u32"),
+                    "width_bits": _value_width_bits(item.get("value_type", "u32")),
+                }
+            if "target" in item:
+                entry["target"] = item.get("target", "")
+            if "symbol" in item:
+                entry["symbol"] = item.get("symbol", "")
+            if "offset" in item:
+                entry["offset"] = item.get("offset", 0)
+            source = str(item.get("source", "")).lower()
+            if source not in {"register", "cpu_register"} or "address" in item or _can_parse_number(item.get("target", "")):
+                try:
+                    entry["resolved_address"] = f"0x{self._resolve_address(item):08x}"
+                except Exception as exc:
+                    entry["resolve_error"] = str(exc)
+            sample_rows.append(entry)
+
+        if halted:
+            try:
+                self.openocd.resume()
+            except Exception:
+                pass
+        return sample_rows
+
+    def probe_once(self) -> tuple[int, dict[str, object]]:
+        details: dict[str, object] = {
+            "symbol_image": str(self.cfg["monitor"]["symbols"]["path"]),
+            "connect_commands": list(self.cfg["monitor"]["openocd"].get("connect_commands", [])),
+            "items": [],
+        }
+        try:
+            self.openocd.connect()
+            details["connect_ok"] = True
+        except Exception as exc:
+            details["connect_ok"] = False
+            details["error"] = str(exc)
+            return 2, details
+
+        try:
+            outputs = self._apply_connect_commands()
+            if outputs:
+                details["connect_outputs"] = [item.strip() for item in outputs]
+            details["items"] = self._sample_items(persist=False)
+            return 0, details
+        except Exception as exc:
+            details["error"] = str(exc)
+            return 3, details
+        finally:
+            try:
+                self.openocd.resume()
+            except Exception:
+                pass
+            self.openocd.close()
+
     def run(self) -> int:
         self._init_files()
         try:
@@ -157,18 +321,28 @@ class MonitorEngine:
             append_jsonl(self.paths.meta_path, {"ts": utc_now_iso(), "event": "openocd_connect_failed", "error": str(exc)})
             return 2
 
+        try:
+            outputs = self._apply_connect_commands()
+            if outputs:
+                append_jsonl(
+                    self.paths.meta_path,
+                    {"ts": utc_now_iso(), "event": "openocd_connect_commands", "outputs": [item.strip() for item in outputs]},
+                )
+        except Exception as exc:
+            append_jsonl(self.paths.meta_path, {"ts": utc_now_iso(), "event": "openocd_connect_commands_failed", "error": str(exc)})
+            self.openocd.close()
+            return 3
+
+        try:
+            self.openocd.resume()
+        except Exception:
+            pass
+
         sample_interval = 1.0 / self.sample_hz
         last_export = time.time()
         while not self.stop_event.is_set():
             tick_start = time.time()
-            ts = utc_now_iso()
-            for item in self.items:
-                item_name = item.get("name", "unnamed")
-                try:
-                    value = self._read_item(item)
-                    self._append_sample(ts, item_name, value, True, "")
-                except Exception as exc:
-                    self._append_sample(ts, item_name, "", False, str(exc))
+            self._sample_items()
             if time.time() - last_export >= self.export_interval_sec:
                 self._dump_snapshot()
                 last_export = time.time()
@@ -177,6 +351,10 @@ class MonitorEngine:
 
         self._dump_snapshot()
         append_jsonl(self.paths.meta_path, {"ts": utc_now_iso(), "event": "monitor_stop"})
+        try:
+            self.openocd.resume()
+        except Exception:
+            pass
         self.openocd.close()
         return 0
 

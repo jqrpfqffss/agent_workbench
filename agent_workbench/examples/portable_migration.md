@@ -29,11 +29,12 @@ Regenerate them after updating the new project's config.
 3. Update at least:
    - `project.name`
    - `project.build_dir`
-   - `project.artifact_elf`
+   - `project.artifact_file` (or legacy `project.artifact_elf`)
    - `project.compile_commands`
    - `project.source_dirs`
    - `tools.cmake.toolchain_file`
-   - `tools.openocd.*`
+   - `tools.openocd.config_files`
+   - `monitor.openocd.connect_commands`
    - `uart.*`
    - `diag_uart.*`
 4. Run:
@@ -66,7 +67,9 @@ cmd /c ".\agent_workbench.bat uart exec --expect-ready --command help --command 
 ## Practical Notes
 
 - `project.root` usually stays `..` if `agent_workbench/` is placed under the target project root.
-- `artifact_elf`, `compile_commands`, and `monitor.symbols.elf_path` should all match the same real build output family.
+- `artifact_file`, `compile_commands`, and `monitor.symbols.path` should all match the same real build output family.
+- `.elf` and `.axf` are both fine as long as `arm-none-eabi-nm` can parse the file.
+- Monitor portability should come from YAML: `tools.openocd.config_files`, optional `monitor.openocd.connect_commands`, and `monitor.items`.
 - If you change `project.name`, `ready_banner`, `prompt`, or `source_dirs`, rerun `integration install`.
 - The current build pipeline expects a CMake-based STM32 project.
 

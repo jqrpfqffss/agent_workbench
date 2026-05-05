@@ -41,6 +41,7 @@ class UartExecResult:
     timeout_commands: list[str]
     diag_path: Path | None = None
     diag: dict[str, Any] | None = None
+    reset_exit_code: int | None = None
 
 
 def _require_serial() -> None:
@@ -183,6 +184,17 @@ def _wait_for_command_response(ser, encoding: str, timeout_sec: float, prompt: s
     return lines, saw_prompt
 
 
+def _prompt_sync(ser, encoding: str, timeout_sec: float, prompt: str) -> tuple[list[str], bool]:
+    if prompt.strip() == "":
+        return [], False
+    ser.write(b"\r\n")
+    try:
+        ser.flush()
+    except AttributeError:
+        pass
+    return _wait_for_command_response(ser, encoding, timeout_sec, prompt)
+
+
 def _powershell_available() -> bool:
     return command_exists("powershell") or command_exists("powershell.exe")
 
@@ -202,6 +214,7 @@ def _powershell_exec_backend(
     commands: list[str],
     transcript_path: Path,
     *,
+    reset_log_path: Path,
     reset_first: bool,
     require_ready: bool,
     ready_banner: str,
@@ -230,6 +243,7 @@ param(
   [string]$CommandFile,
   [string]$ResultFile,
   [string]$ResetCommand,
+  [string]$ResetLogPath,
   [string]$ReadyBanner,
   [string]$Prompt,
   [int]$ReadTimeoutMs,
@@ -249,6 +263,7 @@ $serial.ReadTimeout = $ReadTimeoutMs
 $transcript = New-Object System.Collections.Generic.List[string]
 $timeoutCommands = New-Object System.Collections.Generic.List[string]
 $script:exitCode = 0
+$script:resetExitCode = 0
 $script:sawReady = $false
 $script:sawPrompt = $false
 $script:promptCount = 0
@@ -364,8 +379,23 @@ function Invoke-ResetCommand {
   if ([string]::IsNullOrWhiteSpace($ResetCommand)) {
     return 0
   }
-  $proc = Start-Process -FilePath "cmd.exe" -ArgumentList "/d", "/c", $ResetCommand -Wait -NoNewWindow -PassThru
-  return [int]$proc.ExitCode
+  Append-Utf8 $ResetLogPath ("[{0}] $ {1}" -f (Get-Timestamp), $ResetCommand)
+  $stdoutPath = [System.IO.Path]::GetTempFileName()
+  $stderrPath = [System.IO.Path]::GetTempFileName()
+  try {
+    $proc = Start-Process -FilePath "cmd.exe" -ArgumentList "/d", "/c", $ResetCommand -Wait -NoNewWindow -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+    if (Test-Path $stdoutPath) {
+      Get-Content -Path $stdoutPath | ForEach-Object { Append-Utf8 $ResetLogPath $_ }
+    }
+    if (Test-Path $stderrPath) {
+      Get-Content -Path $stderrPath | ForEach-Object { Append-Utf8 $ResetLogPath $_ }
+    }
+    Append-Utf8 $ResetLogPath ("[{0}] exit={1}" -f (Get-Timestamp), [int]$proc.ExitCode)
+    return [int]$proc.ExitCode
+  } finally {
+    Remove-Item -LiteralPath $stdoutPath -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $stderrPath -ErrorAction SilentlyContinue
+  }
 }
 
 function Wait-Ready {
@@ -377,6 +407,20 @@ function Wait-Ready {
     }
   }
   Flush-PendingText
+  if (($ResetFirst -ne 1) -and (-not [string]::IsNullOrWhiteSpace($Prompt))) {
+    Write-TranscriptLine ("[{0}] [cli] prompt-sync send-empty-line" -f (Get-Timestamp))
+    $serial.Write("`r`n")
+    $deadline = [DateTime]::UtcNow.AddMilliseconds($CommandTimeoutMs)
+    $startPromptCount = $script:promptCount
+    while ([DateTime]::UtcNow -lt $deadline) {
+      [void](Pump-Serial)
+      if ($script:promptCount -gt $startPromptCount) {
+        Write-TranscriptLine ("[{0}] [cli] prompt-sync acquired" -f (Get-Timestamp))
+        return
+      }
+    }
+    Flush-PendingText
+  }
   if (-not $script:sawReady) {
     $script:exitCode = 31
     Write-TranscriptLine ("[{0}] [cli] ready-missing expected={1}" -f (Get-Timestamp), $ReadyBanner)
@@ -429,6 +473,7 @@ try {
     $script:promptCount = 0
     $script:pendingText = ""
     $resetExit = Invoke-ResetCommand
+    $script:resetExitCode = [int]$resetExit
     Write-TranscriptLine ("[{0}] [cli] reset-first exit={1}" -f (Get-Timestamp), $resetExit)
     if ($resetExit -ne 0) {
       $script:exitCode = if ($resetExit -eq 0) { 30 } else { [int]$resetExit }
@@ -453,6 +498,7 @@ try {
   saw_ready = $script:sawReady
   saw_prompt = $script:sawPrompt
   timeout_commands = @($timeoutCommands)
+  reset_exit_code = $script:resetExitCode
 } | ConvertTo-Json -Depth 4 | Set-Content -Path $ResultFile -Encoding UTF8
 """.strip()
         + "\n",
@@ -478,6 +524,8 @@ try {
             str(result_path),
             "-ResetCommand",
             _render_reset_command(cfg) if reset_first else "",
+            "-ResetLogPath",
+            str(reset_log_path),
             "-ReadyBanner",
             ready_banner,
             "-Prompt",
@@ -517,7 +565,36 @@ try {
         saw_ready=bool(payload.get("saw_ready", False)),
         saw_prompt=bool(payload.get("saw_prompt", False)),
         timeout_commands=list(payload.get("timeout_commands", [])),
+        reset_exit_code=(int(payload["reset_exit_code"]) if payload.get("reset_exit_code") is not None else None),
     )
+
+
+def _build_reset_failure_diag(reset_code: int, reset_log_path: Path) -> dict[str, Any]:
+    return {
+        "generated_at": utc_now_iso(),
+        "status": "error",
+        "reset_exit_code": int(reset_code),
+        "reset_log_path": str(reset_log_path),
+        "classification": {
+            "code": "reset_failed",
+            "category": "target_reset",
+            "summary": "Target reset command failed",
+            "detail": f"Reset command exited with code {int(reset_code)} before UART validation could start.",
+            "possible_causes": [
+                "ST-Link/OpenOCD 当前没有设备访问权限",
+                "调试器被别的进程占用",
+                "USB 调试链路未连接或驱动异常",
+            ],
+            "suggested_next_step": "先查看 uart_exec_reset.log 中的 OpenOCD 输出，再释放调试器占用并重试。",
+        },
+    }
+
+
+def _write_reset_failure_diag(diag_target: Path, reset_code: int, reset_log_path: Path) -> tuple[Path, dict[str, Any]]:
+    ensure_dir(diag_target.parent)
+    payload = _build_reset_failure_diag(reset_code, reset_log_path)
+    diag_target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return diag_target, payload
 
 
 def _powershell_logger_backend(
@@ -736,6 +813,7 @@ def execute_uart_commands(
     saw_ready = False
     saw_prompt = False
     exit_code = 0
+    reset_code = 0
 
     ensure_dir(transcript_path.parent)
     diag_target = diag_path or transcript_path.with_name("cli_diag.json")
@@ -760,6 +838,7 @@ def execute_uart_commands(
                 cfg,
                 commands,
                 transcript_path,
+                reset_log_path=reset_target,
                 reset_first=reset_first,
                 require_ready=require_ready,
                 ready_banner=ready_banner,
@@ -796,16 +875,21 @@ def execute_uart_commands(
                 diag=diag_payload,
             )
         if result.exit_code != 0:
-            diag_result_path = collect_cli_diag(
-                cfg,
-                diag_target,
-                saw_ready=result.saw_ready,
-                saw_prompt=result.saw_prompt,
-                timeout_commands=result.timeout_commands,
-            )
-            result.diag_path = diag_result_path
-            if diag_result_path.exists():
-                result.diag = json.loads(diag_result_path.read_text(encoding="utf-8"))
+            if result.reset_exit_code not in (None, 0):
+                diag_result_path, diag_payload = _write_reset_failure_diag(diag_target, int(result.reset_exit_code), reset_target)
+                result.diag_path = diag_result_path
+                result.diag = diag_payload
+            else:
+                diag_result_path = collect_cli_diag(
+                    cfg,
+                    diag_target,
+                    saw_ready=result.saw_ready,
+                    saw_prompt=result.saw_prompt,
+                    timeout_commands=result.timeout_commands,
+                )
+                result.diag_path = diag_result_path
+                if diag_result_path.exists():
+                    result.diag = json.loads(diag_result_path.read_text(encoding="utf-8"))
         return result
 
     with serial.Serial(
@@ -849,9 +933,22 @@ def execute_uart_commands(
                 _write_rx(fp, transcript_lines, line)
             saw_ready = saw_ready or ready_seen
             saw_prompt = saw_prompt or prompt_seen
+            prompt_synced = False
+            if (not reset_first) and (not saw_prompt):
+                fp.write(f"[{utc_now_iso()}] [cli] prompt-sync send-empty-line\n")
+                sync_lines, sync_prompt_seen = _prompt_sync(ser, encoding, command_timeout_sec, prompt)
+                for line in sync_lines:
+                    _write_rx(fp, transcript_lines, line)
+                saw_prompt = saw_prompt or sync_prompt_seen
+                prompt_synced = sync_prompt_seen
+                if prompt_synced:
+                    fp.write(f"[{utc_now_iso()}] [cli] prompt-sync acquired\n")
             if not saw_ready:
-                exit_code = 31
-                fp.write(f"[{utc_now_iso()}] [cli] ready-missing expected={ready_banner}\n")
+                if prompt_synced:
+                    fp.write(f"[{utc_now_iso()}] [cli] ready-missing ignored after prompt-sync expected={ready_banner}\n")
+                else:
+                    exit_code = 31
+                    fp.write(f"[{utc_now_iso()}] [cli] ready-missing expected={ready_banner}\n")
             elif not saw_prompt:
                 exit_code = 32
                 fp.write(f"[{utc_now_iso()}] [cli] prompt-missing expected={prompt}\n")
@@ -884,15 +981,18 @@ def execute_uart_commands(
     diag_payload = None
     diag_result_path: Path | None = None
     if exit_code != 0:
-        diag_result_path = collect_cli_diag(
-            cfg,
-            diag_target,
-            saw_ready=saw_ready,
-            saw_prompt=saw_prompt,
-            timeout_commands=timeout_commands,
-        )
-        if diag_result_path.exists():
-            diag_payload = json.loads(diag_result_path.read_text(encoding="utf-8"))
+        if reset_first and reset_code != 0:
+            diag_result_path, diag_payload = _write_reset_failure_diag(diag_target, reset_code, reset_target)
+        else:
+            diag_result_path = collect_cli_diag(
+                cfg,
+                diag_target,
+                saw_ready=saw_ready,
+                saw_prompt=saw_prompt,
+                timeout_commands=timeout_commands,
+            )
+            if diag_result_path.exists():
+                diag_payload = json.loads(diag_result_path.read_text(encoding="utf-8"))
 
     return UartExecResult(
         exit_code=exit_code,
@@ -902,6 +1002,7 @@ def execute_uart_commands(
         timeout_commands=timeout_commands,
         diag_path=diag_result_path,
         diag=diag_payload,
+        reset_exit_code=(reset_code if reset_first else None),
     )
 
 

@@ -266,6 +266,42 @@ def spawn_detached_command(
             log_fp.close()
 
 
+def spawn_detached_command_with_stdin_keeper(
+    command: str,
+    cwd: Path,
+    log_path: Optional[Path] = None,
+    env: Optional[dict[str, str]] = None,
+) -> int:
+    helper = WORKBENCH_ROOT / "core" / "process_keeper.py"
+    argv = [str(helper), "--cwd", str(cwd)]
+    if log_path is not None:
+        argv.extend(["--log", str(log_path)])
+    argv.append("--")
+    argv.extend(split_command(command))
+    if os.name != "nt":
+        return spawn_detached_python(argv, cwd=WORKBENCH_ROOT, env=env)
+
+    helper_argv = [sys.executable, *argv]
+    kwargs: dict[str, Any] = {
+        "cwd": str(WORKBENCH_ROOT),
+        "stdin": subprocess.DEVNULL,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+        "close_fds": True,
+    }
+    if env:
+        merged_env = dict(os.environ)
+        merged_env.update(env)
+        kwargs["env"] = merged_env
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startupinfo.wShowWindow = subprocess.SW_HIDE
+    kwargs["creationflags"] = subprocess.CREATE_NEW_CONSOLE
+    kwargs["startupinfo"] = startupinfo
+    proc = subprocess.Popen(helper_argv, **kwargs)
+    return int(proc.pid)
+
+
 def can_write_directory(path: Path) -> tuple[bool, str]:
     try:
         ensure_dir(path)

@@ -1,37 +1,16 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from typing import Any
 
 from .openocd_client import OpenOcdClient, OpenOcdConfig
 from .openocd_service import start_openocd_daemon, stop_openocd_daemon
+from .symbols import load_symbols
 from .utils import command_exists, command_head, render_template, utc_now_iso, write_json
 
 
 _CLI_STATS_SYMBOL = "DebugCliStats"
 _CLI_STATS_WORDS = 14
-
-
-def _load_symbols(cfg: dict) -> dict[str, int]:
-    elf_path = Path(cfg["project"]["artifact_elf_path"])
-    nm_command = cfg["tools"].get("symbols_nm", "arm-none-eabi-nm")
-    if not elf_path.exists():
-        return {}
-    try:
-        output = subprocess.check_output([nm_command, "-n", str(elf_path)], stderr=subprocess.STDOUT, text=True)
-    except Exception:
-        return {}
-    symbols: dict[str, int] = {}
-    for line in output.splitlines():
-        parts = line.strip().split()
-        if len(parts) < 3:
-            continue
-        try:
-            symbols[parts[2]] = int(parts[0], 16)
-        except ValueError:
-            continue
-    return symbols
 
 
 def _decode_text(words: list[int], byte_count: int) -> str:
@@ -173,10 +152,10 @@ def collect_cli_diag(
         payload["classification"] = _classify_failure(None, saw_ready, saw_prompt, timeout_commands)
         return write_json(output_path, payload)
 
-    symbols = _load_symbols(cfg)
+    symbols = load_symbols(cfg)
     address = symbols.get(_CLI_STATS_SYMBOL)
     if address is None:
-        payload["error"] = f"symbol not found in ELF: {_CLI_STATS_SYMBOL}"
+        payload["error"] = f"symbol not found in symbol image: {_CLI_STATS_SYMBOL}"
         payload["classification"] = _classify_failure(None, saw_ready, saw_prompt, timeout_commands)
         return write_json(output_path, payload)
 
