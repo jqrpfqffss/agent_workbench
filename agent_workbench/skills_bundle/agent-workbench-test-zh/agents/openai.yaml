@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench 测试验证（中文）"
+  short_description: "中文说明的 STM32 runtime 测试设计、覆盖审查和实机验证"
+  default_prompt: "使用 $agent-workbench-test-zh 和 $agent-workbench-toolbox-zh，设计 STM32 runtime 测试，执行 UART/diag/monitor 验证并分层分析失败。"

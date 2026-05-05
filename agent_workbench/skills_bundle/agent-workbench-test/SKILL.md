@@ -1,68 +1,42 @@
 ---
 name: agent-workbench-test
-description: Use for automated test generation, test execution, task-driven test asset updates, and evidence-first test reporting in agent_workbench STM32 projects.
+description: Use for STM32 test design, runtime verification, regression probes, assertion planning, real-board validation, and failure triage in repositories that use agent_workbench. Combine with agent-workbench-toolbox to design high-quality tests from source behavior and runtime evidence, then validate them with build, flash, UART, diag, monitor, verify, report, and compare.
 ---
 
 # Agent Workbench Test
 
-Use this skill when the user wants to generate tests, run tests, improve test assets, or explain test failures in a repo that uses `agent_workbench`.
+Use this workflow when the user asks for test cases, regression coverage, assertions, verification, failure analysis, or real-board validation.
 
-## First Step
+Always pair with `agent-workbench-toolbox`.
 
-Resolve the task yaml first. Then run:
+## Test Flow
 
-```powershell
-cmd /c ".\agent_workbench.bat test generate --task <task.yaml>"
-cmd /c ".\agent_workbench.bat test run"
-```
+1. Run `doctor --json` and `scan-project --json`.
+2. Identify the behavior contract from source, CLI help/status, user request, existing evidence, and hardware constraints.
+3. Build a coverage matrix: happy path, boundary values, invalid input, state transition, reset behavior, persistence if relevant, timing/trend, and regression probes.
+4. Choose the evidence surface for each case: UART command, diag exchange, monitor item, build/unit self-check, or report/compare artifact.
+5. If monitor evidence is needed, update `agent_workbench/agent_workbench.yaml` automatically and run `monitor probe --json`.
+6. Run `build --json`, flash when real-board validation is needed, then execute UART/diag/monitor probes.
+7. Run `test run --json` only when the migrated project has a configured host/unit test command.
+8. Run `verify current --json`, `report --latest --json`, and `compare --latest --json` when regression comparison matters.
+9. Produce a test report using [references/test-report-template.md](references/test-report-template.md).
 
-If the model is low-context or the task is complex, generate a staged card first:
+## Read When Needed
 
-```powershell
-cmd /c ".\agent_workbench.bat context --mode test --stage analyze --task <task.yaml>"
-```
+- End-to-end test path: [references/test-flow.md](references/test-flow.md)
+- Test design methodology: [references/test-design-methodology.md](references/test-design-methodology.md)
+- Coverage matrix: [references/test-coverage-matrix.md](references/test-coverage-matrix.md)
+- Assertion patterns: [references/assertion-patterns.md](references/assertion-patterns.md)
+- Failure triage: [references/test-failure-triage.md](references/test-failure-triage.md)
+- Report template: [references/test-report-template.md](references/test-report-template.md)
+- Monitor configuration: `agent-workbench-toolbox/references/monitor-configuration.md`
 
-Then read only the newest `*_paste.md`.
+## Quality Bar
 
-## Read These Files
+Good STM32 tests are evidence-driven:
 
-Read only the test-relevant artifacts first:
-
-- `agent_workbench/generated/tasks/<task_id>/blackbox_assertions.yaml`
-- `agent_workbench/generated/tasks/<task_id>/unit_test_plan.md`
-- `agent_workbench/generated/tasks/<task_id>/implementation_brief.md`
-- `agent_workbench/generated/tasks/<task_id>/task_snapshot.json`
-- `agent_workbench/runtime/unit.log`
-
-## What To Change First
-
-If the test design is wrong:
-
-- update the task yaml
-- regenerate tests
-- rerun tests
-
-If the task yaml is correct but generated assets are too weak:
-
-- improve the task yaml or generated test artifacts first
-- do not immediately blame source files
-
-If the source really violates the task acceptance:
-
-- only then coordinate with the feature flow
-
-## Guardrails
-
-- Keep assertions stable and machine-readable.
-- Prefer short deterministic strings over vague output matching.
-- Report whether the failure is in task definition, test assets, or source behavior.
-- Do not edit broad production code during a test-only request unless the user explicitly asks for a fix.
-
-## Default Output
-
-Respond in this order:
-
-1. Test result
-2. Generated assets used
-3. First failing layer
-4. Recommended next action
+- they assert externally visible behavior when possible
+- they observe internal state only through deliberate monitor items
+- they cover boundaries, invalid inputs, reset/restart, and regression risks
+- they avoid brittle strings except stable ready/prompt/help/status text
+- they report exactly which evidence proves or fails each case

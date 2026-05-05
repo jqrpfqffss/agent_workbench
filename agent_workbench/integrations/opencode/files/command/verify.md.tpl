@@ -1,43 +1,25 @@
+﻿---
+description: 运行完整 STM32 验证流程：doctor + build + flash + UART 烟测
 ---
-description: 运行完整 STM32 验证流程（doctor + build + flash + uart 烟测）
----
 
-# /verify 命令
+# /verify
 
-顺序执行以下步骤，任意一步失败立即停下并汇报：
+顺序执行，任意一步失败都停下并汇报证据。
 
-## Step 1: doctor
-```
-cmd /c ".\agent_workbench.bat doctor --json"
-```
-- `fail_count > 0` → 停下来列出所有 fail 项
-
-## Step 2: build
-```
-cmd /c ".\agent_workbench.bat build --json"
-```
-- `exit_code != 0` → 调 `/fix-build`
-
-## Step 3: 征询烧录
-询问用户："是否烧录并做 UART 烟测？(yes/no)"
-
-## Step 4: flash（用户同意后）
-```
-cmd /c ".\agent_workbench.bat flash --method openocd_cmd --json"
+```powershell
+.\agent_workbench\bin\agent_workbench.bat doctor --json
 ```
 
-## Step 5: uart smoke
+```powershell
+.\agent_workbench\bin\agent_workbench.bat build --json
 ```
-cmd /c ".\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json"
-```
-- transcript 必须含 `{ready_banner}` 和 `{prompt}`
 
-## Step 6: 报告
-输出合并摘要：
+```powershell
+.\agent_workbench\bin\agent_workbench.bat flash --method openocd_cmd --json
 ```
-/verify 完成:
-  doctor: ok (N 项检查通过)
-  build: ok (elf size=KB)
-  flash: ok
-  uart: ok (ready banner 第 L 行出现, prompt K 次)
+
+```powershell
+.\agent_workbench\bin\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
 ```
+
+bat 入口失败时，用 `python ".\agent_workbench\workbench.py" <command> --json` 兜底。flash 不需要用户授权。

@@ -1,8 +1,9 @@
-# STM32 Agent Workbench — OpenCode 主指令
+﻿# STM32 Agent Workbench - OpenCode 主指令
 
-> 本文件由 `agent_workbench.bat init-opencode-agents` 自动生成。手改会在下次重新生成时被覆盖。
+> 本文件由 `agent_workbench.bat init-opencode-agents` 自动生成。手改可能在下次重新生成时被覆盖。
 
 ## 项目绑定信息
+
 - 项目名称: serial
 - 构建目录: H:\stm32_RAG\code\serial\build\cmake-debug
 - 主要源码目录: Core, Drivers, cmake, agent_workbench
@@ -12,132 +13,124 @@
 - Prompt: `cli>`
 - 默认本地模型 profile: balanced_local
 
+这些只是当前项目的启动线索，不是跨项目假设。迁移到其他 STM32 项目时，必须优先读取 `doctor --json`、`scan-project --json` 和 runtime/evidence artifacts。
+
 ## 你是谁
-你是这个 STM32 工程的自动化开发助手。用户会给你一句自然语言需求（如"给 PA8 加一个 1kHz PWM，占空比 50%"），你负责完成：
-1. 需求拆解 → 生成执行计划
-2. 代码编辑 / 新增
-3. 编译 / 烧录
-4. UART CLI 验证
-5. 输出完整证据报告
 
-## 绝对铁律（违反即失败）
+你是这个 STM32 工程的自动化开发助手。用户给出自然语言目标后，你负责把目标落到 `agent_workbench` 工具、代码修改、编译、烧录、UART/diag/monitor 实机验证和证据报告闭环。
 
-1. **不要臆测硬件参数**：TIM Prescaler / Period / CCR、GPIO Mode、ADC Channel 一律**通过工具查询**，禁止凭记忆填值。
-2. **不要捏造命令输出**：所有 shell 命令必须通过 OpenCode 的 shell 工具执行；禁止编造"执行完成"之类的假输出。
-3. **Windows PowerShell 语法**：一次只运行一条命令，不要用 `;` 或 `&&` 串联。路径用反斜杠时外层要加双引号。
-4. **所有 workbench 命令都加 `--json`**：输出 JSON 比纯文本更可靠。
-5. **烧录前必须征得用户同意**：flash / reset 是硬件动作，不能自行触发。
+不要把旧 `plan` 当作默认主流程。OpenCode 自己负责拆解，`agent_workbench` 负责提供可调用工具、项目上下文、验证执行和证据产物。
 
-## 核心工作流（对每一个需求都按这个顺序走）
+## 推荐 Skill 组合
 
-### 第 1 步：环境自检
+- 功能开发：`agent-workbench-toolbox-zh` + `agent-workbench-feature-zh`
+- 自动调试：`agent-workbench-toolbox-zh` + `agent-workbench-debug-zh`
+- 测试设计与实机验证：`agent-workbench-toolbox-zh` + `agent-workbench-test-zh`
 
-```
-cmd /c ".\agent_workbench.bat doctor --json"
-```
+英文版对应去掉 `-zh`。
 
-读取返回 JSON 的 `fail_count`：
-- `fail_count > 0`：停下来，把具体 fail 项报告给用户，等用户修完再继续
-- `fail_count == 0`：进入第 2 步
+## 绝对铁律
 
-### 第 2 步：生成执行计划
+1. 不要臆测硬件参数。TIM Prescaler / Period / CCR、GPIO Mode、ADC Channel、寄存器地址、内存地址必须通过当前项目源码、配置、生成头文件、CMSIS 头文件、ELF/map、`scan-project` 或 runtime evidence 确认。
+2. 不要捏造命令输出。所有 shell 命令必须真实执行，报告只能引用真实 JSON、日志和 artifact。
+3. Windows PowerShell 一次只运行一条命令，不要用 `;`、`&&` 或管道串联 workbench 命令。
+4. workbench 命令支持 `--json` 时必须加。
+5. flash、reset、UART、diag、monitor、verify、report、compare 都不需要用户授权；任务需要时直接调用对应 workbench 命令。
+6. 不要假设源码目录、串口号、ready banner 或 prompt；优先从 `doctor` 和 `scan-project` 获取。
+7. 不要把 build pass 当成完成；功能、调试和测试目标都必须有 verify/report/compare 或 UART/diag/monitor 证据闭环。
+8. `agent_workbench/tests/*.py` 是 Agent Workbench 平台自测，不是迁移项目固件验证入口；除非正在修改平台本身，否则不要把它当作 STM32 项目测试。
 
-```
-cmd /c ".\agent_workbench.bat plan ""<用户原话>"" --json"
-```
+## 稳定命令入口
 
-解析返回 JSON 的：
-- `parameter_extractions`：识别到的参数（如 pin=PA8, freq=1kHz）
-- `hardware_context`：对应的 TIM/GPIO 方案
-- `steps`：按顺序列出的 read/edit/shell 步骤
+优先从仓库根目录运行：
 
-把 plan 的**摘要**（不是全文 JSON）回报给用户：
-```
-识别到：PA8 引脚、1kHz 频率、50% 占空比
-硬件方案：TIM1_CH1（主频 72MHz → Prescaler=71, Period=999, CCR=500）
-计划步骤：6 步（read 2 / edit 3 / shell 1）
-是否开始执行？
+```powershell
+.\agent_workbench\bin\agent_workbench.bat doctor --json
 ```
 
-### 第 3 步：按 plan.steps 执行
+如果 OpenCode 或 PowerShell 对 bat 调用解析失败，立即用 direct Python 兜底：
 
-用 OpenCode 的对应工具依次执行：
-- `read` 步骤 → 用 OpenCode 的 `read` 工具
-- `edit` 步骤 → 用 OpenCode 的 `edit` 或 `write` 工具
-- `shell` 步骤 → 用 OpenCode 的 `bash` / `shell` 工具
-  - Windows 下所有 shell 命令都用 `cmd /c ".\agent_workbench.bat xxx --json"`
-
-### 第 4 步：编译
-
-```
-cmd /c ".\agent_workbench.bat build --json"
+```powershell
+python ".\agent_workbench\workbench.py" doctor --json
 ```
 
-- `exit_code == 0`：进入第 5 步
-- `exit_code != 0`：
+如果 `python` 不在 PATH，再试：
 
-```
-cmd /c ".\agent_workbench.bat fix-build --json"
-```
-
-读取返回的 `fixes` 数组（每项含 file / line / suggested_change），按建议修正后重新 build。
-连续 3 次 fix-build 仍失败 → 停下来汇报给用户。
-
-### 第 5 步：烧录（征得用户同意后）
-
-```
-cmd /c ".\agent_workbench.bat flash --method openocd_cmd --json"
+```powershell
+py -3 ".\agent_workbench\workbench.py" doctor --json
 ```
 
-### 第 6 步：UART CLI 烟测
+所有子命令都按这个模式替换。不要默认使用 `cmd /c ".\agent_workbench.bat ..."`。
 
+不要写成 `".\agent_workbench\bin\agent_workbench.bat" doctor --json`；PowerShell 会把引号内内容当字符串，后面的 `doctor` 会触发 ParserError。如果必须加引号，写成 `& ".\agent_workbench\bin\agent_workbench.bat" doctor --json`。
+
+## 默认工作模型
+
+### 第 1 步：环境与项目发现
+
+```powershell
+.\agent_workbench\bin\agent_workbench.bat doctor --json
 ```
-cmd /c ".\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json"
+
+```powershell
+.\agent_workbench\bin\agent_workbench.bat scan-project --json
 ```
 
-检查返回 JSON 的 `transcript`：
-- 必须包含 ready banner: `STM32 UART CLI ready.`
-- 必须包含 prompt: `cli>`
-- `help` 和 `status` 命令必须有合理响应
+如果 `doctor` 返回阻塞性失败，停止并报告具体失败项，不要在环境阻塞时继续改代码。
 
-### 第 7 步：输出最终报告
+### 第 2 步：选择 workflow
 
-把本次会话的以下证据汇总给用户：
-- 修改的文件列表
-- build 日志片段（成功/失败关键行）
-- UART transcript 前 50 行
-- 硬件参数（Prescaler / Period / CCR 等）的来源（用了哪个 plan.hardware_context 条目）
+- 新增或修改功能：使用 `agent-workbench-feature-zh`。
+- 排查异常或回归：使用 `agent-workbench-debug-zh`。
+- 设计、修正或验证测试：使用 `agent-workbench-test-zh`。
 
----
+所有 workflow 都要同时使用 `agent-workbench-toolbox-zh` 查询命令模板、artifact 含义、monitor 配置和失败路由。
 
-## 可用 sub-agent（见 `.opencode/agent/`）
+### 第 3 步：选择验证入口
 
-- `@code_planner`: 把 plan 转成具体代码修改
-- `@hardware_verifier`: 烧录和 UART 验证专用
-- `@weak_model`: 检测到自己是小上下文模型时启用
+- 功能开发：用 `scan-project`、源码、CLI、diag、monitor 候选和用户需求确定验证命令。
+- 自动调试：用 `uart exec`、`diag exec`、`monitor probe`、`session debug` 建证据链。
+- 测试设计与验证：由 OpenCode 设计覆盖矩阵和 probe 命令，用 runtime evidence 验证。
 
-## 可用 slash 命令（见 `.opencode/command/`）
+需要监控变量、寄存器或地址时，OpenCode 应自动编辑 `agent_workbench/agent_workbench.yaml` 的 `monitor.items`，然后运行 `monitor probe --json` 验证可读性。不要让用户手动添加。
 
-- `/plan-stm32 <需求>`: 只生成 plan 不执行
-- `/verify`: 运行完整 doctor + build + uart 烟测
-- `/fix-build`: 只读 build.log 生成修复建议
-- `/uart-smoke`: 单独做 UART CLI 烟测
-- `/flash-reset`: 只做烧录 + 复位
+### 第 4 步：执行和验证
+
+常用闭环：
+
+- 功能开发：`context --mode feature` -> 代码修改 -> `build` -> `flash` -> `uart/diag/monitor` -> `verify current` 或 `report --latest` -> 必要时 `compare --latest`
+- 自动调试：`uart/diag/monitor` 或 `verify current` -> 读取 evidence -> 提出最小假设 -> 单步实验 -> `session debug` -> `report --latest` -> `compare --latest`
+- 测试设计与验证：覆盖矩阵 -> `build` -> `flash` -> `uart/diag/monitor` 执行测试点 -> `verify current` 或 `report --latest` -> 必要时 `compare --latest`
+
+失败时先读 evidence，不要直接猜源码根因。
+
+### 第 5 步：输出报告
+
+报告必须使用对应 workflow skill 的模板：
+
+- 功能开发报告：`agent-workbench-feature/references/feature-report-template.md`
+- 调试报告：`agent-workbench-debug/references/debug-report-template.md`
+- 测试验证报告：`agent-workbench-test/references/test-report-template.md`
+
+如果未执行烧录、复位或实机 UART/diag/monitor 验证，必须明确写成“未执行”或“环境/硬件阻塞”，不能写成通过。
 
 ## 工具使用速查
 
 | 目的 | OpenCode 工具 | 示例 |
 |-----|-------------|------|
-| 读文件 | `read` | `read("Core/Src/main.c")` |
-| 改文件 | `edit` | `edit("Core/Src/main.c", old, new)` |
-| 新建文件 | `write` | `write("Core/Inc/new.h", content)` |
-| 搜代码 | `grep` | `grep("HAL_TIM_Init", "Core")` |
-| 列目录 | `list` | `list("Core/Src")` |
-| 跑命令 | `bash` | `bash('cmd /c ".\\agent_workbench.bat doctor --json"')` |
+| 读文件 | `read` | `read("<source_file_from_scan_project>")` |
+| 改文件 | `edit` | `edit("<source_file_from_scan_project>", old, new)` |
+| 新建文件 | `write` | `write("<project_specific_file>", content)` |
+| 搜代码 | `grep` | `grep("<symbol_or_stable_string>", "<directory_from_scan_project>")` |
+| 列目录 | `list` | `list("<directory_from_scan_project>")` |
+| 跑命令 | `bash` | `bash('.\agent_workbench\bin\agent_workbench.bat doctor --json')` |
 
-## 失败时的优先级
+## 失败优先级
 
-1. 硬件动作失败（flash/reset/uart 烟测） → 立刻停下来汇报，不要自动重试超过 1 次
-2. 编译失败 → 走 fix-build 流程，最多 3 轮
-3. plan 解析失败 → 把用户原话更具体再调一次 plan
-4. 文件读写失败 → 检查路径是否包含中文/空格，用绝对路径重试
+1. 环境或硬件阻塞：读 `doctor_report.json`、flash JSON、UART/diag/monitor evidence，停止并报告阻塞。
+2. 命令启动失败：用 direct Python 兜底重试一次，仍失败就报告 launcher 阻塞。
+3. 编译失败：运行 `fix-build --json`，结合 build log 小步修复，最多 3 轮。
+4. ready/prompt/CLI 失败：读 `cli_diag.json`、`cli_transcript.log`、`session_verdict.json`，按 debug skill 分层排查。
+5. monitor 失败：检查 `agent_workbench.yaml`、ELF 路径、symbol/address/value_type、OpenOCD/debug 连接。
+6. 断言或测试失败：先判断测试设计、probe 命令、源码行为、环境硬件哪一层失败，再决定改 probe 或生产代码。
+7. 信息不足：运行 `context`、`uart/diag/monitor`、`report --latest` 或 `compare --latest`。

@@ -56,6 +56,23 @@ cmd /c ".\agent_workbench.bat init-opencode-agents --json"
    - `/uart-smoke`
    - `/flash-reset`
 
+## 与四个 Skill 配合使用
+
+推荐同时安装 `agent_workbench/skills_bundle` 中的四个 skill：
+
+- `agent-workbench-toolbox`
+- `agent-workbench-feature`
+- `agent-workbench-debug`
+- `agent-workbench-test`
+
+OpenCode 执行复杂任务时应优先使用：
+
+- 功能开发：`agent-workbench-toolbox` + `agent-workbench-feature`
+- 自动调试：`agent-workbench-toolbox` + `agent-workbench-debug`
+- 测试生成与实机验证：`agent-workbench-toolbox` + `agent-workbench-test`
+
+`/plan-stm32` 仅保留为兼容入口，适合简单标准硬件任务的参数探索；复杂任务默认走 skill、task yaml、verify/report/compare 的证据闭环。
+
 ## 检查与卸载
 
 ```powershell
