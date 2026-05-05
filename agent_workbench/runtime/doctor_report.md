@@ -2,7 +2,7 @@
 
 | check | level | detail |
 |---|---|---|
-| python | ok | D:\Anaconda1\python.exe |
+| python | ok | C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe |
 | yaml | ok | PyYAML available |
 | runtime_root | ok | ok |
 | evidence_root | ok | ok |
@@ -15,14 +15,15 @@
 | monitor_symbol_image | ok | H:\stm32_RAG\code\serial\build\cmake-debug\serial.elf |
 | openocd | ok | openocd |
 | flash_method | ok | openocd_cmd: openocd |
-| monitor_items | ok | count=2 |
+| monitor_items | ok | count=5 |
 | monitor_symbol_items | ok | symbol items=2 |
 | monitor_target_selection | ok | not required by current config |
-| uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> |
-| uart_backend | warn | pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial. |
-| diag_uart_requests | ok | count=2 port=COM3 |
-| diag_uart_backend | warn | pyserial unavailable: No module named 'serial'. PowerShell fallback is available for diag exec. |
-| diag_uart_port | warn | port availability not checked without pyserial |
+| uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> format=8N1 |
+| uart_backend | ok | pyserial available |
+| uart_port | ok | COM3 |
+| diag_uart_requests | ok | count=2 port=COM3 format=7O1.5 |
+| diag_uart_backend | ok | pyserial available |
+| diag_uart_port | ok | COM3 |
 | agent_profile | ok | balanced_local missing=none |
 | uart_markers | ok | ready=STM32 UART CLI ready. prompt=cli> probe_count=6 |
 | agent_state | ok | H:\stm32_RAG\code\serial\agent_workbench\runtime\agent_state.json |
@@ -46,4 +47,4 @@
 | integration::opencode::.opencode/command/flash-reset.md | ok | H:\stm32_RAG\code\serial\.opencode\command\flash-reset.md |
 | planner_templates | ok | count=16 minimum=15 |
 | migration_docs | ok | migration docs ready |
-| unit_command | ok | D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |
+| unit_command | ok | C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py" |

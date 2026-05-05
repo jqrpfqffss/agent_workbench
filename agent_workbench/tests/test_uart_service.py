@@ -16,7 +16,7 @@ class _FakeSerial:
     write_hooks: dict[bytes, list[bytes]] = {}
     last_instance: "_FakeSerial | None" = None
 
-    def __init__(self, port: str, baudrate: int, timeout: float):
+    def __init__(self, port: str, baudrate: int, timeout: float, **kwargs):
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
@@ -74,6 +74,9 @@ class UartExecTests(unittest.TestCase):
                 "enabled": True,
                 "port": "COM3",
                 "baudrate": 9600,
+                "data_bits": 8,
+                "stop_bits": 1,
+                "parity": "none",
                 "encoding": "utf-8",
                 "line_timeout_sec": 0.01,
                 "startup_drain_sec": 0.0,
