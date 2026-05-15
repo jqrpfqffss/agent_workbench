@@ -1,5 +1,28 @@
 # OpenCode 集成说明
 
+## Remote DT 开发闭环
+
+当 DT 编译、用例执行和覆盖率生成都在 Linux 服务器上完成时，优先使用：
+
+```powershell
+cmd /c ".\agent_workbench.bat remote-dt pipeline --json"
+```
+
+标准闭环：
+1. 修改本地 DT 用例或业务代码。
+2. 等待 RemoteDevPlus 将代码同步到 Linux 服务器。
+3. 执行 `remote-dt pipeline --json`。
+4. 如果失败，读取 `agent_workbench/runtime/remote_dt/dt_remote_result.json`、`agent_workbench/runtime/remote_dt/dt_remote_summary.md` 和 `agent_workbench/runtime/remote_dt/logs/dt_*.log`。
+5. 根据第一失败阶段修复本地代码，再次等待同步并执行 pipeline。
+6. 直到 build、execute、coverage 全部通过。
+
+约束：
+- 不允许只根据源码静态检查判断 DT 通过，必须以 `remote-dt pipeline` 的 JSON 结果和 DT 日志为准。
+- 失败时优先分析第一失败阶段。
+- build 失败先修 build；execute 失败再修用例或业务逻辑；coverage 失败再修覆盖率脚本或产物路径。
+
+迁移提示：默认使用系统 `ssh` 和 `scp`，并依赖 SSH key。若 Windows 环境需要指定特殊客户端，可在 `remote_dt.ssh.ssh_command` 和 `remote_dt.ssh.scp_command` 中覆盖；一般真实项目保持为空即可。
+
 这个集成包会为当前 STM32 项目生成 OpenCode 所需的项目级配置：
 
 - `AGENTS.md`

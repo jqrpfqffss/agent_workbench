@@ -3,7 +3,7 @@
     {
       "name": "python",
       "level": "ok",
-      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
+      "detail": "D:\\Anaconda1\\python.exe"
     },
     {
       "name": "yaml",
@@ -87,13 +87,8 @@
     },
     {
       "name": "uart_backend",
-      "level": "ok",
-      "detail": "pyserial available"
-    },
-    {
-      "name": "uart_port",
-      "level": "ok",
-      "detail": "COM3"
+      "level": "warn",
+      "detail": "pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial."
     },
     {
       "name": "diag_uart_requests",
@@ -102,13 +97,13 @@
     },
     {
       "name": "diag_uart_backend",
-      "level": "ok",
-      "detail": "pyserial available"
+      "level": "warn",
+      "detail": "pyserial unavailable: No module named 'serial'. PowerShell fallback is available for diag exec."
     },
     {
       "name": "diag_uart_port",
-      "level": "ok",
-      "detail": "COM3"
+      "level": "warn",
+      "detail": "port availability not checked without pyserial"
     },
     {
       "name": "agent_profile",
@@ -228,9 +223,9 @@
     {
       "name": "unit_command",
       "level": "ok",
-      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
+      "detail": "D:\\Anaconda1\\python.exe -m unittest discover -s agent_workbench/tests -p \"test_*.py\""
     }
   ],
   "fail_count": 0,
-  "warn_count": 0
+  "warn_count": 3
 }

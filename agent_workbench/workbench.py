@@ -101,6 +101,14 @@ def _cmd_build(args: argparse.Namespace) -> int:
     return _emit(args, payload, [payload["summary"]])
 
 
+def _cmd_remote_dt(args: argparse.Namespace) -> int:
+    from core.remote_dt_service import RemoteDtService
+
+    cfg = _cfg(args.config)
+    payload = RemoteDtService(cfg).run(args.action)
+    return _emit(args, payload, [payload["summary"]])
+
+
 def _cmd_flash(args: argparse.Namespace) -> int:
     from core.flash_service import run_flash
 
@@ -774,6 +782,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_build.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_json_flag(p_build)
     p_build.set_defaults(func=_cmd_build)
+
+    p_remote_dt = sub.add_parser("remote-dt", help="run remote DT build, execute, coverage, and artifact pull")
+    p_remote_dt.add_argument("action", choices=["build", "execute", "coverage", "pipeline", "pull-logs"])
+    p_remote_dt.add_argument("--config", default=str(DEFAULT_CONFIG))
+    _add_json_flag(p_remote_dt)
+    p_remote_dt.set_defaults(func=_cmd_remote_dt)
 
     p_flash = sub.add_parser("flash", help="flash firmware")
     p_flash.add_argument("--config", default=str(DEFAULT_CONFIG))

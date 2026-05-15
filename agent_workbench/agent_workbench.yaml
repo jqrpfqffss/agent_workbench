@@ -326,6 +326,131 @@ monitor:
         source: register
         target: pc
         value_type: u32
+remote_dt:
+  # Remote DT 远程自动化测试功能开关。
+  # DT 可以理解为“在另一台 Linux 机器上跑的一套开发/测试/覆盖率流水线”：
+  # - 本机 Windows 负责发起命令、收集日志、生成 result JSON / summary Markdown。
+  # - 远端 Linux 负责真正执行 build.sh、execute.sh、gen_coverage.sh。
+  # 当前默认关闭。迁移到真实 Linux 服务器并填好 host/user/remote_project_dir 后再改成 true。
+  enabled: false
+
+  # 远程 Linux 主机地址。
+  # 可以写 IP，例如 "192.168.1.50"；也可以写主机名，例如 "dt-server"。
+  # enabled=true 时不能为空，否则 remote-dt 命令会直接返回配置失败。
+  host: ""
+
+  # 登录远程 Linux 的用户名。
+  # 这个用户需要能进入 remote_project_dir，并有权限执行 scripts 里的脚本。
+  user: ""
+
+  # SSH 端口。大多数服务器是 22；如果服务器映射了其它端口，就改成对应端口。
+  port: 22
+
+  # 远程项目目录，也就是 Linux 服务器上工程所在目录。
+  # remote-dt 每个阶段都会先执行 `cd remote_project_dir`，再运行下面 scripts 中的命令。
+  # 路径里可以有空格，工具会自动做基本 quoting；但迁移时仍建议尽量使用不带空格的目录。
+  # 示例：/home/dtuser/projects/serial
+  remote_project_dir: ""
+
+  # 本机用于保存远程 DT 产物的目录，路径相对 project.root。
+  # 成功或失败后，工具会在这里写入：
+  # - dt_remote_result.json：机器可读的完整结果
+  # - dt_remote_summary.md：人可读摘要
+  # - logs/dt_build.log、logs/dt_execute.log、logs/dt_coverage.log
+  # - results/dt_*_result.json
+  # - coverage/ 覆盖率目录
+  local_artifact_dir: agent_workbench/runtime/remote_dt
+
+  ssh:
+    # SSH 私钥文件路径。
+    # 留空表示使用系统默认 SSH key，例如 Windows 用户目录下的 .ssh/id_rsa 或 id_ed25519。
+    # 如果要指定专用 key，可写绝对路径，例如 C:/Users/you/.ssh/dt_ed25519。
+    identity_file: ""
+
+    # SSH/SCP 建立连接的超时时间，单位秒。
+    # 网络慢或服务器首次连接较慢时可适当加大；连接很快的内网一般 5~10 秒够用。
+    connect_timeout_sec: 10
+
+    # 是否启用严格主机密钥检查。
+    # false：首次连接或主机 key 变化时更省事，适合内网/临时环境。
+    # true：更安全，适合长期固定服务器；需要提前处理 known_hosts。
+    strict_host_key_checking: false
+
+    # 可选：覆盖 ssh 命令。
+    # 留空时使用系统 PATH 中的 ssh。
+    # 只有在 Windows 上需要指定特殊客户端、wrapper 或模拟测试脚本时才填写。
+    # 真实项目通常保持空字符串。
+    ssh_command: ""
+
+    # 可选：覆盖 scp 命令。
+    # 留空时使用系统 PATH 中的 scp。
+    # 如果 ssh_command 做了特殊覆盖，scp_command 通常也要保持同一套客户端。
+    scp_command: ""
+
+  scripts:
+    # 远程构建脚本。
+    # 在 remote_project_dir 下执行，stdout/stderr 会写到远端 remote_log_dir/dt_build.log，
+    # 随后拉回本机 local_artifact_dir/logs/dt_build.log。
+    # 返回码非 0 时，pipeline 会停止，不再执行 execute/coverage。
+    build: ./build.sh
+
+    # 远程测试/执行脚本。
+    # 一般用于跑单元测试、集成测试、仿真测试或 DT 用例。
+    # build 成功后才会执行；失败时 coverage 会被标记为 skipped。
+    execute: ./execute.sh
+
+    # 远程覆盖率生成脚本。
+    # 一般用于运行 gcov/lcov/genhtml 等命令，并生成 artifacts.remote_coverage_dir 指向的覆盖率目录。
+    coverage: ./gen_coverage.sh
+
+  timeouts:
+    # build 阶段最大允许耗时，单位秒。
+    # 超时会被记录为失败，并在 dt_remote_result.json 中标记 timed out。
+    build_sec: 600
+
+    # execute 阶段最大允许耗时，单位秒。
+    # 如果远程测试很多或会跑仿真，可以适当加大。
+    execute_sec: 1200
+
+    # coverage 阶段最大允许耗时，单位秒。
+    # 覆盖率数据量大时 genhtml/lcov 可能较慢。
+    coverage_sec: 600
+
+    # 每一次 scp 拉取日志、JSON 或覆盖率目录的超时时间，单位秒。
+    # 覆盖率目录很大或网络慢时需要加大。
+    pull_sec: 300
+
+  artifacts:
+    # 远端 DT 工作目录名。
+    # 当前配置主要作为约定说明；实际日志/结果路径由 remote_log_dir 和 remote_result_dir 控制。
+    remote_work_dir: .agent_workbench_remote_dt
+
+    # 远端日志目录，路径相对 remote_project_dir。
+    # 每个阶段会生成一个固定文件：
+    # - dt_build.log
+    # - dt_execute.log
+    # - dt_coverage.log
+    remote_log_dir: .agent_workbench_remote_dt/logs
+
+    # 远端结果 JSON 目录，路径相对 remote_project_dir。
+    # 每个阶段会生成一个轻量 JSON：
+    # - dt_build_result.json
+    # - dt_execute_result.json
+    # - dt_coverage_result.json
+    remote_result_dir: .agent_workbench_remote_dt/results
+
+    # 远端覆盖率目录，路径相对 remote_project_dir。
+    # coverage 阶段完成后会递归拉回到 local_artifact_dir/coverage。
+    remote_coverage_dir: coverage
+
+    # 期望拉回本机的远端产物模式清单。
+    # 这组值是给迁移人员和后续工具看的“产物约定”：
+    # 当前 remote-dt pull-logs 实际会按 remote_log_dir、remote_result_dir、remote_coverage_dir 拉取。
+    # 修改这里时，也要保持上面三个目录字段一致。
+    pull_patterns:
+      - .agent_workbench_remote_dt/logs/dt_*.log
+      - .agent_workbench_remote_dt/results/dt_*.json
+      - coverage/**
 checks:
   unit:
     # 是否启用单元测试检查。
