@@ -1046,3 +1046,185 @@ Ran 58 tests in 2.735s
 
 FAILED (failures=2, skipped=1)
 [2026-05-05T04:36:40.991+00:00] exit=1
+
+[2026-05-15T11:45:24.966+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...............................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 68 tests in 2.808s
+
+OK (skipped=1)
+[2026-05-15T11:45:28.580+00:00] exit=0
+
+[2026-05-15T11:46:16.827+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...............................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 68 tests in 2.879s
+
+OK (skipped=1)
+[2026-05-15T11:46:19.996+00:00] exit=0
+
+[2026-05-15T11:47:21.717+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s...............................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 68 tests in 2.730s
+
+OK (skipped=1)
+[2026-05-15T11:47:24.729+00:00] exit=0
+
+[2026-05-15T12:03:47.651+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s................................................EFusage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+======================================================================
+ERROR: test_real_cli_pipeline_stops_after_fake_build_failure (test_remote_dt_service.RemoteDtServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_remote_dt_service.py", line 328, in test_real_cli_pipeline_stops_after_fake_build_failure
+    self.assertEqual(call_log.read_text(encoding="utf-8").splitlines(), ["build"])
+  File "D:\Anaconda1\lib\pathlib.py", line 1235, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "D:\Anaconda1\lib\pathlib.py", line 1221, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "D:\Anaconda1\lib\pathlib.py", line 1077, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: 'H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_remote_dt__lq5q8y7\\calls_fail.txt'
+
+======================================================================
+FAIL: test_real_cli_pipeline_with_fake_ssh_scp_on_windows (test_remote_dt_service.RemoteDtServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_remote_dt_service.py", line 272, in test_real_cli_pipeline_with_fake_ssh_scp_on_windows
+    self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+AssertionError: 1 != 0 : {"command": "remote-dt", "action": "pipeline", "status": "fail", "exit_code": 1, "summary": "remote DT build failed, execute and coverage skipped", "steps": [{"name": "build", "status": "fail", "exit_code": 255, "remote_exit_code": 255, "duration_sec": 3.031, "remote_command": "ssh -p 2200 -o ConnectTimeout=3 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"set -o pipefail\ncd '/srv/remote project'\nmkdir -p .agent_workbench_remote_dt/logs .agent_workbench_remote_dt/results\nSTART_TS=$(date +%s)\n( ./build.sh ) > .agent_workbench_remote_dt/logs/dt_build.log 2>&1\nEXIT_CODE=$?\nEND_TS=$(date +%s)\nprintf '{\\\"step\\\":\\\"build\\\",\\\"exit_code\\\":%s,\\\"start_ts\\\":%s,\\\"end_ts\\\":%s}\\n' \\\"$EXIT_CODE\\\" \\\"$START_TS\\\" \\\"$END_TS\\\" > .agent_workbench_remote_dt/results/dt_build_result.json\nexit \\\"$EXIT_CODE\\\"\"", "remote_log_path": ".agent_workbench_remote_dt/logs/dt_build.log", "local_log_path": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/logs/dt_build.log", "error_count": 3, "warning_count": 0, "pulls": [{"command": "scp -P 2200 -o ConnectTimeout=3 -o StrictHostKeyChecking=no \"dtuser@127.0.0.1:'/srv/remote project/.agent_workbench_remote_dt/logs/dt_build.log'\" H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_remote_dt_g09o27qw\\cli_remote_dt\\logs", "exit_code": 1, "stdout": "", "stderr": "Could not create directory 'C:\\\\Users\\\\CodexSandboxOffline/.ssh'.\nkex_exchange_identification: write: Connection refused\n"}, {"command": "scp -P 2200 -o ConnectTimeout=3 -o StrictHostKeyChecking=no \"dtuser@127.0.0.1:'/srv/remote project/.agent_workbench_remote_dt/results/dt_build_result.json'\" H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\test_tmp\\awb_remote_dt_g09o27qw\\cli_remote_dt\\results", "exit_code": 1, "stdout": "", "stderr": "Could not create directory 'C:\\\\Users\\\\CodexSandboxOffline/.ssh'.\nkex_exchange_identification: write: Connection refused\n"}]}, {"name": "execute", "status": "skipped", "reason": "build failed"}, {"name": "coverage", "status": "skipped", "reason": "build failed"}], "details": {}, "artifacts": {"result_json": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/dt_remote_result.json", "summary_md": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/dt_remote_summary.md", "log_dir": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/logs", "build_log": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/logs/dt_build.log", "execute_log": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/logs/dt_execute.log", "coverage_log": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/logs/dt_coverage.log", "coverage_dir": "runtime/test_tmp/awb_remote_dt_g09o27qw/cli_remote_dt/coverage"}, "errors": [{"step": "build", "file": "", "line": null, "message": "remote DT build exited with code 255", "raw": "Could not create directory 'C:\\\\Users\\\\CodexSandboxOffline/.ssh'.\nkex_exchange_identification: write: Connection refused"}, {"step": "build", "file": "", "line": null, "message": "failed to pull remote DT artifact", "raw": "Could not create directory 'C:\\\\Users\\\\CodexSandboxOffline/.ssh'.\nkex_exchange_identification: write: Connection refused\n"}, {"step": "build", "file": "", "line": null, "message": "failed to pull remote DT artifact", "raw": "Could not create directory 'C:\\\\Users\\\\CodexSandboxOffline/.ssh'.\nkex_exchange_identification: write: Connection refused\n"}], "warnings": [], "test_failures": [], "timestamp": "2026-05-15T12:04:32.327+00:00"}
+
+
+----------------------------------------------------------------------
+Ran 71 tests in 44.602s
+
+FAILED (failures=1, errors=1, skipped=1)
+[2026-05-15T12:04:32.534+00:00] exit=1
+
+[2026-05-15T12:06:12.931+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s................................................EFusage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+======================================================================
+ERROR: test_real_cli_pipeline_stops_after_fake_build_failure (test_remote_dt_service.RemoteDtServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_remote_dt_service.py", line 339, in test_real_cli_pipeline_stops_after_fake_build_failure
+    payload = json.loads(proc.stdout)
+  File "D:\Anaconda1\lib\json\__init__.py", line 357, in loads
+    return _default_decoder.decode(s)
+  File "D:\Anaconda1\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "D:\Anaconda1\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+======================================================================
+FAIL: test_real_cli_pipeline_with_fake_ssh_scp_on_windows (test_remote_dt_service.RemoteDtServiceTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\tests\test_remote_dt_service.py", line 278, in test_real_cli_pipeline_with_fake_ssh_scp_on_windows
+    self.assertEqual(proc.returncode, 0, proc.stderr + proc.stdout)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "H:\stm32_RAG\code\serial\agent_workbench\bin\..\workbench.py", line 994, in <module>
+    raise SystemExit(main())
+  File "H:\stm32_RAG\code\serial\agent_workbench\bin\..\workbench.py", line 990, in main
+    return dispatch_args()
+  File "H:\stm32_RAG\code\serial\agent_workbench\bin\..\workbench.py", line 986, in dispatch_args
+    return int(args.func(args))
+  File "H:\stm32_RAG\code\serial\agent_workbench\bin\..\workbench.py", line 107, in _cmd_remote_dt
+    cfg = _cfg(args.config)
+  File "H:\stm32_RAG\code\serial\agent_workbench\bin\..\workbench.py", line 16, in _cfg
+    return load_config(Path(path_text).resolve())
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\config.py", line 320, in load_config
+    loaded = _load_yaml(config_path)
+  File "H:\stm32_RAG\code\serial\agent_workbench\core\config.py", line 20, in _load_yaml
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+  File "D:\Anaconda1\lib\site-packages\yaml\__init__.py", line 162, in safe_load
+    return load(stream, SafeLoader)
+  File "D:\Anaconda1\lib\site-packages\yaml\__init__.py", line 114, in load
+    return loader.get_single_data()
+  File "D:\Anaconda1\lib\site-packages\yaml\constructor.py", line 49, in get_single_data
+    node = self.get_single_node()
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 36, in get_single_node
+    document = self.compose_document()
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 55, in compose_document
+    node = self.compose_node(None, None)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "D:\Anaconda1\lib\site-packages\yaml\composer.py", line 127, in compose_mapping_node
+    while not self.check_event(MappingEndEvent):
+  File "D:\Anaconda1\lib\site-packages\yaml\parser.py", line 98, in check_event
+    self.current_event = self.state()
+  File "D:\Anaconda1\lib\site-packages\yaml\parser.py", line 438, in parse_block_mapping_key
+    raise ParserError("while parsing a block mapping", self.marks[-1],
+yaml.parser.ParserError: while parsing a block mapping
+  in "<unicode string>", line 11, column 5:
+        identity_file: ''
+        ^
+expected <block end>, but found '<scalar>'
+  in "<unicode string>", line 14, column 44:
+     ... mand: "D:/Anaconda1/python.exe" "H:/stm32_RAG/code/serial/agent_ ... 
+                                         ^
+
+
+----------------------------------------------------------------------
+Ran 71 tests in 5.180s
+
+FAILED (failures=1, errors=1, skipped=1)
+[2026-05-15T12:06:18.384+00:00] exit=1
+
+[2026-05-15T12:06:38.317+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s..................................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 71 tests in 6.020s
+
+OK (skipped=1)
+[2026-05-15T12:06:44.611+00:00] exit=0
+
+[2026-05-15T12:07:26.871+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s..................................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 71 tests in 6.105s
+
+OK (skipped=1)
+[2026-05-15T12:07:33.253+00:00] exit=0
+
+[2026-05-15T12:30:13.714+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
+.....s..................................................usage: python.exe -m unittest remote-dt [-h] [--config CONFIG] [--json]
+                                        {build,execute,coverage,pipeline,pull-logs}
+python.exe -m unittest remote-dt: error: argument action: invalid choice: 'doctor' (choose from 'build', 'execute', 'coverage', 'pipeline', 'pull-logs')
+...............
+----------------------------------------------------------------------
+Ran 71 tests in 6.034s
+
+OK (skipped=1)
+[2026-05-15T12:30:20.018+00:00] exit=0

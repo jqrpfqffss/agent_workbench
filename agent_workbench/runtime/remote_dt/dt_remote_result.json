@@ -1,0 +1,29 @@
+{
+  "command": "remote-dt",
+  "action": "pipeline",
+  "status": "fail",
+  "exit_code": 2,
+  "summary": "remote_dt is not enabled",
+  "steps": [],
+  "details": {},
+  "artifacts": {
+    "result_json": "agent_workbench/runtime/remote_dt/dt_remote_result.json",
+    "summary_md": "agent_workbench/runtime/remote_dt/dt_remote_summary.md",
+    "log_dir": "agent_workbench/runtime/remote_dt/logs",
+    "build_log": "agent_workbench/runtime/remote_dt/logs/dt_build.log",
+    "execute_log": "agent_workbench/runtime/remote_dt/logs/dt_execute.log",
+    "coverage_log": "agent_workbench/runtime/remote_dt/logs/dt_coverage.log",
+    "coverage_dir": "agent_workbench/runtime/remote_dt/coverage"
+  },
+  "errors": [
+    {
+      "step": "",
+      "kind": "config",
+      "message": "remote_dt is not enabled",
+      "raw": "remote_dt is not enabled"
+    }
+  ],
+  "warnings": [],
+  "test_failures": [],
+  "timestamp": "2026-05-15T12:07:40.638+00:00"
+}

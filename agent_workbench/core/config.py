@@ -173,6 +173,43 @@ def _defaults() -> dict[str, Any]:
             },
             "items": [],
         },
+        "remote_dt": {
+            "enabled": False,
+            "host": "",
+            "user": "",
+            "port": 22,
+            "remote_project_dir": "",
+            "local_artifact_dir": "agent_workbench/runtime/remote_dt",
+            "ssh": {
+                "identity_file": "",
+                "connect_timeout_sec": 10,
+                "strict_host_key_checking": False,
+                "ssh_command": "",
+                "scp_command": "",
+            },
+            "scripts": {
+                "build": "./build.sh",
+                "execute": "./execute.sh",
+                "coverage": "./gen_coverage.sh",
+            },
+            "timeouts": {
+                "build_sec": 600,
+                "execute_sec": 1200,
+                "coverage_sec": 600,
+                "pull_sec": 300,
+            },
+            "artifacts": {
+                "remote_work_dir": ".agent_workbench_remote_dt",
+                "remote_log_dir": ".agent_workbench_remote_dt/logs",
+                "remote_result_dir": ".agent_workbench_remote_dt/results",
+                "remote_coverage_dir": "coverage",
+                "pull_patterns": [
+                    ".agent_workbench_remote_dt/logs/dt_*.log",
+                    ".agent_workbench_remote_dt/results/dt_*.json",
+                    "coverage/**",
+                ],
+            },
+        },
         "checks": {
             "unit": {
                 "enabled": True,
