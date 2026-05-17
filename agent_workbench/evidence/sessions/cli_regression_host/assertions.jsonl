@@ -1,4 +1,0 @@
-{"ts": "2026-04-05T04:04:04.151+00:00", "name": "cli_help_lists_version", "type": "cli_contains", "ok": false, "status": "skip", "detail": "cli_transcript.log missing"}
-{"ts": "2026-04-05T04:04:04.152+00:00", "name": "cli_version_reports_fw", "type": "cli_contains", "ok": false, "status": "skip", "detail": "cli_transcript.log missing"}
-{"ts": "2026-04-05T04:04:04.152+00:00", "name": "cli_selftest_reports_status", "type": "cli_contains", "ok": false, "status": "skip", "detail": "cli_transcript.log missing"}
-{"ts": "2026-04-05T04:04:04.153+00:00", "name": "cli_alerts_reports_count", "type": "cli_contains", "ok": false, "status": "skip", "detail": "cli_transcript.log missing"}

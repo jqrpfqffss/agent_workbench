@@ -1,9 +1,0 @@
-{"ts": "2026-04-05T05:34:20.451+00:00", "name": "cli_ready_banner_seen", "type": "cli_ready", "ok": false, "status": "fail", "detail": "cli ready"}
-{"ts": "2026-04-05T05:34:20.453+00:00", "name": "cli_prompt_seen", "type": "cli_prompt_seen", "ok": false, "status": "fail", "detail": "cli>"}
-{"ts": "2026-04-05T05:34:20.453+00:00", "name": "cli_has_no_timeout", "type": "cli_no_timeout", "ok": true, "status": "pass", "detail": "no [timeout] expected"}
-{"ts": "2026-04-05T05:34:20.454+00:00", "name": "cli_help_lists_version", "type": "cli_contains", "ok": false, "status": "fail", "detail": "version | version"}
-{"ts": "2026-04-05T05:34:20.454+00:00", "name": "cli_ping_pong", "type": "cli_contains", "ok": false, "status": "fail", "detail": "pong"}
-{"ts": "2026-04-05T05:34:20.455+00:00", "name": "cli_version_reports_fw", "type": "cli_contains", "ok": false, "status": "fail", "detail": "version fw="}
-{"ts": "2026-04-05T05:34:20.455+00:00", "name": "cli_selftest_reports_status", "type": "cli_contains", "ok": false, "status": "fail", "detail": "selftest status="}
-{"ts": "2026-04-05T05:34:20.455+00:00", "name": "cli_alerts_reports_count", "type": "cli_contains", "ok": false, "status": "fail", "detail": "alerts count="}
-{"ts": "2026-04-05T05:34:20.456+00:00", "name": "cli_stats_rx_bytes_non_negative", "type": "cli_diag_field_between", "ok": true, "status": "pass", "detail": "field=stats.rx_bytes value=0 range=[0.0,1000000.0]"}

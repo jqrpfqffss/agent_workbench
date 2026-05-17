@@ -1,28 +1,15 @@
 from __future__ import annotations
 
-import argparse
+import contextlib
+import io
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import workbench  # type: ignore  # noqa: E402
-
-
-class _FakeMonitorEngine:
-    def __init__(self, cfg: dict, out_dir: Path):
-        self.cfg = cfg
-        self.out_dir = out_dir
-
-    def probe_once(self):
-        return 0, {
-            "symbol_image": "build/demo.axf",
-            "connect_commands": ["targets stm32h7x.cpu0"],
-            "items": [{"name": "g_data", "source": "symbol", "value": 1, "ok": True, "error": ""}],
-        }
 
 
 class WorkbenchMonitorTests(unittest.TestCase):
@@ -34,19 +21,32 @@ class WorkbenchMonitorTests(unittest.TestCase):
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_monitor_probe_builds_structured_payload(self) -> None:
-        args = argparse.Namespace(action="probe", config="unused", out_dir=str(self.temp_dir), source="", dest="", json=False)
-        cfg = {"outputs": {"runtime_root_path": self.temp_dir}}
+    def test_removed_commands_are_not_registered(self) -> None:
+        parser = workbench.build_parser()
+        commands = parser._subparsers._group_actions[0].choices
 
-        with patch("workbench._cfg", return_value=cfg):
-            with patch("core.monitor_service.MonitorEngine", _FakeMonitorEngine):
-                with patch("workbench._emit", side_effect=lambda _args, payload, _lines: payload["exit_code"]) as emit:
-                    code = workbench._cmd_monitor(args)
+        self.assertNotIn("scan-project", commands)
+        self.assertNotIn("context", commands)
+        self.assertNotIn("test", commands)
+        self.assertNotIn("verify", commands)
+        self.assertNotIn("report", commands)
+        self.assertNotIn("compare", commands)
+        self.assertNotIn("session", commands)
 
-        self.assertEqual(code, 0)
-        payload = emit.call_args.args[1]
-        self.assertEqual(payload["command"], "monitor probe")
-        self.assertEqual(payload["details"]["items"][0]["name"], "g_data")
+    def test_monitor_only_exposes_kept_actions(self) -> None:
+        parser = workbench.build_parser()
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parser.parse_args(["monitor", "probe"])
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parser.parse_args(["monitor", "run", "--out-dir", str(self.temp_dir)])
+        parsed = parser.parse_args(["monitor", "stats"])
+        self.assertEqual(parsed.action, "stats")
+
+    def test_hidden_monitor_run_internal_accepts_out_dir(self) -> None:
+        parser = workbench.build_parser()
+        parsed = parser.parse_args(["__monitor-run", "--out-dir", str(self.temp_dir)])
+        self.assertEqual(parsed.command, "__monitor-run")
+        self.assertEqual(parsed.out_dir, str(self.temp_dir))
 
 
 if __name__ == "__main__":

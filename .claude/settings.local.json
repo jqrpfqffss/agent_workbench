@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where python *)",
+      "Bash(where python3 *)",
+      "Bash(ls /c/Python*)",
+      "Read(//c/Users/Administrator/AppData/Local/Programs/Python/**)",
+      "Bash(/c/Users/Administrator/AppData/Local/Programs/Python/Python38/python.exe -m pip install PyYAML pyserial)",
+      "Bash(/c/Users/Administrator/AppData/Local/Programs/Python/Python38/python.exe agent_workbench/workbench.py doctor --json)",
+      "Bash(/c/Users/Administrator/AppData/Local/Programs/Python/Python38/python.exe agent_workbench/workbench.py build --json)",
+      "Bash(/c/Users/Administrator/AppData/Local/Programs/Python/Python38/python.exe agent_workbench/workbench.py flash --method openocd_cmd --json)"
+    ]
+  }
+}

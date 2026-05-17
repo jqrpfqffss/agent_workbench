@@ -215,107 +215,6 @@ def _defaults() -> dict[str, Any]:
                 ],
             },
         },
-        "checks": {
-            "unit": {
-                "enabled": True,
-                "command": '{python} -m unittest discover -s agent_workbench/tests -p "test_*.py"',
-            },
-        },
-        "workflow": {
-            "manage_openocd": True,
-            "observe_seconds": 30,
-            "auto_compare_previous": True,
-            "verify_sequence": ["doctor", "build", "flash", "reset", "observe", "report"],
-        },
-        "planner": {
-            "templates_dir": "templates/task_templates",
-            "hardware_knowledge_dir": "templates/hardware_knowledge",
-            "max_total_steps": 15,
-            "minimum_template_count": 15,
-        },
-        "integrations": {
-            "auto_install": [],
-        },
-        "vscode": {
-            "tasks_file": ".vscode/tasks.json",
-        },
-        "agent": {
-            "default_profile": "balanced_local",
-            "profiles": {
-                "balanced_local": {
-                    "max_pack_words": 550,
-                    "max_fact_items": 12,
-                    "max_cli_tail_lines": 6,
-                    "max_failed_assertions_shown": 3,
-                    "max_extra_reads": 2,
-                    "max_edit_files": 2,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-                "deepseek16k": {
-                    "max_pack_words": 420,
-                    "max_fact_items": 10,
-                    "max_cli_tail_lines": 5,
-                    "max_failed_assertions_shown": 2,
-                    "max_extra_reads": 1,
-                    "max_edit_files": 2,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-                "qwen32k": {
-                    "max_pack_words": 520,
-                    "max_fact_items": 12,
-                    "max_cli_tail_lines": 6,
-                    "max_failed_assertions_shown": 3,
-                    "max_extra_reads": 2,
-                    "max_edit_files": 2,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-                "deepseek_r1": {
-                    "max_pack_words": 380,
-                    "max_fact_items": 9,
-                    "max_cli_tail_lines": 5,
-                    "max_failed_assertions_shown": 2,
-                    "max_extra_reads": 1,
-                    "max_edit_files": 2,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-                "qwen7b": {
-                    "max_pack_words": 320,
-                    "max_fact_items": 8,
-                    "max_cli_tail_lines": 4,
-                    "max_failed_assertions_shown": 2,
-                    "max_extra_reads": 1,
-                    "max_edit_files": 1,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-                "glm": {
-                    "max_pack_words": 460,
-                    "max_fact_items": 10,
-                    "max_cli_tail_lines": 5,
-                    "max_failed_assertions_shown": 3,
-                    "max_extra_reads": 2,
-                    "max_edit_files": 2,
-                    "require_fact_citations": True,
-                    "prefer_ascii_runtime_artifacts": True,
-                    "session_pick_strategy": "latest_failed_then_latest_pass",
-                },
-            },
-        },
-        "prompts": {
-            "debug": "prompts/legacy_debug.md",
-            "feature": "prompts/legacy_feature.md",
-            "test_author": "prompts/legacy_test_author.md",
-            "report": "prompts/legacy_report.md",
-        },
     }
 
 
@@ -377,20 +276,6 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["tools"]["cmake"]["toolchain_file_path"] = str(
         _resolve(raw["tools"]["cmake"]["toolchain_file"], project_root)
     )
-    raw["vscode"]["tasks_file_path"] = _resolve(raw["vscode"]["tasks_file"], project_root)
-    raw["planner"]["templates_dir_path"] = _resolve(raw["planner"]["templates_dir"], workbench_root)
-    raw["planner"]["hardware_knowledge_dir_path"] = _resolve(raw["planner"]["hardware_knowledge_dir"], workbench_root)
-    raw["integrations_active"] = [
-        str(item).strip()
-        for item in raw.get("integrations", {}).get("auto_install", [])
-        if str(item).strip()
-    ]
-    raw["prompts"]["debug_path"] = _resolve(raw["prompts"]["debug"], workbench_root)
-    raw["prompts"]["feature_path"] = _resolve(raw["prompts"]["feature"], workbench_root)
-    raw["prompts"]["test_author_path"] = _resolve(raw["prompts"]["test_author"], workbench_root)
-    raw["prompts"]["report_path"] = _resolve(raw["prompts"]["report"], workbench_root)
-    raw["agent"]["state_path"] = raw["outputs"]["runtime_root_path"] / "agent_state.json"
-
     openocd_cfg = raw["tools"]["openocd"]
     daemon_commands = [
         "gdb port 3333",
@@ -442,6 +327,5 @@ def load_config(config_path: Path) -> dict[str, Any]:
         "diag_uart_port": str(raw["diag_uart"].get("port", "")),
         "diag_uart_format": serial_format_code(raw["diag_uart"]),
         "source_dirs_csv": ", ".join(str(item) for item in raw["project"].get("source_dirs", [])),
-        "default_profile": str(raw["agent"].get("default_profile", "")),
     }
     return raw

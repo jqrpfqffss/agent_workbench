@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from agent_workbench.core.monitor_service import (
     MonitorEngine,
@@ -12,6 +13,7 @@ from agent_workbench.core.monitor_service import (
     _value_width_bits,
     export_monitor_wide,
     summarize_monitor_samples,
+    stop_monitor_daemon,
 )
 from agent_workbench.core.openocd_client import _parse_memory_values
 
@@ -201,6 +203,28 @@ class MonitorServiceTests(unittest.TestCase):
         self.assertTrue(stats["ok"])
         self.assertEqual(stats["sample_count"], 3)
         self.assertEqual(stats["actual_sample_hz"], 1000.0)
+
+    def test_summarize_monitor_samples_tolerates_nul_in_messages(self) -> None:
+        src = self.temp_dir / "monitor_samples.csv"
+        src.write_text(
+            "sample_index,elapsed_ms,ts,item,value,ok,message\n"
+            "0,0.000000,2026-05-05T03:21:48.729+00:00,g_data,,0,\x00read failed\n"
+            "1,1.000000,2026-05-05T03:21:48.730+00:00,g_data,,0,read failed\n",
+            encoding="utf-8",
+        )
+
+        stats = summarize_monitor_samples(src)
+
+        self.assertTrue(stats["ok"])
+        self.assertEqual(stats["sample_count"], 2)
+        self.assertEqual(stats["actual_sample_hz"], 1000.0)
+
+    def test_stop_monitor_also_stops_managed_openocd_without_monitor_pid(self) -> None:
+        with patch("agent_workbench.core.openocd_service.stop_openocd_daemon", return_value="openocd stopped via telnet pid=unknown") as stop_openocd:
+            message = stop_monitor_daemon(self.cfg)
+
+        stop_openocd.assert_called_once_with(self.cfg)
+        self.assertEqual(message, "monitor not running; openocd stopped via telnet pid=unknown")
 
     def test_fast_sampling_batches_contiguous_memory_and_buffers_writes(self) -> None:
         engine, fake = self._engine()

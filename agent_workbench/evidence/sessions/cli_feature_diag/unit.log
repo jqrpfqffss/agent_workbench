@@ -1,8 +1,0 @@
-
-[2026-04-05T05:31:56.701+00:00] $ D:\Anaconda1\python.exe -m unittest discover -s agent_workbench/tests -p "test_*.py"
-........
-----------------------------------------------------------------------
-Ran 8 tests in 0.729s
-
-OK
-[2026-04-05T05:31:57.668+00:00] exit=0

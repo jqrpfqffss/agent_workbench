@@ -1,6 +1,9 @@
 ﻿{
     "exit_code":  0,
     "transcript_lines":  [
+                             "STM32 UART CLI ready.",
+                             "Console: USART2 @ 115200 8N1, TX=PA2, RX=PA3",
+                             "Type \u0027help\u0027 to list commands.",
                              "cli\u003e",
                              "status",
                              "System status:",
@@ -11,7 +14,7 @@
                              "  LED BLUE : off",
                              "cli\u003e"
                          ],
-    "saw_ready":  false,
+    "saw_ready":  true,
     "saw_prompt":  true,
     "timeout_commands":  [
 

@@ -29,7 +29,5 @@ if errorlevel 1 (
   )
 )
 
-call "%SCRIPT_DIR%agent_workbench.bat" doctor
-if errorlevel 1 exit /b %ERRORLEVEL%
-call "%SCRIPT_DIR%agent_workbench.bat" init-vscode
+call "%SCRIPT_DIR%agent_workbench.bat" doctor --json
 exit /b %ERRORLEVEL%

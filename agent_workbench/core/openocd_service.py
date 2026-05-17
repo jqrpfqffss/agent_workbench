@@ -51,6 +51,19 @@ def _wait_ready(cfg: dict, timeout_sec: float) -> bool:
     return False
 
 
+def _is_target_healthy(cfg: dict) -> bool:
+    client = _client(cfg)
+    try:
+        client.connect()
+        output = client.command("poll")
+        lowered = output.lower()
+        return "communication failure" not in lowered and "state query failed" not in lowered and "error:" not in lowered
+    except Exception:
+        return False
+    finally:
+        client.close()
+
+
 def _shutdown_via_telnet(cfg: dict) -> bool:
     client = _client(cfg)
     try:
@@ -66,7 +79,9 @@ def start_openocd_daemon(cfg: dict) -> str:
     pid_file = _pid_path(cfg)
     old_pid = read_pid(pid_file)
     if old_pid and is_process_alive(old_pid):
-        return f"openocd already running pid={old_pid}"
+        if _is_target_healthy(cfg):
+            return f"openocd already running pid={old_pid}"
+        stop_openocd_daemon(cfg)
     if old_pid:
         clear_pid_file(pid_file)
 

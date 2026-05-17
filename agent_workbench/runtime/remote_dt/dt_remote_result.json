@@ -1,6 +1,6 @@
 {
   "command": "remote-dt",
-  "action": "pipeline",
+  "action": "pull-logs",
   "status": "fail",
   "exit_code": 2,
   "summary": "remote_dt is not enabled",
@@ -25,5 +25,5 @@
   ],
   "warnings": [],
   "test_failures": [],
-  "timestamp": "2026-05-15T12:07:40.638+00:00"
+  "timestamp": "2026-05-17T09:24:33.348+00:00"
 }

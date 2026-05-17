@@ -1,1 +1,0 @@
-{"ts": "2026-04-29T14:32:56.742+00:00", "event": "monitor_start", "items": [{"name": "g_data", "source": "symbol", "value_type": "u32", "width_bits": 32, "resolved_address": "0x200001b0", "symbol": "g_data"}], "note": "symbol addresses are resolved from monitor.symbols.elf_path; flash the same ELF before monitoring"}

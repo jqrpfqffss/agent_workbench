@@ -1,2 +1,0 @@
-[2026-04-05T05:32:11.844+00:00] [uart] start port=COM3 baud=9600 backend=powershell
-[2026-04-05T05:32:21.563+00:00] [uart] stop

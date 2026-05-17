@@ -1,3 +1,0 @@
-main.c:12:5: error: simulated compile failure
-collect2: error: ld returned 1 exit status
-FAILED expected true actual false
