@@ -1,202 +1,138 @@
-﻿# 命令矩阵
+# 命令矩阵
 
 所有命令默认从仓库根目录运行。优先使用：
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat <command> --json
+./agent_workbench/bin/agent_workbench.bat <command> --json
 ```
 
-如果 OpenCode 无法稳定执行 bat 形式，改用：
+batch 启动失败时，按 [command-execution.md](command-execution.md) 切换到 direct Python 入口。
 
-```powershell
-python ".\agent_workbench\workbench.py" <command> --json
-```
+JSON 通常包含 `command`、`exit_code`、`status`、`summary`、`details`、`artifacts`、`timestamp`，但字段可能因命令不同而变化。必须读实际返回 JSON，不要硬猜 schema。
 
-JSON 命令通常包含 `command`、`exit_code`、`status`、`summary`、`details`、`artifacts`、`timestamp`。不同命令字段会有差异，必须读实际返回 JSON，不要硬猜 schema。
-
-## 发现与上下文
+## 发现
 
 ### `doctor --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat doctor --json
+./agent_workbench/bin/agent_workbench.bat doctor --json
 ```
 
-- 场景：环境、工具链、烧录、UART、diag、monitor 和配置就绪性检查。
-- 必读：`details.fail_count`、`details.warn_count`、`details.results[]`、`artifacts.report_json`、`artifacts.report_md`。
-- 失败：停止源码编辑，先报告环境阻塞。
+- 场景：环境、工具链、ELF、flash、UART、diag、monitor 和配置就绪性检查。
+- 必读：`exit_code`、`status`、`summary`、`details.results[]`、`artifacts.report_json`、`artifacts.report_md`。
+- 失败：停止源码修改，先报告阻塞项。
 
-### `scan-project --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat scan-project --json
-```
-
-- 场景：选择源码文件、CLI probe、handle、符号、monitor 候选和验证路径前。
-- 必读：`details.project`、源码根目录、CLI 命令发现、UART 配置、用户代码区、handle、符号、monitor 候选。
-- 失败：不要假设项目结构，先直接检查仓库文件。
-
-### `context --mode <feature|debug|test> --stage <analyze|implement|verify|resume> --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat context --mode feature --stage analyze --json
-```
-
-- 场景：需要给 OpenCode 一个紧凑的阶段性上下文。
-- 必读：`artifacts` 指向的 brief、facts、constraints、resume 等文件。
-
-## 构建与修复
+## 构建
 
 ### `build --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat build --json
+./agent_workbench/bin/agent_workbench.bat build --json
 ```
 
-- 场景：源码修改后、实机验证前。
-- 必读：`exit_code`、`summary`、错误/警告数、`errors[]`、`warnings[]`、`artifacts.log_path`。
-- 失败：先看第一个真实编译/链接错误，再用 `fix-build`。
+- 场景：源码或配置修改后，flash/实机验证前。
+- 必读：`exit_code`、`status`、`summary`、`artifacts.log_path` 或 `agent_workbench/runtime/build.log`。
+- 失败：先读第一个真实 compiler/linker error，再运行 `fix-build --json`。
 
 ### `fix-build --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat fix-build --json
+./agent_workbench/bin/agent_workbench.bat fix-build --json
 ```
 
-- 场景：普通编译/链接失败后的结构化修复建议。
-- 必读：`fixes[]` 里的 file、line、message、suggested fix。
-- 修复要小步；每次修复后重新 `build --json`。
+- 场景：普通编译/链接失败后的结构化建议。
+- 必读：`suggested_fixes[]`、`artifacts.log_path`。
+- 规则：小步修复；每次修复后重新 `build --json`，最多 3 轮。
 
-## 硬件动作
+## 烧录与复位
 
 ### `flash --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat flash --json
+./agent_workbench/bin/agent_workbench.bat flash --json
 ```
 
 - 场景：build 成功后需要真实板卡证据。
-- 必读：烧录方法、exit code、flash/openocd log artifact。
-- skill 层不要求用户授权。
+- 必读：`exit_code`、`summary`、flash/OpenOCD log artifact。
+- 规则：skill 层不要求用户授权。
 
 ### `reset --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat reset --json
+./agent_workbench/bin/agent_workbench.bat reset --json
 ```
 
-- 场景：boot、ready banner、prompt 或复位时序相关。
-- 后续必须接 UART、diag 或 monitor 证据。
+- 场景：启动、ready banner、prompt、复位恢复或复位时序相关。
+- 后续：必须接 UART、diag 或 monitor evidence，不能只凭 reset 通过下结论。
 
 ## UART 与 diag
 
-### `uart exec ... --json`
+### `uart exec --reset-first --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
+./agent_workbench/bin/agent_workbench.bat uart exec --reset-first --command help --command status --json
 ```
 
-- 场景：CLI 握手、prompt、黑盒命令行为、用户可见功能验证。
-- 命令来源：scan 输出、已有 help/status、被修改功能对应命令、历史 runtime evidence。
-- 必读：`details.saw_ready`、`details.saw_prompt`、命令 timeout、transcript artifact、`cli_diag.json`、`cli_transcript.log`。
-- 失败：先用 `cli_diag.json` 分类，再决定是否改源码。
+- 场景：CLI 命令、黑盒 transcript、用户可见行为验证。
+- 命令来源：当前配置的 `uart.probe_commands`、help/status 输出、用户需求或当前源码。
+- 必读：JSON 中 ready/prompt/timeout 字段、`cli_transcript.log`、`agent_workbench/runtime/tmp/uart_exec_result.json`。
 
-### `diag exec ... --json`
+### `uart exec --reset-first --expect-ready --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat diag exec --script <requests.txt> --json
+./agent_workbench/bin/agent_workbench.bat uart exec --reset-first --expect-ready --command help --command status --json
 ```
 
-- 场景：项目有诊断 UART 协议，或 CLI 证据不足。
-- 必读：exchange count、classification、timeout/error 字段、result/log artifacts。
+- 场景：严格验证 ready banner 和 prompt。
+- 失败：先读 transcript 和 UART result，再判断是端口占用、ready 缺失、prompt 缺失、命令 timeout，还是固件逻辑问题。
+
+### `diag exec --json`
+
+```powershell
+./agent_workbench/bin/agent_workbench.bat diag exec --json
+```
+
+```powershell
+./agent_workbench/bin/agent_workbench.bat diag exec --hex "68 65 6C 70 0D 0A" --json
+```
+
+- 场景：项目有诊断串口/原始报文协议，或 UART CLI 证据不足。
+- 必读：`diag_exec_result.json`、`diag_exchange.log`、timeout/error/exchange 字段。
 
 ## Monitor
 
-运行 monitor 前先读 [monitor-configuration.md](monitor-configuration.md)。如果 items 缺失或过期，OpenCode 应自己修改 `agent_workbench/agent_workbench.yaml`。
+运行 monitor 前先读 [monitor-configuration.md](monitor-configuration.md)。如果 items 缺失或过期，Codex 应自己修改 `agent_workbench/agent_workbench.yaml`。
 
-### `monitor probe --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat monitor probe --json
-```
-
-- 场景：快速检查符号、内存地址、寄存器是否可读。
-- 必读：item result、read error、monitor 输出目录。
-
-### `monitor run --json`
+### `monitor start --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat monitor run --json
+./agent_workbench/bin/agent_workbench.bat monitor start --json
 ```
 
-- 场景：采集一段时间的样本、趋势、状态变化、范围和回归证据。
-- 必读：`monitor_samples.csv`、`monitor_samples.jsonl`、snapshot、session metadata。
+- 场景：开始采集变量、寄存器、内存地址、计数器或趋势。
+- 必读：`summary` 中的 pid、out、log；`agent_workbench/runtime/monitor_live/`。
 
-### `monitor start/status/stop/export --json`
+### `monitor start --reset-first --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat monitor start --json
-.\agent_workbench\bin\agent_workbench.bat monitor status --json
-.\agent_workbench\bin\agent_workbench.bat monitor stop --json
-.\agent_workbench\bin\agent_workbench.bat monitor export --json
+./agent_workbench/bin/agent_workbench.bat monitor start --reset-first --json
 ```
 
-- 场景：长时间采样，并在 start 和 stop 之间执行 UART/diag 动作。
+- 场景：需要从复位后开始采样启动状态或趋势。
 
-## 验证与报告
-
-### `test run --json`
+### `monitor stop --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat test run --json
+./agent_workbench/bin/agent_workbench.bat monitor stop --json
 ```
 
-- 场景：迁移项目已经配置了 host/unit 测试命令。
-- 定位：这是仓库自检，不替代实机 evidence。
+- 场景：停止后台采样。不要在最终回复前留下本任务启动的 monitor 后台进程。
 
-### `verify current --json`
+### `monitor stats --json`
 
 ```powershell
-.\agent_workbench\bin\agent_workbench.bat verify current --json
+./agent_workbench/bin/agent_workbench.bat monitor stats --json
 ```
 
-- 场景：获取当前项目可用的最短端到端验证摘要。
-- 必读：`direct_verify_summary.json`、`direct_verify_summary.md`、verdict/summary/assertion 字段、引用的 runtime artifacts。
-
-### `report --latest --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat report --latest --json
-```
-
-- 场景：重建最新人类可读证据摘要。
-- 必读：session 目录、report path、summary line、linked artifacts。
-
-### `compare --latest --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat compare --latest --json
-```
-
-- 场景：对比最近 evidence session，检查回归。
-- 必读：`compare_delta.json` 和 `compare_brief.md`。
-
-## Session
-
-### `session debug --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat session debug --json
-```
-
-- 场景：调试会话需要完整证据包。
-- 必读：`session_verdict.json`、`session_brief.md`、`session_summary.md`。
-
-### `session feature --json`
-
-```powershell
-.\agent_workbench\bin\agent_workbench.bat session feature --json
-```
-
-- 场景：功能验证需要更完整的证据包。
-- 必读：session 目录和 summary artifacts。
+- 场景：汇总 `monitor_samples.csv`。
+- 必读：sample count、实际采样频率、每个 item 的 last/min/max/error 统计。

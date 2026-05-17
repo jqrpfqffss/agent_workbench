@@ -5,10 +5,10 @@
 把用户需求拆成六个面：
 
 - 用户意图：用户真正要改变什么行为。
-- 控制面：用户如何触发功能，例如 CLI 命令、配置、事件。
+- 控制面：用户如何触发功能，例如 CLI 命令、配置、事件、diag 请求。
 - 状态面：功能影响哪些状态、模式、计数器或标志。
 - 硬件面：涉及哪些外设、引脚、时钟、DMA、中断或 RTOS 资源。
-- 可观测面：如何通过 CLI、diag、monitor 或日志看到结果。
+- 可观测面：如何通过 CLI、diag、monitor、remote-dt 或日志看到结果。
 - 回归面：哪些已有行为必须保持稳定。
 
 ## 垂直切片
@@ -18,10 +18,9 @@
 1. 控制入口
 2. 状态更新
 3. 可观测输出
-4. build
-5. flash，如固件变化或需要板上证据
-6. UART/diag/monitor runtime evidence
-7. report/compare 汇总证据
+4. `build --json`
+5. `flash --json`，如固件变化或需要板上证据
+6. UART/diag/monitor/remote-dt runtime evidence
 
 不要一次性做大重构。复杂功能拆成多个可验证切片。
 
@@ -35,16 +34,15 @@
 
 ## 好验证路径的特征
 
-- 目标是行为，不是实现。
+- 目标是行为，不是实现细节。
 - 修改范围很小。
-- 至少一个 UART、diag 或 monitor probe 能覆盖新行为。
+- 至少一个 UART、diag、monitor 或 remote-dt probe 能覆盖新行为。
 - stable strings 来自当前项目或用户需求。
 - probe 能触发并观察目标行为。
-- compare 或现有 probe 能覆盖关键回归风险。
+- 关键回归风险有相邻 probe 覆盖。
 
 ## 何时暂停询问用户
 
-- 需要 flash/reset 但环境或硬件阻塞。
-- 目标硬件资源不明确且工具无法发现。
-- 修改范围明显超过 scan-project、context 和源码证据支持的范围。
+- 需要用户选择互斥硬件行为或公开协议。
+- 目标硬件资源不明确且无法从项目、头文件、ELF/map 或用户需求中确认。
 - 验证证据无法区分“环境阻塞”和“功能失败”。

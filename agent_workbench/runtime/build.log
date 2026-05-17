@@ -1,14 +1,10 @@
 
-[2026-05-17T13:08:08.362+00:00] $ cmake -S H:\stm32_RAG\code\serial -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+[2026-05-17T14:29:59.883+00:00] $ cmake -S H:\stm32_RAG\code\serial -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
 -- Configuring done (0.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
-[2026-05-17T13:08:08.507+00:00] exit=0
+[2026-05-17T14:30:00.040+00:00] exit=0
 
-[2026-05-17T13:08:08.508+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
-[  4%] Building C object CMakeFiles/serial.dir/Core/Src/main.c.obj
-[  9%] Linking C executable serial.elf
-   text	   data	    bss	    dec	    hex	filename
-  18128	    120	   1944	  20192	   4ee0	H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf
+[2026-05-17T14:30:00.041+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
 [100%] Built target serial
-[2026-05-17T13:08:09.767+00:00] exit=0
+[2026-05-17T14:30:00.520+00:00] exit=0

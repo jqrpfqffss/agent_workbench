@@ -6,12 +6,13 @@
 
 优先级：
 
-1. verdict 明确指出的失败层。
-2. diag 分类码。
-3. transcript 中的实际收发行为。
-4. monitor 运行态数据。
-5. compare 差异。
-6. 源码阅读。
+1. `doctor` 明确指出的环境/配置阻塞。
+2. 命令 JSON 的 `exit_code`、`status`、`summary`。
+3. UART transcript 和 UART result 中的实际收发行为。
+4. diag result/exchange 中的请求、响应、timeout。
+5. monitor samples/stats/log 中的运行态数据。
+6. remote-dt result/summary/log 中的远端阶段结果。
+7. 源码阅读。
 
 ## 输出格式
 

@@ -14,8 +14,9 @@
 
 - CLI 黑盒：用户可见命令、响应、prompt 恢复。
 - 状态查询：status/help/version/diagnostic 等稳定输出。
+- diag：请求/响应、timeout、协议错误恢复。
 - monitor：变量、计数器、状态机、趋势、范围。
-- unit/host：纯逻辑、parser、命令注册、边界处理。
+- remote-dt：远端构建、执行、覆盖率或设备流水线。
 - 回归：已有命令和稳定字符串不变。
 - 负向用例：非法参数、缺参、边界值、错误恢复。
 
@@ -25,7 +26,7 @@
 - 字符串短且稳定。
 - 不断言时间戳、地址、随机数。
 - 至少覆盖正常路径、边界路径、错误路径、回归路径。
-- 硬件相关行为必须有 UART/diag/monitor evidence。
+- 硬件相关行为必须有 UART/diag/monitor/remote-dt evidence。
 
 ## STM32 特别关注
 

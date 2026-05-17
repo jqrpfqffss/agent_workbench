@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench DT 测试（中文）"
+  short_description: "仅用 remote-dt 编写并验证 STM32 DT 用例"
+  default_prompt: "使用 $agent-workbench-dt-test-zh，为当前 STM32 项目编写 DT 测试用例，只调用 remote-dt build/execute/coverage/pipeline/pull-logs --json，并用真实 JSON、日志和覆盖率产物验证。"

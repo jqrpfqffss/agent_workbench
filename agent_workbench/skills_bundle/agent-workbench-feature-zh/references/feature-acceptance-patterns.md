@@ -6,7 +6,7 @@
 
 优先：
 
-- 使用短稳定字符串做 `cli_contains`。
+- 使用短稳定字符串做响应判断。
 - ack 字符串来自用户可见行为契约。
 - status 命令能暴露当前值或模式。
 
@@ -35,6 +35,19 @@
 - 一个 monitor 或 transcript 检查。
 - 相关时增加 reset 或 disabled-state 检查。
 
+## Remote DT 功能
+
+适用：
+
+- 需要 Linux host/unit/integration 测试。
+- 需要覆盖率。
+- 需要远端设备架构提供 evidence。
+
+要求：
+
+- `doctor` 或配置证明 remote_dt 可用。
+- 报告 `dt_remote_result.json`、`dt_remote_summary.md` 和阶段日志。
+
 ## 稳定字符串
 
 除非用户明确改变公开协议，否则保持稳定：
@@ -43,4 +56,4 @@
 - prompt
 - help headings
 - status labels
-- assertion 使用的 ack strings
+- ack strings
