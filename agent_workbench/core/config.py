@@ -106,7 +106,7 @@ def _defaults() -> dict[str, Any]:
                 "telnet_port": 4444,
                 "startup_wait_sec": 3.0,
                 "config_files": ["interface/stlink.cfg", "target/stm32f1x.cfg"],
-                "extra_commands": [],
+                "extra_commands": ["adapter speed 4000"],
                 "daemon_cmd": "",
             },
             "flash": {
@@ -159,13 +159,18 @@ def _defaults() -> dict[str, Any]:
         },
         "monitor": {
             "enabled": True,
-            "sample_hz": 10,
-            "ring_size": 2000,
-            "export_interval_sec": 3,
+            "sample_hz": 1000,
+            "register_sample_hz": 0,
+            "ring_size": 60000,
+            "export_interval_sec": 1,
+            "flush_interval_sec": 0.2,
+            "read_while_running": True,
+            "halt_per_sample": False,
             "openocd": {
                 "host": "127.0.0.1",
                 "port": 4444,
                 "timeout_sec": 2.0,
+                "post_command_drain_sec": 0.0,
             },
             "symbols": {
                 "path": "build/SmartFarm.elf",
@@ -388,8 +393,8 @@ def load_config(config_path: Path) -> dict[str, Any]:
 
     openocd_cfg = raw["tools"]["openocd"]
     daemon_commands = [
-        "gdb_port 3333",
-        "tcl_port 6666",
+        "gdb port 3333",
+        "tcl port 6666",
         f"telnet_port {int(openocd_cfg.get('telnet_port', 4444))}",
         *openocd_cfg.get("extra_commands", []),
     ]

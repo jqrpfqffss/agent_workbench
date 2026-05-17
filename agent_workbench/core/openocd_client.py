@@ -8,17 +8,12 @@ from dataclasses import dataclass
 
 PROMPT = b"> "
 
-# Minimum time (seconds) to wait after halt / resume before the next
-# command so that any asynchronous OpenOCD notification (xPSR, pc, msp
-# lines) has time to arrive and can be drained from the socket buffer.
-_POST_HALT_DRAIN_SEC = 0.05
-
-
 @dataclass
 class OpenOcdConfig:
     host: str = "127.0.0.1"
     port: int = 4444
     timeout_sec: float = 2.0
+    post_command_drain_sec: float = 0.0
 
 
 class OpenOcdClient:
@@ -85,15 +80,15 @@ class OpenOcdClient:
 
     def halt(self) -> str:
         resp = self.command("halt")
-        # Give OpenOCD time to flush any asynchronous target-state lines
-        # (xPSR / pc / msp) that may arrive after the initial prompt.
-        time.sleep(_POST_HALT_DRAIN_SEC)
+        if self.cfg.post_command_drain_sec > 0:
+            time.sleep(self.cfg.post_command_drain_sec)
         self._drain_pending()
         return resp
 
     def resume(self) -> str:
         resp = self.command("resume")
-        time.sleep(_POST_HALT_DRAIN_SEC)
+        if self.cfg.post_command_drain_sec > 0:
+            time.sleep(self.cfg.post_command_drain_sec)
         self._drain_pending()
         return resp
 

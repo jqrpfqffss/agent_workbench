@@ -102,8 +102,9 @@ tools:
     config_files:
       - interface/stlink.cfg
       - target/stm32f1x.cfg
-    extra_commands: []
-    daemon_cmd: openocd -l "{openocd_live_log_posix}" -f interface/stlink.cfg -f target/stm32f1x.cfg -c "gdb_port 3333; tcl_port 6666; telnet_port 4444"
+    extra_commands:
+      - adapter speed 4000
+    daemon_cmd: openocd -l "{openocd_live_log_posix}" -f interface/stlink.cfg -f target/stm32f1x.cfg -c "gdb port 3333; tcl port 6666; telnet_port 4444; adapter speed 4000"
 
   flash:
     # 默认烧录方法名。
@@ -272,14 +273,27 @@ monitor:
   enabled: true
 
   # 监控采样频率，单位 Hz。
-  sample_hz: 10
+  sample_hz: 1000
+
+  # CPU register items (PC/SP/LR etc.) require halt/read/resume and will
+  # disturb 1 kHz variable sampling. Keep disabled for CubeMonitor-like
+  # RAM variable monitoring; enable only when you explicitly need registers.
+  register_sample_hz: 0
 
   # 监控环形缓冲区大小。
   # 值越大，可缓存的样本越多，但内存和导出量也更大。
-  ring_size: 2000
+  ring_size: 60000
 
   # 监控数据导出周期，单位秒。
-  export_interval_sec: 3
+  export_interval_sec: 1
+
+  # Batch disk writes so file IO does not dominate the 1 ms sampling loop.
+  flush_interval_sec: 0.2
+
+  # Read RAM variables while the MCU is running. Set halt_per_sample true
+  # only when the target cannot read memory while running.
+  read_while_running: true
+  halt_per_sample: false
 
   openocd:
     # monitor 子系统连接 OpenOCD 的地址。
@@ -290,6 +304,7 @@ monitor:
 
     # monitor 子系统每次 OpenOCD 读操作的超时，单位秒。
     timeout_sec: 2.0
+    post_command_drain_sec: 0.0
     connect_commands: []
 
   symbols:
@@ -322,10 +337,12 @@ monitor:
         target: 0x200001b4
         value_type: float
 
-      - name: PC
-        source: register
-        target: pc
-        value_type: u32
+      # CPU registers are intentionally not sampled in the 1 kHz variable
+      # profile because reading them requires halt/resume.
+      # - name: PC
+      #   source: register
+      #   target: pc
+      #   value_type: u32
 remote_dt:
   # Remote DT 远程自动化测试功能开关。
   # DT 可以理解为“在另一台 Linux 机器上跑的一套开发/测试/覆盖率流水线”：
