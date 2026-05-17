@@ -1,4 +1,4 @@
 interface:
   display_name: "Agent Workbench 功能开发（中文）"
   short_description: "中文说明的 STM32 功能开发和 runtime evidence 验证闭环"
-  default_prompt: "使用 $agent-workbench-feature-zh 和 $agent-workbench-toolbox-zh，通过 scan-project、build、flash、UART/diag/monitor、verify 和 report 完成 STM32 功能开发。"
+  default_prompt: "使用 $agent-workbench-feature-zh 和 $agent-workbench-toolbox-zh，通过当前项目事实发现、build、flash、UART/diag/monitor/remote-dt evidence 完成 STM32 功能开发。"

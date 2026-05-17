@@ -1,6 +1,10 @@
 param(
   [string]$Port,
   [int]$Baudrate,
+  [int]$DataBits,
+  [string]$ParityName,
+  [string]$StopBitsName,
+  [string]$FormatCode,
   [string]$LogPath,
   [string]$RequestFile,
   [string]$ResultFile,
@@ -13,7 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $requests = Get-Content -Raw -Path $RequestFile -Encoding UTF8 | ConvertFrom-Json
-$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::None), 8, ([System.IO.Ports.StopBits]::One)
+$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::$ParityName), $DataBits, ([System.IO.Ports.StopBits]::$StopBitsName)
 $serial.ReadTimeout = $ReadTimeoutMs
 $serial.WriteTimeout = [Math]::Max($ReadTimeoutMs, 100)
 $script:exitCode = 0
@@ -166,7 +170,7 @@ function To-ByteArray($data) {
 }
 
 try {
-  Write-Log ("[{0}] [diag] start port={1} baud={2} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate)
+  Write-Log ("[{0}] [diag] start port={1} baud={2} format={3} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $FormatCode)
   $serial.Open()
   $serial.DiscardInBuffer()
   $serial.DiscardOutBuffer()

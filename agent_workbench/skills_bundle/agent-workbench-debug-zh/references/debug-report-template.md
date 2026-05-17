@@ -1,43 +1,35 @@
 # 调试报告模板
 
-最终调试回复按此结构生成。
+最终回复按此结构生成。只引用真实执行过的命令和真实 artifact。
 
-## 调试结论
+## 摘要
 
-- 结论：已定位 / 部分定位 / 被阻塞
-- 失败层：环境 / 构建 / 烧录 / 启动 / UART / parser / 功能行为 / 测试资产 / 未知
-- 最可能根因：`<hypothesis>`
+- 结果：`<root cause found / fixed / blocked / inconclusive>`
+- 失败层：`<environment/build/flash/reset/UART/diag/monitor/remote-dt/source/regression>`
+- 根因：`<one concise statement or unknown>`
 
-## 现象
+## 证据
 
-- 用户描述：`<symptom>`
-- 复现命令：`<command>`
-- 是否稳定复现：是 / 否 / 未确认
+- `doctor`：`exit_code=<n>`，`<artifact>`
+- `build/fix-build`：`exit_code=<n>`，`<build.log or suggested_fixes>`
+- `flash/reset`：`exit_code=<n>`，`<flash/reset log>`
+- `uart exec`：`exit_code=<n>`，`<cli_transcript.log / uart_exec_result.json>`
+- `diag exec`：`exit_code=<n>`，`<diag_exec_result.json / diag_exchange.log>`
+- `monitor`：`exit_code=<n>`，`<monitor_samples/stats/log>`
+- `remote-dt`：`exit_code=<n>`，`<dt_remote_result/summary/logs>`
 
-## 证据链
+## 根因排序
 
-- `doctor`：`<result + artifact>`
-- `build`：`<result + artifact>`
-- `uart/diag`：`<classification + artifact>`
-- `monitor`：`<key samples or not run>`
-- `verify/report`：`<verdict + artifact>`
-- `compare`：`<delta or not run>`
+1. `<hypothesis>` - 支持证据：`<artifact/field>`
+2. `<hypothesis>` - 支持证据：`<artifact/field>`
 
-## 假设与排除
+## 处理结果
 
-- 支持的假设：`<hypothesis + evidence>`
-- 已排除的假设：`<hypothesis + counter evidence>`
-- 证据不足的假设：`<hypothesis + missing evidence>`
+- 修改内容：`<files or none>`
+- 修复验证：`<commands and artifacts>`
+- 未执行项：`<none / skipped / blocked reason>`
 
-## 已采取动作
+## 剩余风险
 
-- `<action and result>`
-
-## 当前阻塞或风险
-
-- `<hardware/environment/permission/risk>`
-
-## 下一条最小实验
-
-- 命令：`<single command>`
-- 目的：`<what it will prove>`
+- `<risk>`
+- 下一条最小动作：`<command or edit>`

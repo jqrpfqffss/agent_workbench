@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -216,7 +218,7 @@ class RemoteDtServiceTests(unittest.TestCase):
 
     def test_remote_dt_doctor_subcommand_does_not_exist(self) -> None:
         parser = workbench.build_parser()
-        with self.assertRaises(SystemExit):
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             parser.parse_args(["remote-dt", "doctor"])
 
     def test_real_cli_pipeline_with_fake_ssh_scp_on_windows(self) -> None:

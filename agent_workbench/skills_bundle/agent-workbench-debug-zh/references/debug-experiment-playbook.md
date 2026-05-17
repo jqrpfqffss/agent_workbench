@@ -13,7 +13,7 @@
 
 ## 环境实验
 
-- 目标：确认工具链、配置、串口、烧录器可用。
+- 目标：确认工具链、配置、串口、烧录器、monitor、remote-dt 可用性。
 - 命令：`doctor --json`
 - 失败：停止，不改源码。
 
@@ -21,7 +21,7 @@
 
 - 目标：确认当前源码能生成固件。
 - 命令：`build --json`
-- 失败：`fix-build --json`。
+- 失败：`fix-build --json`，然后小步修复。
 
 ## 烧录实验
 
@@ -31,26 +31,24 @@
 
 ## UART 握手实验
 
-- 目标：确认 ready/prompt。
+- 目标：确认 ready/prompt 和基本命令。
 - 命令：`uart exec --reset-first --expect-ready --command <probe> --json`
-- 失败：读 `cli_diag.json` 和 transcript。
+- 失败：读 `tmp/uart_exec_result.json` 和 `cli_transcript.log`。
 
-## Parser 实验
+## Diag 实验
 
-- 目标：确认命令是否到达并被解析。
-- 命令：`diag exec ... --json`
-- 结果：
-  - `parser_no_command` 指向命令表/输入处理。
-  - `rx_zero` 指向链路/启动。
+- 目标：确认诊断请求/响应是否符合当前协议。
+- 命令：`diag exec --json` 或 `diag exec --hex "<bytes>" --json`
+- 失败：读 `diag_exec_result.json` 和 `diag_exchange.log`。
 
 ## 运行态实验
 
 - 目标：确认变量、状态机或外设状态。
-- 命令：`monitor probe --json`
-- 失败：确认符号、目标运行、probe 配置。
+- 命令：`monitor start --json` -> 触发行为 -> `monitor stop --json` -> `monitor stats --json`
+- 失败：确认符号、ELF、目标运行、OpenOCD 和 monitor 配置。
 
-## 回归实验
+## Remote DT 实验
 
-- 目标：判断新失败是否由最近改动引入。
-- 命令：`compare --latest --json`
-- 关注：新增失败、已解决失败、transcript/monitor 差异。
+- 目标：确认远端构建、执行或覆盖率链路。
+- 命令：`remote-dt pipeline --json` 或更窄的 `remote-dt build/execute/coverage --json`
+- 关注：`dt_remote_result.json`、`dt_remote_summary.md`、`logs/dt_*.log`。

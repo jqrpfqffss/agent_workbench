@@ -1,4 +1,0 @@
-interface:
-  display_name: "Agent Workbench Feature"
-  short_description: "Implement STM32 features with runtime evidence"
-  default_prompt: "Use $agent-workbench-feature with $agent-workbench-toolbox to implement this STM32 feature through scan-project, build, flash, UART/diag/monitor, verify, and report flows."

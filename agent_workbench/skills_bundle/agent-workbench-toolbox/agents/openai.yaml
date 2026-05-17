@@ -1,4 +1,0 @@
-interface:
-  display_name: "Agent Workbench Toolbox"
-  short_description: "Use agent_workbench runtime commands and artifacts safely"
-  default_prompt: "Use $agent-workbench-toolbox to choose the right agent_workbench runtime command and read JSON evidence artifacts for this STM32 workflow."

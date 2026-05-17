@@ -1,4 +1,4 @@
 interface:
   display_name: "Agent Workbench 工具箱（中文）"
-  short_description: "中文说明的 agent_workbench runtime 命令、产物和失败路由"
-  default_prompt: "使用 $agent-workbench-toolbox-zh 为当前 STM32 项目选择正确的 agent_workbench runtime 命令，并读取 JSON 证据产物。"
+  short_description: "中文说明的 STM32 Agent Workbench 命令、产物、monitor 和失败路由"
+  default_prompt: "使用 $agent-workbench-toolbox-zh 为当前 STM32 项目选择 README 支持的 agent_workbench 命令，读取 JSON/evidence artifact，并报告真实 exit_code 和产物路径。"

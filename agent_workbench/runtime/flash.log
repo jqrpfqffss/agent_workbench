@@ -466,3 +466,262 @@ in procedure 'program'
 shutdown command invoked
 
 [2026-05-17T04:01:34.492+00:00] exit=1
+
+[2026-05-17T05:05:34.233+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-05-17T05:05:34.298+00:00] exit=1
+
+[2026-05-17T05:17:26.406+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-05-17T05:17:26.501+00:00] exit=1
+
+[2026-05-17T05:17:38.488+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-05-17T05:17:38.548+00:00] exit=1
+
+[2026-05-17T05:17:43.123+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-05-17T05:17:43.181+00:00] exit=1
+
+[2026-05-17T05:18:25.257+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T05:18:27.054+00:00] exit=0
+
+[2026-05-17T05:18:34.921+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T05:18:36.724+00:00] exit=0
+
+[2026-05-17T05:19:01.499+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T05:19:03.289+00:00] exit=0
+
+[2026-05-17T09:16:27.855+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Error: libusb_open() failed with LIBUSB_ERROR_ACCESS
+Error: open failed
+in procedure 'program'
+** OpenOCD init failed **
+shutdown command invoked
+
+[2026-05-17T09:16:27.931+00:00] exit=1
+
+[2026-05-17T09:19:18.327+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T09:19:20.122+00:00] exit=0
+
+[2026-05-17T13:18:01.938+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T13:18:03.768+00:00] exit=0
+
+[2026-05-17T13:18:14.815+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.197374
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x0800190c msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-17T13:18:16.614+00:00] exit=0

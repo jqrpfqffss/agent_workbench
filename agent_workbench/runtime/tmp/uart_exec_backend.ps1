@@ -1,6 +1,10 @@
 param(
   [string]$Port,
   [int]$Baudrate,
+  [int]$DataBits,
+  [string]$ParityName,
+  [string]$StopBitsName,
+  [string]$FormatCode,
   [string]$TranscriptPath,
   [string]$CommandFile,
   [string]$ResultFile,
@@ -18,7 +22,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $commands = Get-Content -Raw -Path $CommandFile -Encoding UTF8 | ConvertFrom-Json
-$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::None), 8, ([System.IO.Ports.StopBits]::One)
+$serial = New-Object System.IO.Ports.SerialPort $Port, $Baudrate, ([System.IO.Ports.Parity]::$ParityName), $DataBits, ([System.IO.Ports.StopBits]::$StopBitsName)
 $serial.Encoding = [System.Text.Encoding]::UTF8
 $serial.NewLine = "`n"
 $serial.ReadTimeout = $ReadTimeoutMs
@@ -227,7 +231,7 @@ try {
   $serial.Open()
   $serial.DiscardInBuffer()
   $serial.DiscardOutBuffer()
-  Write-TranscriptLine ("[{0}] [cli] start port={1} baud={2} expect_ready={3} reset_first={4} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $RequireReady, $ResetFirst)
+  Write-TranscriptLine ("[{0}] [cli] start port={1} baud={2} format={3} expect_ready={4} reset_first={5} backend=powershell" -f (Get-Timestamp), $Port, $Baudrate, $FormatCode, $RequireReady, $ResetFirst)
   Drain-ForMs $StartupDrainMs
   if ($ResetFirst -eq 1) {
     $script:sawReady = $false

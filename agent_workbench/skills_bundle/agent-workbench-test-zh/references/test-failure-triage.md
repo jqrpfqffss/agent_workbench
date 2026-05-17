@@ -6,9 +6,9 @@
 
 表现：
 
-- 预期行为模糊
-- probe 不匹配用户目标
-- 断言目标是不稳定字符串或数值
+- 预期行为模糊。
+- probe 不匹配用户目标。
+- 断言目标是不稳定字符串或抖动数值。
 
 动作：先修覆盖矩阵、probe 命令或断言目标。
 
@@ -16,19 +16,20 @@
 
 表现：
 
-- `uart exec` 没有发送能触发功能的命令
-- `diag exec` 请求不匹配当前协议
-- `monitor probe` 读取了错误或不存在的符号
+- `uart exec` 没有发送能触发功能的命令。
+- `diag exec` 请求不匹配当前协议。
+- monitor 读取了错误或不存在的符号。
+- remote-dt 阶段没有运行目标测试。
 
-动作：先修命令、请求、monitor 项或可观测路径。
+动作：先修命令、请求、monitor 项、remote script 或可观测路径。
 
 ## 3. 源码行为问题
 
 表现：
 
-- 测试设计清楚
-- probe 确实触发行为
-- runtime evidence 证明行为不符合预期
+- 测试设计清楚。
+- probe 确实触发行为。
+- runtime evidence 证明行为不符合预期。
 
 动作：修改生产代码，然后重新 build 并重跑 runtime evidence 路径。
 
@@ -36,10 +37,11 @@
 
 表现：
 
-- `doctor` 失败
-- `flash` 失败
-- UART 无接收字节
-- monitor 无法采样
+- `doctor` 失败。
+- `flash` 失败。
+- UART/diag 端口无法打开或无接收字节。
+- monitor 无法采样。
+- remote-dt 未启用、SSH 失败或远端路径不可达。
 
 动作：停止并报告阻塞，不把它写成固件测试失败。
 

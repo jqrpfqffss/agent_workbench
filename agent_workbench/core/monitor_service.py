@@ -4,6 +4,8 @@ import csv
 import ctypes
 import json
 import os
+import subprocess
+import sys
 import struct
 import threading
 import time
@@ -20,7 +22,7 @@ from .utils import (
     ensure_dir,
     is_process_alive,
     read_pid,
-    spawn_detached_python,
+    spawn_detached_command_with_stdin_keeper,
     terminate_process,
     utc_now_iso,
     write_pid,
@@ -108,6 +110,10 @@ def _json_string(value: object) -> str:
 
 def _json_value(value: object) -> str:
     return json.dumps(value, ensure_ascii=False)
+
+
+def _csv_safe(value: object) -> str:
+    return str(value).replace("\x00", "")
 
 
 @dataclass
@@ -360,8 +366,9 @@ class MonitorEngine:
     def _append_samples(self, ts: str, elapsed_ms: float, rows: list[dict[str, object]]) -> None:
         sample_index = self._sample_count
         for row in rows:
+            message = _csv_safe(row["message"])
             self._pending_long_rows.append(
-                [sample_index, f"{elapsed_ms:.6f}", ts, row["item"], row["value"], int(bool(row["ok"])), row["message"]]
+                [sample_index, f"{elapsed_ms:.6f}", ts, row["item"], row["value"], int(bool(row["ok"])), message]
             )
             self._pending_json_rows.append(
                 {
@@ -371,7 +378,7 @@ class MonitorEngine:
                     "item": row["item"],
                     "value": row["value"],
                     "ok": bool(row["ok"]),
-                    "message": row["message"],
+                    "message": message,
                 }
             )
         values_by_name = {str(row["item"]): row["value"] if bool(row["ok"]) else "" for row in rows}
@@ -385,7 +392,7 @@ class MonitorEngine:
         )
         for row in rows:
             item_name = str(row["item"])
-            self.ring[item_name].append((ts, row["value"], bool(row["ok"]), str(row["message"])))
+            self.ring[item_name].append((ts, row["value"], bool(row["ok"]), _csv_safe(row["message"])))
 
     def _flush_samples(self) -> None:
         if self._pending_long_rows:
@@ -465,7 +472,7 @@ class MonitorEngine:
                 read = self._memory_reads.get(item_name)
                 try:
                     if read is None:
-                        raise RuntimeError("item was not included in memory read plan")
+                        raise RuntimeError("item was not included in the memory read batch")
                     raw = raw_values[(read.address, read.width_bits)]
                     value = _convert_value(raw, value_type)
                     ok = True
@@ -747,8 +754,7 @@ def start_monitor_daemon(cfg: dict, config_path: Path, workbench_script: Path, *
         return f"{openocd_message}; monitor not started"
     args = [
         str(workbench_script),
-        "monitor",
-        "run",
+        "__monitor-run",
         "--config",
         str(config_path),
         "--out-dir",
@@ -757,31 +763,41 @@ def start_monitor_daemon(cfg: dict, config_path: Path, workbench_script: Path, *
     if reset_first:
         args.append("--reset-first")
     log_path = out_dir / "monitor_daemon.log"
-    pid = spawn_detached_python(args, cwd=cfg["project_root_path"], log_path=log_path)
+    command = subprocess.list2cmdline([sys.executable, *args])
+    with log_path.open("a", encoding="utf-8") as fp:
+        fp.write(f"[{utc_now_iso()}] spawn: {command}\n")
+    pid = spawn_detached_command_with_stdin_keeper(command, cwd=cfg["project_root_path"], log_path=log_path)
     write_pid(pid_file, pid)
     reset_note = " reset_first=1" if reset_first else ""
     return f"{openocd_message}; monitor started pid={pid}, out={out_dir}, log={log_path}{reset_note}"
 
 
 def stop_monitor_daemon(cfg: dict) -> str:
+    from .openocd_service import stop_openocd_daemon
+
+    openocd_message = ""
     pid_file = _pid_path(cfg)
     pid = read_pid(pid_file)
     if not pid:
-        return "monitor not running"
+        openocd_message = stop_openocd_daemon(cfg)
+        return f"monitor not running; {openocd_message}"
     if not is_process_alive(pid):
         clear_pid_file(pid_file)
-        return f"monitor stale pid cleaned pid={pid}"
+        openocd_message = stop_openocd_daemon(cfg)
+        return f"monitor stale pid cleaned pid={pid}; {openocd_message}"
     out_dir = ensure_dir(cfg["outputs"]["runtime_root_path"] / "monitor_live")
     stop_request_path = out_dir / "monitor.stop"
     stop_request_path.write_text(utc_now_iso(), encoding="utf-8")
     for _ in range(100):
         if not is_process_alive(pid):
             clear_pid_file(pid_file)
-            return f"monitor stopped pid={pid}"
+            openocd_message = stop_openocd_daemon(cfg)
+            return f"monitor stopped pid={pid}; {openocd_message}"
         time.sleep(0.05)
     terminate_process(pid)
     clear_pid_file(pid_file)
-    return f"monitor force stopped pid={pid}"
+    openocd_message = stop_openocd_daemon(cfg)
+    return f"monitor force stopped pid={pid}; {openocd_message}"
 
 
 def monitor_status(cfg: dict) -> str:
@@ -802,9 +818,9 @@ def export_monitor_table(src: Path, dst: Path) -> str:
 def summarize_monitor_samples(src: Path) -> dict[str, object]:
     if not src.exists():
         return {"ok": False, "error": f"source not found: {src}", "source": str(src)}
-    with src.open("r", encoding="utf-8", newline="") as fp:
-        reader = csv.DictReader(fp)
-        rows = list(reader)
+    text = src.read_text(encoding="utf-8").replace("\x00", "")
+    reader = csv.DictReader(text.splitlines())
+    rows = list(reader)
     samples: dict[str, float] = {}
     fallback_index = 0
     for row in rows:
@@ -854,9 +870,9 @@ def export_monitor_wide(src: Path, dst: Path) -> str:
     if not src.exists():
         return f"source not found: {src}"
     ensure_dir(dst.parent)
-    with src.open("r", encoding="utf-8", newline="") as fp:
-        reader = csv.DictReader(fp)
-        rows = list(reader)
+    text = src.read_text(encoding="utf-8").replace("\x00", "")
+    reader = csv.DictReader(text.splitlines())
+    rows = list(reader)
     item_names: list[str] = []
     sample_order: list[str] = []
     by_sample: dict[str, dict[str, str]] = {}

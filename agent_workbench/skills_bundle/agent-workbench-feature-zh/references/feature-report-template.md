@@ -15,18 +15,19 @@
 
 ## 验证证据
 
-- `doctor`：通过 / 失败，关键证据 `<artifact>`
-- `build`：通过 / 失败，关键证据 `<artifact>`
-- `verify current`：verdict `<pass/fail/blocked>`，证据 `<summary>`
-- runtime validation：通过 / 失败 / 阻塞，证据 `<UART/diag/monitor artifact>`
-- `report --latest`：`<report path>`
-- `compare --latest`：`<delta path>`，如已执行
+- `doctor`：`exit_code=<n>`，关键证据 `<artifact>`
+- `build`：`exit_code=<n>`，关键证据 `<artifact>`
+- `flash/reset`：`exit_code=<n>`，证据 `<artifact>`，如已执行
+- `uart exec`：`exit_code=<n>`，证据 `<cli_transcript.log / uart_exec_result.json>`，如已执行
+- `diag exec`：`exit_code=<n>`，证据 `<diag result/log>`，如已执行
+- `monitor`：`exit_code=<n>`，证据 `<monitor samples/stats/log>`，如已执行
+- `remote-dt`：`exit_code=<n>`，证据 `<dt result/summary/logs>`，如已执行
 
 ## 行为验证
 
 - 已验证的新行为：`<behavior>`
-- 使用命令：`<cli/diag/monitor command>`
-- 关键 transcript / monitor / assertion：`<short evidence>`
+- 使用命令：`<cli/diag/monitor/remote-dt command>`
+- 关键 transcript / monitor / remote evidence：`<short evidence>`
 
 ## 风险与限制
 

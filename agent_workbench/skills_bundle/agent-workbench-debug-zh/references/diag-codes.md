@@ -43,4 +43,4 @@
 
 ## `diag_unavailable`
 
-diag 子系统不可用。退回 `uart exec` 和 `monitor probe` 建证据链。
+diag 子系统不可用。退回 `uart exec` 和 monitor 采样闭环建立证据链：`monitor start` -> 触发动作 -> `monitor stop` -> `monitor stats`。

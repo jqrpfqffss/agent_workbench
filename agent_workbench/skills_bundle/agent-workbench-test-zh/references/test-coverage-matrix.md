@@ -53,6 +53,12 @@
 - response shape 有断言。
 - 必要时覆盖 timeout 或 malformed response。
 
+### Remote DT
+
+- 远端 build/execute/coverage 哪些阶段运行清楚。
+- 每个阶段有 result JSON 和 log。
+- 远端失败不被写成本地固件行为失败，除非 evidence 支持。
+
 ## 质量门槛
 
 弱验证计划：
@@ -61,7 +67,7 @@
 - 只检查 `help`，没有目标行为。
 - 断言字符串不来自配置、runtime evidence 或明确行为契约。
 - 不能区分环境失败和源码行为失败。
-- 硬件相关行为没有 CLI、diag 或 monitor 证据路径。
+- 硬件相关行为没有 CLI、diag、monitor 或 remote-dt 证据路径。
 
 强验证计划：
 

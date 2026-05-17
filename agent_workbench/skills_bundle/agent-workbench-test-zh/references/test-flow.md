@@ -4,21 +4,17 @@
 
 1. 从用户需求、源码、CLI help/status 输出、硬件限制和历史 evidence 提取行为契约。
 2. 先建立覆盖矩阵，再写或运行 probe。
-3. 每个用例都映射到明确证据面：UART、diag、monitor、build/unit 自检、verify summary 或 compare delta。
+3. 每个用例都映射到明确证据面：UART、diag、monitor、build 自检、remote-dt 或源码审查。
 4. 定义稳定断言：稳定协议文本才用精确字符串；测量值用数值范围；计数器用单调/趋势；控制逻辑用状态迁移。
 
 ## 执行
 
 1. `doctor --json`
-2. `scan-project --json`
-3. `build --json`
-4. 涉及实机行为时运行 `flash --json`
-5. `uart exec ... --json` 和/或 `diag exec ... --json`
-6. 涉及内部状态时更新 monitor YAML，并运行 `monitor probe --json` 或 `monitor run --json`
-7. 只有仓库配置了自检命令时才运行 `test run --json`
-8. `verify current --json`
-9. `report --latest --json`
-10. 需要回归证据时运行 `compare --latest --json`
+2. `build --json`
+3. 涉及实机行为时运行 `flash --json`，必要时 `reset --json`
+4. `uart exec --reset-first --expect-ready --json` 和/或 `diag exec --json`
+5. 涉及内部状态时更新 monitor YAML，并运行 `monitor start`、触发行为、`monitor stop`、`monitor stats`
+6. 涉及远程 Linux 测试或覆盖率时运行 `remote-dt build/execute/coverage/pipeline/pull-logs --json`
 
 ## 改进
 

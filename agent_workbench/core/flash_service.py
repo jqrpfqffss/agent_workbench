@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from .openocd_service import stop_openocd_daemon
 from .utils import render_template, run_command
 
 
@@ -20,6 +21,7 @@ def run_flash(cfg: dict, method: Optional[str], log_path: Path) -> int:
     command = render_template(method_cfg.get("flash", ""), cfg["template_values"])
     if not command:
         return 2
+    stop_openocd_daemon(cfg)
     return run_command(command, cwd=cfg["project_root_path"], log_path=log_path)
 
 
@@ -28,4 +30,5 @@ def run_reset(cfg: dict, method: Optional[str], log_path: Path) -> int:
     command = render_template(method_cfg.get("reset", ""), cfg["template_values"])
     if not command:
         return 2
+    stop_openocd_daemon(cfg)
     return run_command(command, cwd=cfg["project_root_path"], log_path=log_path)
