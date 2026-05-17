@@ -51,6 +51,17 @@ class OpenOcdServiceTests(unittest.TestCase):
 
         self.assertIn("startup timeout", message)
 
+    def test_start_openocd_times_out_and_terminates_when_telnet_never_becomes_ready(self) -> None:
+        with mock.patch.object(openocd_service, "command_exists", return_value=True), mock.patch.object(
+            openocd_service, "spawn_detached_command_with_stdin_keeper", return_value=4321
+        ), mock.patch.object(openocd_service, "_wait_ready", return_value=False), mock.patch.object(
+            openocd_service, "is_process_alive", return_value=True
+        ), mock.patch.object(openocd_service, "terminate_process") as terminate:
+            message = openocd_service.start_openocd_daemon(self.cfg)
+
+        self.assertIn("startup timeout", message)
+        terminate.assert_called_once_with(4321)
+
 
 if __name__ == "__main__":
     unittest.main()

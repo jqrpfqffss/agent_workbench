@@ -279,13 +279,23 @@ def _cmd_diag(args: argparse.Namespace) -> int:
 
 
 def _cmd_monitor(args: argparse.Namespace) -> int:
-    from core.monitor_service import MonitorEngine, export_monitor_table, monitor_status, start_monitor_daemon, stop_monitor_daemon
+    from core.monitor_service import (
+        MonitorEngine,
+        export_monitor_table,
+        export_monitor_wide,
+        monitor_status,
+        start_monitor_daemon,
+        stop_monitor_daemon,
+        summarize_monitor_samples,
+    )
     from core.utils import ensure_dir
 
     cfg = _cfg(args.config)
+    live_dir = cfg["outputs"]["runtime_root_path"] / "monitor_live"
     if args.action == "start":
-        message = start_monitor_daemon(cfg, Path(args.config), Path(__file__).resolve())
-        payload = build_result_payload("monitor start", 0, summary=message, details={"action": "start"})
+        message = start_monitor_daemon(cfg, Path(args.config), Path(__file__).resolve(), reset_first=bool(args.reset_first))
+        code = 2 if "monitor not started" in message else 0
+        payload = build_result_payload("monitor start", code, summary=message, details={"action": "start", "reset_first": bool(args.reset_first)})
         return _emit(args, payload, [message])
     if args.action == "stop":
         message = stop_monitor_daemon(cfg)
@@ -296,7 +306,7 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
         payload = build_result_payload("monitor status", 0, summary=message, details={"action": "status"})
         return _emit(args, payload, [message])
     if args.action == "probe":
-        out_dir = Path(args.out_dir) if args.out_dir else cfg["outputs"]["runtime_root_path"] / "monitor_live"
+        out_dir = Path(args.out_dir) if args.out_dir else live_dir
         ensure_dir(out_dir)
         engine = MonitorEngine(cfg, out_dir)
         code, details = engine.probe_once()
@@ -309,25 +319,55 @@ def _cmd_monitor(args: argparse.Namespace) -> int:
         )
         return _emit(args, payload, [payload["summary"]])
     if args.action == "run":
-        out_dir = Path(args.out_dir) if args.out_dir else cfg["outputs"]["runtime_root_path"] / "monitor_live"
+        out_dir = Path(args.out_dir) if args.out_dir else live_dir
         ensure_dir(out_dir)
-        code = MonitorEngine(cfg, out_dir).run()
+        code = MonitorEngine(cfg, out_dir).run(reset_first=bool(args.reset_first))
         payload = build_result_payload(
             "monitor run",
             code,
             summary=f"monitor run exit={code}",
+            details={"reset_first": bool(args.reset_first)},
             artifacts={"out_dir": str(out_dir)},
         )
         return _emit(args, payload, [payload["summary"]])
     if args.action == "export":
-        message = export_monitor_table(Path(args.source), Path(args.dest))
+        source = Path(args.source) if args.source else live_dir / "monitor_samples.csv"
+        dest = Path(args.dest) if args.dest else live_dir / "monitor_samples_export.csv"
+        message = export_monitor_table(source, dest)
         payload = build_result_payload(
             "monitor export",
             0,
             summary=message,
-            artifacts={"source": args.source, "dest": args.dest},
+            artifacts={"source": str(source), "dest": str(dest)},
         )
         return _emit(args, payload, [message])
+    if args.action == "export-wide":
+        source = Path(args.source) if args.source else live_dir / "monitor_samples.csv"
+        dest = Path(args.dest) if args.dest else live_dir / "monitor_samples_wide.csv"
+        message = export_monitor_wide(source, dest)
+        payload = build_result_payload(
+            "monitor export-wide",
+            0,
+            summary=message,
+            artifacts={"source": str(source), "dest": str(dest)},
+        )
+        return _emit(args, payload, [message])
+    if args.action == "stats":
+        source = Path(args.source) if args.source else live_dir / "monitor_samples.csv"
+        details = summarize_monitor_samples(source)
+        code = 0 if details.get("ok") else 2
+        payload = build_result_payload(
+            "monitor stats",
+            code,
+            summary=(
+                f"monitor stats hz={details.get('actual_sample_hz', 0)} samples={details.get('sample_count', 0)}"
+                if details.get("ok")
+                else f"monitor stats failed: {details.get('error', 'unknown error')}"
+            ),
+            details=details,
+            artifacts={"source": str(source)},
+        )
+        return _emit(args, payload, [payload["summary"]])
     raise ValueError(f"unknown monitor action: {args.action}")
 
 
@@ -337,7 +377,8 @@ def _cmd_openocd(args: argparse.Namespace) -> int:
     cfg = _cfg(args.config)
     if args.action == "start":
         message = start_openocd_daemon(cfg)
-        payload = build_result_payload("openocd start", 0, summary=message, details={"action": "start"})
+        code = 2 if "startup timeout" in message or "unavailable" in message or "empty" in message else 0
+        payload = build_result_payload("openocd start", code, summary=message, details={"action": "start"})
         return _emit(args, payload, [message])
     if args.action == "stop":
         message = stop_openocd_daemon(cfg)
@@ -825,11 +866,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_diag.set_defaults(func=_cmd_diag)
 
     p_monitor = sub.add_parser("monitor", help="monitor variables/registers/memory")
-    p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export", "probe"])
+    p_monitor.add_argument("action", choices=["start", "run", "stop", "status", "export", "export-wide", "stats", "probe"])
     p_monitor.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_monitor.add_argument("--out-dir", default="")
-    p_monitor.add_argument("--source", default="")
-    p_monitor.add_argument("--dest", default="")
+    p_monitor.add_argument("--source", "--src", default="")
+    p_monitor.add_argument("--dest", "--dst", default="")
+    p_monitor.add_argument("--reset-first", action="store_true")
     _add_json_flag(p_monitor)
     p_monitor.set_defaults(func=_cmd_monitor)
 

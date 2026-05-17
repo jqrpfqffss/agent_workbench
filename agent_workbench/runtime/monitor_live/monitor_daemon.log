@@ -1,0 +1,2 @@
+[2026-05-17T04:07:59.447+00:00] spawn: C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe H:\stm32_RAG\code\serial\agent_workbench\workbench.py monitor run --config H:\stm32_RAG\code\serial\agent_workbench\agent_workbench.yaml --out-dir H:\stm32_RAG\code\serial\agent_workbench\runtime\monitor_live --reset-first
+monitor run exit=0

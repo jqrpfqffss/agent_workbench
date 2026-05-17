@@ -68,7 +68,7 @@
     {
       "name": "monitor_items",
       "level": "ok",
-      "detail": "count=5"
+      "detail": "count=4"
     },
     {
       "name": "monitor_symbol_items",

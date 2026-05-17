@@ -6,7 +6,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from agent_workbench.core.monitor_service import MonitorEngine, _convert_value, _value_width_bits
+from agent_workbench.core.monitor_service import (
+    MonitorEngine,
+    _convert_value,
+    _value_width_bits,
+    export_monitor_wide,
+    summarize_monitor_samples,
+)
 from agent_workbench.core.openocd_client import _parse_memory_values
 
 
@@ -39,6 +45,10 @@ class FakeOpenOcd:
         self.mem_calls.append((address, width_bits))
         return {8: 0xFE, 16: 0xFFFE, 32: 0xFFFFFFFE}[width_bits]
 
+    def read_mem(self, address: int, count: int, width_bits: int = 32) -> list[int]:
+        self.mem_calls.append((address, width_bits))
+        return [{8: 0xFE, 16: 0xFFFE, 32: 0xFFFFFFFE}[width_bits] for _ in range(count)]
+
     def read_register(self, register_name: str) -> int:
         self.register_calls.append(register_name)
         return 0x12345678
@@ -52,8 +62,12 @@ class MonitorServiceTests(unittest.TestCase):
         self.cfg = {
             "monitor": {
                 "sample_hz": 10,
+                "register_sample_hz": 10,
                 "ring_size": 4,
                 "export_interval_sec": 1,
+                "flush_interval_sec": 0.01,
+                "read_while_running": True,
+                "halt_per_sample": False,
                 "openocd": {
                     "host": "127.0.0.1",
                     "port": 4444,
@@ -137,6 +151,78 @@ class MonitorServiceTests(unittest.TestCase):
         self.assertEqual(meta[0]["event"], "monitor_start")
         self.assertEqual(meta[0]["items"][0]["resolved_address"], "0x200001b0")
         self.assertEqual(meta[0]["symbol_image"], str(self.temp_dir / "missing.axf"))
+        self.assertEqual(
+            engine.paths.wide_csv_path.read_text(encoding="utf-8").splitlines()[0],
+            "sample_index,elapsed_ms,ts,g_data",
+        )
+        self.assertEqual(
+            engine.paths.csv_path.read_text(encoding="utf-8").splitlines()[0],
+            "sample_index,elapsed_ms,ts,item,value,ok,message",
+        )
+
+    def test_export_monitor_wide_pivots_long_samples_for_plotting(self) -> None:
+        src = self.temp_dir / "monitor_samples.csv"
+        dst = self.temp_dir / "monitor_samples_wide.csv"
+        src.write_text(
+            "sample_index,elapsed_ms,ts,item,value,ok,message\n"
+            "0,0.125000,2026-05-05T03:21:48.729+00:00,g_data,11200,1,\n"
+            "0,0.125000,2026-05-05T03:21:48.729+00:00,g_data1,2800.0,1,\n"
+            "1,1.125000,2026-05-05T03:21:48.730+00:00,g_data,11202,1,\n"
+            "1,1.125000,2026-05-05T03:21:48.730+00:00,g_data1,,0,read failed\n",
+            encoding="utf-8",
+        )
+
+        message = export_monitor_wide(src, dst)
+
+        self.assertIn("exported wide table", message)
+        self.assertEqual(
+            dst.read_text(encoding="utf-8").splitlines(),
+            [
+                "sample_index,elapsed_ms,ts,g_data,g_data1",
+                "0,0.125000,2026-05-05T03:21:48.729+00:00,11200,2800.0",
+                "1,1.125000,2026-05-05T03:21:48.730+00:00,11202,",
+            ],
+        )
+
+    def test_summarize_monitor_samples_uses_unique_sample_index(self) -> None:
+        src = self.temp_dir / "monitor_samples.csv"
+        src.write_text(
+            "sample_index,elapsed_ms,ts,item,value,ok,message\n"
+            "0,0.000000,2026-05-05T03:21:48.729+00:00,g_data,1,1,\n"
+            "0,0.000000,2026-05-05T03:21:48.729+00:00,g_data1,2,1,\n"
+            "1,1.000000,2026-05-05T03:21:48.730+00:00,g_data,3,1,\n"
+            "1,1.000000,2026-05-05T03:21:48.730+00:00,g_data1,4,1,\n"
+            "2,2.000000,2026-05-05T03:21:48.731+00:00,g_data,5,1,\n",
+            encoding="utf-8",
+        )
+
+        stats = summarize_monitor_samples(src)
+
+        self.assertTrue(stats["ok"])
+        self.assertEqual(stats["sample_count"], 3)
+        self.assertEqual(stats["actual_sample_hz"], 1000.0)
+
+    def test_fast_sampling_batches_contiguous_memory_and_buffers_writes(self) -> None:
+        engine, fake = self._engine()
+        engine.items = [
+            {"name": "g_data", "source": "symbol", "symbol": "g_data", "value_type": "u32"},
+            {"name": "g_data1", "source": "symbol", "symbol": "g_data1", "value_type": "float"},
+            {"name": "g_data_dup", "source": "memory", "target": "0x200001b0", "value_type": "u32"},
+        ]
+        engine.symbols = {"g_data": 0x200001B0, "g_data1": 0x200001B4}
+        engine._memory_reads.clear()
+        engine._register_items.clear()
+        engine._memory_groups.clear()
+        engine._prepare_read_plan()
+        engine._init_files()
+
+        rows = engine._sample_items_fast()
+        engine._flush_samples()
+
+        self.assertEqual(fake.commands, [])
+        self.assertEqual(fake.mem_calls, [(0x200001B0, 32)])
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(engine.paths.wide_csv_path.read_text(encoding="utf-8").splitlines()[1].count(","), 5)
 
     def test_probe_once_runs_connect_commands_and_collects_all_item_types(self) -> None:
         engine, fake = self._engine()

@@ -15,7 +15,7 @@
 | monitor_symbol_image | ok | H:\stm32_RAG\code\serial\build\cmake-debug\serial.elf |
 | openocd | ok | openocd |
 | flash_method | ok | openocd_cmd: openocd |
-| monitor_items | ok | count=5 |
+| monitor_items | ok | count=4 |
 | monitor_symbol_items | ok | symbol items=2 |
 | monitor_target_selection | ok | not required by current config |
 | uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> format=8N1 |

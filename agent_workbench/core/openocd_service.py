@@ -87,7 +87,7 @@ def start_openocd_daemon(cfg: dict) -> str:
     if _wait_ready(cfg, max(wait_sec, 0.6)):
         return f"openocd started pid={pid} ({host}:{port})"
     if is_process_alive(pid):
-        return f"openocd started pid={pid} ({host}:{port})"
+        terminate_process(pid)
     clear_pid_file(pid_file)
     return f"openocd startup timeout pid={pid} ({host}:{port})"
 

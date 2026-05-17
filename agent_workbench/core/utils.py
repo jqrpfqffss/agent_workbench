@@ -204,23 +204,42 @@ def terminate_process(pid: int) -> None:
         pass
 
 
-def spawn_detached_python(args: Iterable[str], cwd: Path, env: Optional[dict[str, str]] = None) -> int:
+def spawn_detached_python(
+    args: Iterable[str],
+    cwd: Path,
+    env: Optional[dict[str, str]] = None,
+    log_path: Optional[Path] = None,
+) -> int:
     argv = [sys.executable, *args]
+    log_fp = None
+    if log_path is not None:
+        ensure_dir(log_path.parent)
+        log_fp = log_path.open("a", encoding="utf-8")
+        log_fp.write(f"[{utc_now_iso()}] spawn: {' '.join(str(item) for item in argv)}\n")
+        log_fp.flush()
     kwargs: dict[str, Any] = {
         "cwd": str(cwd),
         "stdin": subprocess.DEVNULL,
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
-        "close_fds": True,
+        "close_fds": False if log_fp is not None and os.name == "nt" else True,
     }
+    if log_fp is not None:
+        kwargs["stdout"] = log_fp
+        kwargs["stderr"] = subprocess.STDOUT
+    else:
+        kwargs["stdout"] = subprocess.DEVNULL
+        kwargs["stderr"] = subprocess.DEVNULL
     if env:
         merged_env = dict(os.environ)
         merged_env.update(env)
         kwargs["env"] = merged_env
     if os.name == "nt":
         kwargs["creationflags"] = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-    proc = subprocess.Popen(argv, **kwargs)
-    return int(proc.pid)
+    try:
+        proc = subprocess.Popen(argv, **kwargs)
+        return int(proc.pid)
+    finally:
+        if log_fp is not None:
+            log_fp.close()
 
 
 def spawn_detached_command(
