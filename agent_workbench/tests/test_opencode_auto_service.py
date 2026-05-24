@@ -121,6 +121,28 @@ class OpencodeAutoServiceTests(unittest.TestCase):
         self.assertEqual(payload["status"], "blocked")
         self.assertEqual((self.project_root / "tracked.txt").read_text(encoding="utf-8"), "user dirty\n")
 
+    def test_staged_changes_do_not_block(self) -> None:
+        cfg = load_config(self._write_config(paths=["tracked.txt"]))
+        (self.project_root / "tracked.txt").write_text("staged user work\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        plan = self._write_plan([{"id": "task_001", "title": "PASS", "prompt": "PASS"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
+
+        self.assertEqual(payload["status"], "pass")
+        cached = self._git("diff", "--cached", "--name-only").stdout
+        self.assertIn("tracked.txt", cached)
+
+    def test_untracked_file_still_blocks(self) -> None:
+        cfg = load_config(self._write_config(paths=["untracked.txt"]))
+        (self.project_root / "untracked.txt").write_text("new user work\n", encoding="utf-8")
+        plan = self._write_plan([{"id": "task_001", "title": "PASS", "prompt": "PASS"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
+
+        self.assertEqual(payload["status"], "blocked")
+        self.assertIn("untracked.txt", payload["details"]["dirty"])
+
     def test_dispatch_dry_run_returns_json(self) -> None:
         config_path = self._write_config(paths=["tracked.txt"])
         stdout = io.StringIO()
