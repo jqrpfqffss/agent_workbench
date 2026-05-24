@@ -1,0 +1,23 @@
+﻿project:
+  name: stage-fix-validation
+  root: ../Git Project With Spaces
+  build_dir: build
+  artifact_file: build/demo.elf
+  compile_commands: build/compile_commands.json
+opencode_auto:
+  command: "D:\\msys2\\mingw64\\bin\\python.exe"
+  args:
+    - "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_stage_fix_validation_20260524_220719\\Git Project With Spaces\\fake_worker.py"
+  planner_args:
+    - "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_stage_fix_validation_20260524_220719\\Git Project With Spaces\\fake_worker.py"
+  max_retries: 0
+  timeout_sec: 30
+  planner_timeout_sec: 30
+  runtime_dir: runtime/opencode_auto
+  git:
+    enabled: true
+    worktree: .
+    require_clean: true
+    paths:
+      - tracked.txt
+      - runtime

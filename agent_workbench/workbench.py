@@ -83,6 +83,20 @@ def _cmd_remote_dt(args: argparse.Namespace) -> int:
     return _emit(args, payload, [payload["summary"]])
 
 
+def _cmd_opencode_auto(args: argparse.Namespace) -> int:
+    from core.opencode_auto_service import OpencodeAutoService
+
+    cfg = _cfg(args.config)
+    max_retries = args.max_retries if args.max_retries is not None else None
+    payload = OpencodeAutoService(cfg).run(
+        args.task,
+        plan_file=args.plan_file,
+        max_retries=max_retries,
+        dry_run=bool(args.dry_run),
+    )
+    return _emit(args, payload, [payload["summary"]])
+
+
 def _cmd_flash(args: argparse.Namespace) -> int:
     from core.flash_service import run_flash
 
@@ -304,7 +318,7 @@ def _cmd_fix_build(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Portable STM32 Agent Workbench")
-    public_commands = "{doctor,build,remote-dt,flash,reset,uart,diag,monitor,fix-build}"
+    public_commands = "{doctor,build,remote-dt,opencode-auto,flash,reset,uart,diag,monitor,fix-build}"
     sub = parser.add_subparsers(dest="command", required=True, metavar=public_commands)
 
     p_doctor = sub.add_parser("doctor", help="run environment and configuration checks")
@@ -322,6 +336,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_remote_dt.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_json_flag(p_remote_dt)
     p_remote_dt.set_defaults(func=_cmd_remote_dt)
+
+    p_opencode_auto = sub.add_parser("opencode-auto", help="run OpenCode task planning and subtask execution")
+    p_opencode_auto.add_argument("action", choices=["run"])
+    p_opencode_auto.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_opencode_auto.add_argument("--task", required=True)
+    p_opencode_auto.add_argument("--plan-file", default="")
+    p_opencode_auto.add_argument("--max-retries", type=int, default=None)
+    p_opencode_auto.add_argument("--dry-run", action="store_true")
+    _add_json_flag(p_opencode_auto)
+    p_opencode_auto.set_defaults(func=_cmd_opencode_auto)
 
     p_flash = sub.add_parser("flash", help="flash firmware")
     p_flash.add_argument("--config", default=str(DEFAULT_CONFIG))

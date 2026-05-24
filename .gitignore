@@ -1,3 +1,9 @@
 build
 mx.scratch
 !.settings
+.codex
+__pycache__/
+*.pyc
+agent_workbench/runtime/test_tmp/
+agent_workbench/runtime/opencode_*validation*/
+agent_workbench/runtime/opencode_retry_migration_git/

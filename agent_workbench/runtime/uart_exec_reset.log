@@ -799,3 +799,98 @@ Info : [stm32f1x.cpu] starting gdb server on 3333
 Info : Listening on port 3333 for gdb connections
 shutdown command invoked
 [2026-05-17T13:20:26.902+00:00] exit=0
+
+[2026-05-24T13:52:27.773+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.200000
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+shutdown command invoked
+[2026-05-24T13:52:28.034+00:00] exit=0
+
+[2026-05-24T14:56:33.871+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.200000
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+shutdown command invoked
+[2026-05-24T14:56:34.134+00:00] exit=0
+
+[2026-05-24T14:57:30.302+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.201578
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+shutdown command invoked
+[2026-05-24T14:57:30.566+00:00] exit=0
+
+[2026-05-24T15:02:35.186+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.198422
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+shutdown command invoked
+[2026-05-24T15:02:35.449+00:00] exit=0
+
+[2026-05-24T15:03:32.506+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "init; reset run; shutdown"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.198422
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+shutdown command invoked
+[2026-05-24T15:03:32.770+00:00] exit=0

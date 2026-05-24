@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "dry run",
+      "prompt": "smoke dry run after patch",
+      "acceptance": []
+    }
+  ],
+  "dry_run": true
+}

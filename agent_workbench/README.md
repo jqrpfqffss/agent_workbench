@@ -19,6 +19,7 @@ This workbench is intentionally small. The supported commands are:
 - `remote-dt coverage --json`
 - `remote-dt pipeline --json`
 - `remote-dt pull-logs --json`
+- `opencode-auto run --task "..." --json`
 
 Run commands from the repository root:
 

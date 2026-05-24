@@ -33,6 +33,7 @@
 - `remote-dt coverage --json`
 - `remote-dt pipeline --json`
 - `remote-dt pull-logs --json`
+- `opencode-auto run --task "..." --json`
 
 ## 绝对铁律
 

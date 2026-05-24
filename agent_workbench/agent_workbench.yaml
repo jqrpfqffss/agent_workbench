@@ -468,6 +468,96 @@ remote_dt:
       - .agent_workbench_remote_dt/logs/dt_*.log
       - .agent_workbench_remote_dt/results/dt_*.json
       - coverage/**
+
+opencode_auto:
+  # 是否启用 opencode_auto 自动化编排功能。
+  # 启用后，大型任务会先由 planner 生成计划，然后拆分成小任务，
+  # 在独立 opencode 进程中依次执行。每个小任务成功后自动 git stage，
+  # 失败后回滚，然后重试。
+  # true: 启用 opencode_auto 自动化流水线
+  # false: 关闭该功能，所有 opencode_auto 相关命令不再可用
+  enabled: true
+
+  # opencode 可执行命令名称。
+  # 指定用于执行工作任务的 opencode CLI 命令。
+  # 通常是系统 PATH 中的 "opencode"，如果使用自定义安装路径可写绝对路径。
+  command: opencode
+
+  # 工作进程（worker）启动参数列表。
+  # 每次执行小任务时，会用 `opencode <args> ...` 启动新进程。
+  # run: 以运行模式启动
+  #  --format json: 输出格式为 JSON，便于 machine 解析
+  args:
+    - run
+    - --format
+    - json
+
+  # 计划进程（planner）启动参数列表。
+  # planner 负责分析任务需求、生成执行计划，供 worker 逐步执行。
+  # 参数含义同 args，通常也与 args 保持一致。
+  planner_args:
+    - run
+    - --format
+    - json
+
+  # 单个小任务失败后的最大重试次数。
+  # 0: 不重试，失败即停止
+  # 1: 失败后重试一次（推荐值，兼顾容错与效率）
+  # 增大此值可提高不稳定环境下的成功率，但会延长总耗时。
+  max_retries: 1
+
+  # 单个 worker 任务的最大执行时间，单位秒。
+  # 超过此时间未完成，worker 进程会被强制终止并标记为超时失败。
+  # 1800 秒 = 30 分钟，适合中等规模的代码编辑/构建任务。
+  timeout_sec: 1800
+
+  # planner 进程的最大执行时间，单位秒。
+  # 超过此时间未生成计划，planner 进程会被强制终止。
+  # 600 秒 = 10 分钟，计划生成通常远比执行快，所以超时设得更短。
+  planner_timeout_sec: 600
+
+  # opencode_auto 运行时产物存放目录，相对 project.root。
+  # 每次运行会在此目录下创建独立子目录，保存：
+  # - planner 输出（计划 JSON）
+  # - 每个 worker 任务的日志、diff、状态
+  # - git stage/rollback 记录
+  runtime_dir: agent_workbench/runtime/opencode_auto
+
+  git:
+    # 是否启用 opencode_auto 的 git 自动管理功能。
+    # true: 启用 git stage（成功时）/ git checkout（失败回滚时）
+    # false: 关闭 git 自动管理，由用户自行处理版本控制
+    enabled: true
+
+    # git 工作树（worktree）路径，相对 project.root。
+    # "." 表示在当前仓库根目录执行所有 git 命令。
+    # 所有 paths 和 exclude_paths 中的路径都以此为基准解析。
+    worktree: .
+
+    # 需要纳入 git 自动管理的文件/目录列表，相对 worktree。
+    # 每个 worker 成功后：git add 这些路径下的变更
+    # worker 失败后：git checkout -- 这些路径，恢复到任务开始前的状态
+    # 当前 opencode-auto 运行目录会自动排除，以便保留诊断证据。
+    paths:
+      - Core
+      - Drivers
+      - cmake
+      - CMakeLists.txt
+      - CMakePresets.json
+      - agent_workbench
+
+    # git 自动管理时需要排除的文件/目录 glob 模式列表。
+    # 这些路径不会参与 clean 检查、git stage 和 git rollback。
+    # 当前排除了 Python 字节码缓存，避免 workbench 启动产生的
+    # 临时 pyc/pycache 文件被误判为"脏文件"。
+    exclude_paths:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
+
+    # 是否要求工作区在任务开始前必须是干净的（无未提交变更）。
+    # true: 启动前检查 git status，如有未提交变更则拒绝执行
+    # false: 允许在脏工作区执行（风险更高，可能导致回滚不完整）
+    require_clean: true
 checks:
   unit:
     # 是否启用单元测试检查。

@@ -1,0 +1,20 @@
+{
+  "attempt": 1,
+  "exit_code": 0,
+  "elapsed_sec": 279.359,
+  "timed_out": false,
+  "stdout": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225334\\tasks\\task_001\\attempt_001\\stdout.log",
+  "stderr": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225334\\tasks\\task_001\\attempt_001\\stderr.log",
+  "parsed_json": {
+    "type": "step_start",
+    "timestamp": 1779634432489,
+    "sessionID": "ses_1a585a990ffeYIaNqs5NDPs5Jn",
+    "part": {
+      "id": "prt_e5a7a69e6001ikRwRB5zGA02AG",
+      "messageID": "msg_e5a7a5796001zMR7OCxD3997lp",
+      "sessionID": "ses_1a585a990ffeYIaNqs5NDPs5Jn",
+      "snapshot": "e2ad2d811668ff56c8491ef248948dfa106a5422",
+      "type": "step-start"
+    }
+  }
+}

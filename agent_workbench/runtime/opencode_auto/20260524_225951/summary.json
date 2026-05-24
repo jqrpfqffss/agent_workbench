@@ -1,0 +1,85 @@
+{
+  "command": "opencode-auto run",
+  "exit_code": 0,
+  "status": "pass",
+  "summary": "opencode-auto tasks=1 passed=1 failed=0 retries=0",
+  "details": {
+    "task_count": 1,
+    "passed_count": 1,
+    "failed_count": 0,
+    "retry_count": 0,
+    "stopped_task": null,
+    "git": {
+      "enabled": true,
+      "worktree": "H:\\stm32_RAG\\code\\serial",
+      "paths": [
+        "Core",
+        "Drivers",
+        "cmake",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "agent_workbench"
+      ],
+      "exclude_paths": [
+        "**/__pycache__/**",
+        "**/*.pyc"
+      ],
+      "require_clean": true
+    },
+    "tasks": [
+      {
+        "id": "task_001",
+        "title": "Task 1",
+        "status": "pass",
+        "attempts": 1,
+        "artifacts": {
+          "task_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\tasks\\task_001",
+          "last_attempt": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\tasks\\task_001\\attempt_001"
+        },
+        "attempt_results": [
+          {
+            "attempt": 1,
+            "exit_code": 0,
+            "elapsed_sec": 232.25,
+            "timed_out": false,
+            "stdout": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\tasks\\task_001\\attempt_001\\stdout.log",
+            "stderr": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\tasks\\task_001\\attempt_001\\stderr.log",
+            "parsed_json": {
+              "type": "step_start",
+              "timestamp": 1779634810087,
+              "sessionID": "ses_1a57fe6d0ffe3qYq1h2od2i6DH",
+              "part": {
+                "id": "prt_e5a802ce5001uQztwFJSPHw0qz",
+                "messageID": "msg_e5a801a52001Wf6O7YcJtGgs5R",
+                "sessionID": "ses_1a57fe6d0ffe3qYq1h2od2i6DH",
+                "snapshot": "37b537e8d24fe97392041620570ff2fada30b890",
+                "type": "step-start"
+              }
+            }
+          }
+        ],
+        "git_add": {
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "warning: in the working copy of 'agent_workbench/runtime/build.log', LF will be replaced by CRLF the next time Git touches it\n",
+          "paths": [
+            "Core",
+            "Drivers",
+            "cmake",
+            "CMakeLists.txt",
+            "CMakePresets.json",
+            "agent_workbench"
+          ]
+        }
+      }
+    ]
+  },
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951",
+    "task": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\task.md",
+    "plan": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\plan.json",
+    "summary_json": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\summary.json",
+    "summary_md": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_225951\\summary.md"
+  },
+  "timestamp": "2026-05-24T15:03:56.129+00:00"
+}
