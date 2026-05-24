@@ -466,9 +466,12 @@ class OpencodeAutoService:
         result = self._git(["status", "--porcelain", "--untracked-files=all", "--", *paths])
         if result.exit_code != 0:
             return {"summary": f"git status failed exit={result.exit_code}", "dirty": result.stderr or result.stdout}
-        dirty_lines = self._unstaged_or_untracked_status_lines(
-            self._filter_preserved_status_lines(result.stdout.splitlines(), preserve_dir)
-        )
+        lines = result.stdout.splitlines()
+        lines = self._filter_preserved_status_lines(lines, preserve_dir)
+        runtime_root_str = str(self.options.get("runtime_dir_path", "")).strip()
+        if runtime_root_str:
+            lines = self._filter_preserved_status_lines(lines, Path(runtime_root_str))
+        dirty_lines = self._unstaged_or_untracked_status_lines(lines)
         dirty = "\n".join(dirty_lines).strip()
         if dirty:
             return {"summary": "configured git paths are dirty before opencode-auto run", "dirty": dirty}
