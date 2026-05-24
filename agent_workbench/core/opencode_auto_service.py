@@ -266,16 +266,99 @@ def _git_status_porcelain(cwd: Path, *, ignore_path: Path | None = None) -> dict
     return result
 
 
-def _git_cleanup_failed_attempt(project_root: Path, preserve_path: Path) -> dict[str, Any]:
+def _git_preserve_excludes(project_root: Path, preserve_path: Path) -> list[str]:
     rel = preserve_path.resolve().relative_to(project_root.resolve()).as_posix()
     parts = rel.split("/")
     excludes: list[str] = []
     for index in range(1, len(parts) + 1):
         prefix = "/".join(parts[:index])
         excludes.extend(["-e", prefix, "-e", f"{prefix}/"])
+    return excludes
+
+
+def _git_pathspec_excluding(project_root: Path, exclude_path: Path) -> list[str]:
+    rel = exclude_path.resolve().relative_to(project_root.resolve()).as_posix().rstrip("/")
+    return ["--", ".", f":(exclude){rel}", f":(exclude){rel}/**"]
+
+
+def _git_stash_top(cwd: Path) -> str:
+    result = _run_git(["git", "rev-parse", "-q", "--verify", "refs/stash"], cwd)
+    if int(result.get("exit_code", 1)) != 0:
+        return ""
+    return str(result.get("stdout") or "").strip()
+
+
+def _git_stash_selector(cwd: Path, stash_hash: str) -> str:
+    result = _run_git(["git", "stash", "list", "--format=%H%x00%gd"], cwd)
+    if int(result.get("exit_code", 1)) != 0:
+        return ""
+    for line in str(result.get("stdout") or "").splitlines():
+        commit_hash, _, selector = line.partition("\0")
+        if commit_hash == stash_hash:
+            return selector
+    return ""
+
+
+def _git_drop_snapshot(project_root: Path, snapshot: dict[str, Any] | None) -> dict[str, Any]:
+    stash_hash = str((snapshot or {}).get("stash") or "")
+    if not stash_hash:
+        return {"status": "pass", "reason": "no git baseline stash to drop", "commands": []}
+    selector = _git_stash_selector(project_root, stash_hash)
+    if not selector:
+        return {"status": "pass", "reason": "git baseline stash already absent", "commands": []}
+    result = _run_git(["git", "stash", "drop", selector], project_root)
+    status = "pass" if int(result.get("exit_code", 1)) == 0 else "fail"
+    return {
+        "status": status,
+        "reason": "dropped git baseline stash" if status == "pass" else result.get("stderr") or result.get("error") or "git stash drop failed",
+        "commands": [result],
+    }
+
+
+def _git_capture_worktree_snapshot(project_root: Path, preserve_path: Path) -> dict[str, Any]:
+    commands: list[dict[str, Any]] = []
+    before = _git_stash_top(project_root)
+    argv = [
+        "git",
+        "stash",
+        "push",
+        "--include-untracked",
+        "--message",
+        "agent-workbench opencode-auto run baseline",
+        *_git_pathspec_excluding(project_root, preserve_path),
+    ]
+    push = _run_git(argv, project_root)
+    commands.append(push)
+    if int(push.get("exit_code", 1)) != 0:
+        return {
+            "status": "fail",
+            "reason": push.get("stderr") or push.get("error") or "git stash baseline failed",
+            "commands": commands,
+        }
+    after = _git_stash_top(project_root)
+    stash_hash = after if after and after != before else ""
+    if stash_hash:
+        apply = _run_git(["git", "stash", "apply", "--index", stash_hash], project_root)
+        commands.append(apply)
+        if int(apply.get("exit_code", 1)) != 0:
+            return {
+                "status": "fail",
+                "stash": stash_hash,
+                "reason": apply.get("stderr") or apply.get("error") or "git baseline restore failed",
+                "commands": commands,
+            }
+    return {
+        "status": "pass",
+        "stash": stash_hash,
+        "reason": "captured git worktree baseline" if stash_hash else "git worktree baseline is clean",
+        "commands": commands,
+    }
+
+
+def _git_cleanup_failed_attempt(project_root: Path, preserve_path: Path) -> dict[str, Any]:
     commands = [
         ["git", "reset", "--hard", "HEAD"],
-        ["git", "clean", "-fd", *excludes, "--", "."],
+        ["git", "clean", "-fd", *_git_preserve_excludes(project_root, preserve_path), "--", "."],
     ]
     results = []
     for argv in commands:
@@ -284,6 +367,24 @@ def _git_cleanup_failed_attempt(project_root: Path, preserve_path: Path) -> dict
         if int(item.get("exit_code", 1)) != 0:
             return {"status": "fail", "commands": results, "reason": item.get("stderr") or item.get("error") or "git cleanup failed"}
     return {"status": "pass", "commands": results, "reason": "cleaned failed attempt changes"}
+
+
+def _git_restore_worktree_snapshot(project_root: Path, preserve_path: Path, snapshot: dict[str, Any] | None) -> dict[str, Any]:
+    cleanup = _git_cleanup_failed_attempt(project_root, preserve_path)
+    commands = list(cleanup.get("commands") or [])
+    if cleanup.get("status") != "pass":
+        return cleanup
+    stash_hash = str((snapshot or {}).get("stash") or "")
+    if stash_hash:
+        apply = _run_git(["git", "stash", "apply", "--index", stash_hash], project_root)
+        commands.append(apply)
+        if int(apply.get("exit_code", 1)) != 0:
+            return {
+                "status": "fail",
+                "commands": commands,
+                "reason": apply.get("stderr") or apply.get("error") or "git baseline restore failed",
+            }
+    return {"status": "pass", "commands": commands, "reason": "restored git worktree baseline"}
 
 
 def _render_attempt_md(attempt: dict[str, Any]) -> str:
@@ -551,6 +652,7 @@ def run_opencode_auto(
     review_cmd_template: str = "",
     max_retries: int = 3,
     timeout_seconds: int = 1800,
+    git_cleanup: bool = True,
 ) -> dict[str, Any]:
     runtime_root = Path(cfg["outputs"]["runtime_root_path"])
     project_root = Path(cfg["project_root_path"])
@@ -617,6 +719,31 @@ def run_opencode_auto(
                 "attempts": [],
             }
             task_results.append(compact)
+            task_snapshot = None
+            if git_cleanup and not dry_run:
+                task_snapshot = _git_capture_worktree_snapshot(project_root, run_dir)
+                compact["git_baseline"] = {
+                    "status": task_snapshot.get("status"),
+                    "reason": task_snapshot.get("reason"),
+                    "has_stash": bool(task_snapshot.get("stash")),
+                }
+                _write_summary(summary_path, summary)
+                if task_snapshot.get("status") != "pass":
+                    reason = _short(str(task_snapshot.get("reason") or "git baseline capture failed"))
+                    compact["status"] = "failed_git_baseline"
+                    compact["reason"] = reason
+                    summary["status"] = "fail"
+                    summary["reason"] = reason
+                    summary["counts"]["skipped"] += 1
+                    _write_summary(summary_path, summary)
+                    return build_result_payload(
+                        "opencode-auto run",
+                        2,
+                        status="fail",
+                        summary=f"opencode-auto git baseline failed: {reason}",
+                        details={"total": len(tasks), "passed": summary["counts"]["passed"], "skipped": summary["counts"]["skipped"], "tasks": task_results},
+                        artifacts={**summary["artifacts"], "summary_path": str(summary_path)},
+                    )
             task_passed = False
             last_reason = "not attempted"
             for attempt_index in range(1, max_attempts + 1):
@@ -674,6 +801,38 @@ def run_opencode_auto(
                     "review": review_result,
                     "attempt_dir": str(attempt_dir),
                 }
+                if not attempt_passed and git_cleanup and not dry_run:
+                    cleanup = _git_restore_worktree_snapshot(project_root, run_dir, task_snapshot)
+                    attempt_summary["cleanup"] = cleanup
+                    if cleanup.get("status") != "pass":
+                        last_reason = _short(str(cleanup.get("reason") or "git cleanup failed"))
+                        attempt_summary["reason"] = last_reason
+                        write_json(attempt_dir / "result.json", attempt_summary)
+                        compact["attempts"].append(
+                            {
+                                "attempt": attempt_index,
+                                "status": attempt_summary["status"],
+                                "reason": last_reason,
+                                "attempt_dir": str(attempt_dir),
+                                "result_path": str(attempt_dir / "result.json"),
+                            }
+                        )
+                        compact["attempt_count"] = attempt_index
+                        compact["status"] = "failed_git_cleanup"
+                        compact["reason"] = last_reason
+                        summary["status"] = "fail"
+                        summary["reason"] = last_reason
+                        summary["counts"]["skipped"] += 1
+                        _write_summary(summary_path, summary)
+                        _git_drop_snapshot(project_root, task_snapshot)
+                        return build_result_payload(
+                            "opencode-auto run",
+                            1,
+                            status="fail",
+                            summary=f"opencode-auto git cleanup failed: {last_reason}",
+                            details={"total": len(tasks), "passed": summary["counts"]["passed"], "skipped": summary["counts"]["skipped"], "tasks": task_results},
+                            artifacts={**summary["artifacts"], "summary_path": str(summary_path)},
+                        )
                 write_json(attempt_dir / "result.json", attempt_summary)
                 compact["attempts"].append(
                     {
@@ -689,6 +848,12 @@ def run_opencode_auto(
                 if attempt_passed:
                     task_passed = True
                     break
+            drop_result = _git_drop_snapshot(project_root, task_snapshot) if git_cleanup and not dry_run else None
+            if drop_result and drop_result.get("status") != "pass":
+                compact["git_baseline_drop"] = {
+                    "status": drop_result.get("status"),
+                    "reason": _short(str(drop_result.get("reason") or "git baseline drop failed")),
+                }
             if task_passed:
                 compact["status"] = "passed"
                 summary["counts"]["passed"] += 1

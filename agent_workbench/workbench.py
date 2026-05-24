@@ -136,6 +136,7 @@ def _cmd_opencode_auto(args: argparse.Namespace) -> int:
             review_cmd_template=_template_value(args.review_cmd_template, args.review_cmd_template_file),
             max_retries=int(args.max_retries),
             timeout_seconds=int(args.timeout_seconds),
+            git_cleanup=not bool(args.no_git_cleanup),
         )
     lines = [payload["summary"]]
     details = payload.get("details", {})

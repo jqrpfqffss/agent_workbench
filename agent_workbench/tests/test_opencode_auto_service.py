@@ -66,6 +66,7 @@ Large task
     def test_failed_executor_retries_then_skips(self) -> None:
         script = self.temp_dir / "fail_task.py"
         script.write_text("import sys\nsys.exit(7)\n", encoding="utf-8")
+        self._init_git_repo(self.temp_dir)
         template = f'"{sys.executable}" "{script}"'
 
         payload = run_opencode_auto(
@@ -82,6 +83,115 @@ Large task
         self.assertEqual(task["status"], "failed_skipped")
         self.assertEqual(task["attempt_count"], 3)
         self.assertEqual(len(task["attempts"]), 3)
+
+    def test_run_failed_subtask_cleanup_preserves_previous_success(self) -> None:
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        script = self.temp_dir / "run_worker.py"
+        script.write_text(
+            "\n".join(
+                [
+                    "from pathlib import Path",
+                    "import sys",
+                    "task = Path(sys.argv[1]).read_text(encoding='utf-8')",
+                    "if 'Successful first' in task:",
+                    "    Path('tracked.txt').write_text('success\\n', encoding='utf-8')",
+                    "    raise SystemExit(0)",
+                    "Path('tracked.txt').write_text('failed\\n', encoding='utf-8')",
+                    "Path('failed_new.txt').write_text('new\\n', encoding='utf-8')",
+                    "raise SystemExit(7)",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self._init_git_repo(self.temp_dir)
+        template = f'"{sys.executable}" "{script}" "{{task_file}}"'
+
+        payload = run_opencode_auto(
+            self.cfg,
+            task_text="- Successful first\n- Failing second",
+            opencode_cmd_template=template,
+            max_retries=0,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 1)
+        self.assertEqual(payload["details"]["passed"], 1)
+        self.assertEqual(payload["details"]["skipped"], 1)
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "success\n")
+        self.assertFalse((self.temp_dir / "failed_new.txt").exists())
+        failed_attempt = payload["details"]["tasks"][1]["attempts"][0]
+        result = json.loads(Path(failed_attempt["result_path"]).read_text(encoding="utf-8"))
+        self.assertEqual(result["cleanup"]["status"], "pass")
+
+    def test_run_failed_subtask_cleanup_preserves_dirty_baseline(self) -> None:
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        script = self.temp_dir / "fail_and_dirty.py"
+        script.write_text(
+            "\n".join(
+                [
+                    "from pathlib import Path",
+                    "Path('tracked.txt').write_text('failed\\n', encoding='utf-8')",
+                    "Path('pre_existing.txt').write_text('failed preexisting\\n', encoding='utf-8')",
+                    "Path('failed_new.txt').write_text('new\\n', encoding='utf-8')",
+                    "raise SystemExit(7)",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self._init_git_repo(self.temp_dir)
+        tracked.write_text("user change\n", encoding="utf-8")
+        pre_existing = self.temp_dir / "pre_existing.txt"
+        pre_existing.write_text("user untracked\n", encoding="utf-8")
+        template = f'"{sys.executable}" "{script}"'
+
+        payload = run_opencode_auto(
+            self.cfg,
+            task_text="- Failing dirty baseline",
+            opencode_cmd_template=template,
+            max_retries=0,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 1)
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "user change\n")
+        self.assertEqual(pre_existing.read_text(encoding="utf-8"), "user untracked\n")
+        self.assertFalse((self.temp_dir / "failed_new.txt").exists())
+
+    def test_run_no_git_cleanup_leaves_failed_subtask_changes(self) -> None:
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        script = self.temp_dir / "fail_without_cleanup.py"
+        script.write_text(
+            "\n".join(
+                [
+                    "from pathlib import Path",
+                    "Path('tracked.txt').write_text('failed\\n', encoding='utf-8')",
+                    "Path('failed_new.txt').write_text('new\\n', encoding='utf-8')",
+                    "raise SystemExit(7)",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self._init_git_repo(self.temp_dir)
+        template = f'"{sys.executable}" "{script}"'
+
+        payload = run_opencode_auto(
+            self.cfg,
+            task_text="- Failing without cleanup",
+            opencode_cmd_template=template,
+            max_retries=0,
+            timeout_seconds=5,
+            git_cleanup=False,
+        )
+
+        self.assertEqual(payload["exit_code"], 1)
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "failed\n")
+        self.assertTrue((self.temp_dir / "failed_new.txt").exists())
+        failed_attempt = payload["details"]["tasks"][0]["attempts"][0]
+        result = json.loads(Path(failed_attempt["result_path"]).read_text(encoding="utf-8"))
+        self.assertNotIn("cleanup", result)
 
     def test_missing_executor_requires_dry_run(self) -> None:
         payload = run_opencode_auto(
