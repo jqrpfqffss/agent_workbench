@@ -1,0 +1,20 @@
+{
+  "command": "opencode-auto run",
+  "exit_code": 0,
+  "status": "pass",
+  "summary": "opencode-auto dry-run tasks=1",
+  "details": {
+    "dry_run": true,
+    "task_count": 1,
+    "passed_count": 0,
+    "failed_count": 0
+  },
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_220618",
+    "task": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_220618\\task.md",
+    "plan": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_220618\\plan.json",
+    "summary_json": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_220618\\summary.json",
+    "summary_md": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_220618\\summary.md"
+  },
+  "timestamp": "2026-05-24T14:06:18.353+00:00"
+}

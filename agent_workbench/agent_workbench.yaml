@@ -491,20 +491,17 @@ opencode_auto:
     enabled: true
     # Relative paths are resolved against project.root. Git commands run here.
     worktree: .
-    # Keep runtime artifacts out of the default pathspec so normal doctor/test
-    # logs do not block opencode-auto. Projects can narrow or expand this list.
+    # Paths to stage after each successful worker and roll back after failed
+    # attempts. The current opencode-auto run directory is ignored during the
+    # initial clean check and excluded from git clean so evidence remains
+    # available for diagnosis.
     paths:
       - Core
       - Drivers
       - cmake
       - CMakeLists.txt
       - CMakePresets.json
-      - agent_workbench/workbench.py
-      - agent_workbench/core
-      - agent_workbench/tests
-      - agent_workbench/docs
-      - agent_workbench/README.md
-      - agent_workbench/agent_workbench.yaml
+      - agent_workbench
     require_clean: true
 checks:
   unit:

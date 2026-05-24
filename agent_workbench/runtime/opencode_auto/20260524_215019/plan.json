@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Task 1",
+      "prompt": "请通过cli指令点亮LED红灯",
+      "acceptance": []
+    }
+  ],
+  "raw_plan": null
+}

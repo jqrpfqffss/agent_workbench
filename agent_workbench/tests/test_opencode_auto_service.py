@@ -75,8 +75,19 @@ class OpencodeAutoServiceTests(unittest.TestCase):
         self.assertIn("tracked.txt", cached)
         self.assertIn("PASS_TWO", (self.project_root / "tracked.txt").read_text(encoding="utf-8"))
 
+    def test_success_stages_runtime_artifacts_when_configured(self) -> None:
+        cfg = load_config(self._write_config(paths=["tracked.txt", "runtime"]))
+        plan = self._write_plan([{"id": "task_001", "title": "PASS_ONE", "prompt": "PASS_ONE"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan))
+
+        self.assertEqual(payload["status"], "pass")
+        cached = self._git("diff", "--cached", "--name-only").stdout
+        self.assertIn("tracked.txt", cached)
+        self.assertIn("runtime/opencode_auto", cached.replace("\\", "/"))
+
     def test_failed_subtask_rolls_back_tracked_and_untracked_changes(self) -> None:
-        cfg = load_config(self._write_config(paths=["tracked.txt", "created.txt"]))
+        cfg = load_config(self._write_config(paths=["tracked.txt", "created.txt", "runtime"]))
         plan = self._write_plan([{"id": "task_001", "title": "FAIL_ALWAYS", "prompt": "FAIL_ALWAYS"}])
 
         payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
@@ -84,6 +95,7 @@ class OpencodeAutoServiceTests(unittest.TestCase):
         self.assertEqual(payload["status"], "fail")
         self.assertEqual((self.project_root / "tracked.txt").read_text(encoding="utf-8"), "base\n")
         self.assertFalse((self.project_root / "created.txt").exists())
+        self.assertTrue(Path(payload["artifacts"]["summary_json"]).exists())
         self.assertEqual(self._git("diff", "--cached", "--name-only").stdout.strip(), "")
 
     def test_retry_success_stages_only_final_success(self) -> None:

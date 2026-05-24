@@ -259,7 +259,7 @@ class OpencodeAutoService:
                 [],
             )
 
-        clean_error = self._check_clean()
+        clean_error = self._check_clean(preserve_dir=run_dir)
         if clean_error:
             return self._finish(
                 run_dir,
@@ -425,7 +425,7 @@ class OpencodeAutoService:
                     "artifacts": {"task_dir": str(task_dir), "last_attempt": str(attempt_dir)},
                     "attempt_results": attempts,
                 }
-            rollback = self._git_rollback()
+            rollback = self._git_rollback(preserve_dir=run_dir)
             attempt_payload["rollback"] = rollback
             if attempt_index >= max_attempts:
                 return {
@@ -459,14 +459,15 @@ class OpencodeAutoService:
     def _git(self, args: list[str]) -> ProcessResult:
         return _run_process(["git", *args], Path(self.git_options["worktree_path"]), 300)
 
-    def _check_clean(self) -> dict[str, Any] | None:
+    def _check_clean(self, *, preserve_dir: Path | None = None) -> dict[str, Any] | None:
         if not self.git_options.get("enabled", True) or not self.git_options.get("require_clean", True):
             return None
         paths = list(self.git_options.get("paths", ["."]))
-        result = self._git(["status", "--porcelain", "--", *paths])
+        result = self._git(["status", "--porcelain", "--untracked-files=all", "--", *paths])
         if result.exit_code != 0:
             return {"summary": f"git status failed exit={result.exit_code}", "dirty": result.stderr or result.stdout}
-        dirty = result.stdout.strip()
+        dirty_lines = self._filter_preserved_status_lines(result.stdout.splitlines(), preserve_dir)
+        dirty = "\n".join(dirty_lines).strip()
         if dirty:
             return {"summary": "configured git paths are dirty before opencode-auto run", "dirty": dirty}
         return None
@@ -480,7 +481,7 @@ class OpencodeAutoService:
         result = self._git(["add", "-A", "--", *paths])
         return {"exit_code": result.exit_code, "stdout": result.stdout, "stderr": result.stderr, "paths": paths}
 
-    def _git_rollback(self) -> dict[str, Any]:
+    def _git_rollback(self, *, preserve_dir: Path | None = None) -> dict[str, Any]:
         if not self.git_options.get("enabled", True):
             return {"exit_code": 0, "skipped": True}
         paths = list(self.git_options.get("paths", ["."]))
@@ -492,13 +493,45 @@ class OpencodeAutoService:
             restore = ProcessResult(0, "", "", 0)
         else:
             restore = tracked
-        clean = self._git(["clean", "-fd", "--", *paths])
+        clean_args = ["clean", "-fd"]
+        excluded = self._clean_exclude_args(preserve_dir)
+        clean_args.extend(excluded)
+        clean_args.extend(["--", *paths])
+        clean = self._git(clean_args)
         return {
             "exit_code": 0 if restore.exit_code == 0 and clean.exit_code == 0 else 1,
             "tracked_paths": tracked_paths if tracked.exit_code == 0 else [],
+            "clean_excludes": excluded,
             "restore": {"exit_code": restore.exit_code, "stdout": restore.stdout, "stderr": restore.stderr},
             "clean": {"exit_code": clean.exit_code, "stdout": clean.stdout, "stderr": clean.stderr},
         }
+
+    def _clean_exclude_args(self, preserve_dir: Path | None) -> list[str]:
+        if preserve_dir is None:
+            return []
+        worktree = Path(self.git_options["worktree_path"]).resolve()
+        try:
+            relative = preserve_dir.resolve().relative_to(worktree).as_posix()
+        except ValueError:
+            return []
+        return ["-e", relative, "-e", f"{relative}/**"]
+
+    def _filter_preserved_status_lines(self, lines: list[str], preserve_dir: Path | None) -> list[str]:
+        if preserve_dir is None:
+            return lines
+        worktree = Path(self.git_options["worktree_path"]).resolve()
+        try:
+            relative = preserve_dir.resolve().relative_to(worktree).as_posix().rstrip("/")
+        except ValueError:
+            return lines
+        prefix = f"{relative}/"
+        filtered: list[str] = []
+        for line in lines:
+            path = line[3:].replace("\\", "/") if len(line) > 3 else ""
+            if path == relative or path.startswith(prefix):
+                continue
+            filtered.append(line)
+        return filtered
 
     def _existing_or_tracked_paths(self) -> list[str]:
         paths = list(self.git_options.get("paths", ["."]))
