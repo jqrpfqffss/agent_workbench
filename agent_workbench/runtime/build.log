@@ -1,10 +1,10 @@
 
-[2026-05-24T15:15:00.146+00:00] $ cmake -S H:\stm32_RAG\code\serial -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
+[2026-05-24T15:25:01.355+00:00] $ cmake -S H:\stm32_RAG\code\serial -B H:\stm32_RAG\code\serial\build\cmake-debug -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=H:\stm32_RAG\code\serial\cmake\arm-none-eabi-toolchain.cmake
 -- Configuring done (0.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: H:/stm32_RAG/code/serial/build/cmake-debug
-[2026-05-24T15:15:00.317+00:00] exit=0
+[2026-05-24T15:25:01.524+00:00] exit=0
 
-[2026-05-24T15:15:00.318+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
+[2026-05-24T15:25:01.525+00:00] $ cmake --build H:\stm32_RAG\code\serial\build\cmake-debug -j
 [100%] Built target serial
-[2026-05-24T15:15:00.861+00:00] exit=0
+[2026-05-24T15:25:02.066+00:00] exit=0

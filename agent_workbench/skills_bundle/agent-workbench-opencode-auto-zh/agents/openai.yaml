@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench OpenCode Auto（中文）"
+  short_description: "中文说明的 opencode-auto 子任务拆分、Git 自动管理、失败恢复和证据闭环"
+  default_prompt: "使用 $agent-workbench-opencode-auto-zh 和 $agent-workbench-toolbox-zh，通过 opencode-auto run 把大型任务拆成串行 OpenCode worker 执行，处理 Git 暂存与回滚，并按 evidence 输出最终报告。"
