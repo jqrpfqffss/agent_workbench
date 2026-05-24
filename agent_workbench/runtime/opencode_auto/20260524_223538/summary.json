@@ -1,0 +1,29 @@
+{
+  "command": "opencode-auto run",
+  "exit_code": 3,
+  "status": "blocked",
+  "summary": "configured git paths are dirty before opencode-auto run",
+  "details": {
+    "git": {
+      "enabled": true,
+      "worktree": "H:\\stm32_RAG\\code\\serial",
+      "paths": [
+        "Core",
+        "Drivers",
+        "cmake",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "agent_workbench"
+      ],
+      "require_clean": true
+    },
+    "dirty": "M agent_workbench/core/__pycache__/config.cpython-38.pyc\n M agent_workbench/core/__pycache__/opencode_auto_service.cpython-38.pyc"
+  },
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_223538",
+    "task": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_223538\\task.md",
+    "summary_json": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_223538\\summary.json",
+    "summary_md": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_223538\\summary.md"
+  },
+  "timestamp": "2026-05-24T14:35:38.799+00:00"
+}

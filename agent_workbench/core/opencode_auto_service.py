@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 import shutil
@@ -11,6 +12,9 @@ from typing import Any
 
 from .cli_output import build_result_payload
 from .utils import ensure_dir, local_now_tag, read_text, write_json
+
+
+DEFAULT_GIT_EXCLUDE_PATHS = ["**/__pycache__/**", "**/*.pyc"]
 
 
 @dataclass
@@ -291,10 +295,12 @@ class OpencodeAutoService:
             item_result = self._run_task(task_item, run_dir, retries)
             summary_tasks.append(item_result)
             retry_count += max(0, int(item_result["attempts"]) - 1)
+            baseline_tree = item_result.pop("_baseline_tree", None)
             if item_result["status"] == "pass":
                 add_result = self._git_add()
                 item_result["git_add"] = add_result
                 if add_result["exit_code"] != 0:
+                    item_result["rollback"] = self._git_rollback(preserve_dir=run_dir, baseline_tree=baseline_tree)
                     failed_count += 1
                     stopped_task = task_item
                     item_result["status"] = "fail"
@@ -395,6 +401,7 @@ class OpencodeAutoService:
 
         for attempt_index in range(1, max_attempts + 1):
             attempt_dir = ensure_dir(task_dir / f"attempt_{attempt_index:03d}")
+            baseline_tree = self._git_index_tree()
             argv = [
                 str(self.options.get("command", "opencode")),
                 *map(str, self.options.get("args", [])),
@@ -424,8 +431,9 @@ class OpencodeAutoService:
                     "attempts": attempt_index,
                     "artifacts": {"task_dir": str(task_dir), "last_attempt": str(attempt_dir)},
                     "attempt_results": attempts,
+                    "_baseline_tree": baseline_tree,
                 }
-            rollback = self._git_rollback(preserve_dir=run_dir)
+            rollback = self._git_rollback(preserve_dir=run_dir, baseline_tree=baseline_tree)
             attempt_payload["rollback"] = rollback
             if attempt_index >= max_attempts:
                 return {
@@ -453,17 +461,27 @@ class OpencodeAutoService:
             "enabled": bool(self.git_options.get("enabled", True)),
             "worktree": str(self.git_options.get("worktree_path", "")),
             "paths": list(self.git_options.get("paths", ["."])),
+            "exclude_paths": self._git_exclude_paths(),
             "require_clean": bool(self.git_options.get("require_clean", True)),
         }
 
     def _git(self, args: list[str]) -> ProcessResult:
         return _run_process(["git", *args], Path(self.git_options["worktree_path"]), 300)
 
+    def _git_index_tree(self) -> str | None:
+        if not self.git_options.get("enabled", True):
+            return None
+        result = self._git(["write-tree"])
+        if result.exit_code != 0:
+            return None
+        tree = result.stdout.strip()
+        return tree or None
+
     def _check_clean(self, *, preserve_dir: Path | None = None) -> dict[str, Any] | None:
         if not self.git_options.get("enabled", True) or not self.git_options.get("require_clean", True):
             return None
         paths = list(self.git_options.get("paths", ["."]))
-        result = self._git(["status", "--porcelain", "--untracked-files=all", "--", *paths])
+        result = self._git(["status", "--porcelain", "--untracked-files=all", "--", *self._git_pathspecs(paths)])
         if result.exit_code != 0:
             return {"summary": f"git status failed exit={result.exit_code}", "dirty": result.stderr or result.stdout}
         lines = result.stdout.splitlines()
@@ -471,6 +489,7 @@ class OpencodeAutoService:
         runtime_root_str = str(self.options.get("runtime_dir_path", "")).strip()
         if runtime_root_str:
             lines = self._filter_preserved_status_lines(lines, Path(runtime_root_str))
+        lines = self._filter_ignored_status_lines(lines)
         dirty_lines = self._unstaged_or_untracked_status_lines(lines)
         dirty = "\n".join(dirty_lines).strip()
         if dirty:
@@ -483,31 +502,69 @@ class OpencodeAutoService:
         paths = self._existing_or_tracked_paths()
         if not paths:
             return {"exit_code": 0, "skipped": True, "reason": "no existing or tracked configured paths"}
-        result = self._git(["add", "-A", "--", *paths])
+        result = self._git(["add", "-A", "--", *self._git_pathspecs(paths)])
         return {"exit_code": result.exit_code, "stdout": result.stdout, "stderr": result.stderr, "paths": paths}
 
-    def _git_rollback(self, *, preserve_dir: Path | None = None) -> dict[str, Any]:
+    def _git_rollback(self, *, preserve_dir: Path | None = None, baseline_tree: str | None = None) -> dict[str, Any]:
         if not self.git_options.get("enabled", True):
             return {"exit_code": 0, "skipped": True}
         paths = list(self.git_options.get("paths", ["."]))
-        tracked = self._git(["ls-files", "--", *paths])
-        tracked_paths = [line.strip() for line in tracked.stdout.splitlines() if line.strip()]
-        if tracked.exit_code == 0 and tracked_paths:
-            restore = self._git(["restore", "--worktree", "--", *tracked_paths])
-        elif tracked.exit_code == 0:
-            restore = ProcessResult(0, "", "", 0)
+        if baseline_tree:
+            tracked = ProcessResult(0, "", "", 0)
+            tree_files = self._git(["ls-tree", "-r", "--name-only", baseline_tree, "--", *paths])
+            tracked_paths = [
+                line.strip()
+                for line in tree_files.stdout.splitlines()
+                if line.strip() and not self._is_ignored_git_path(line.strip())
+            ]
+            if tree_files.exit_code == 0 and tracked_paths:
+                restore = self._git(["restore", f"--source={baseline_tree}", "--staged", "--worktree", "--", *tracked_paths])
+            elif tree_files.exit_code == 0:
+                restore = ProcessResult(0, "", "", 0)
+            else:
+                restore = tree_files
+            index_added = self._git(
+                ["diff", "--cached", "--name-only", "--diff-filter=A", baseline_tree, "--", *paths]
+            )
+            index_added_paths = [
+                line.strip()
+                for line in index_added.stdout.splitlines()
+                if line.strip() and not self._is_ignored_git_path(line.strip())
+            ]
+            if index_added.exit_code == 0 and index_added_paths:
+                unstage_added = self._git(["rm", "-f", "--cached", "--ignore-unmatch", "--", *index_added_paths])
+            elif index_added.exit_code == 0:
+                unstage_added = ProcessResult(0, "", "", 0)
+            else:
+                unstage_added = index_added
         else:
-            restore = tracked
+            tracked = self._git(["ls-files", "--", *self._git_pathspecs(paths)])
+            tracked_paths = [line.strip() for line in tracked.stdout.splitlines() if line.strip()]
+            if tracked.exit_code == 0 and tracked_paths:
+                restore = self._git(["restore", "--worktree", "--", *tracked_paths])
+            elif tracked.exit_code == 0:
+                restore = ProcessResult(0, "", "", 0)
+            else:
+                restore = tracked
+            index_added_paths = []
+            unstage_added = ProcessResult(0, "", "", 0)
         clean_args = ["clean", "-fd"]
         excluded = self._clean_exclude_args(preserve_dir)
         clean_args.extend(excluded)
-        clean_args.extend(["--", *paths])
+        clean_args.extend(["--", *self._git_pathspecs(paths)])
         clean = self._git(clean_args)
         return {
-            "exit_code": 0 if restore.exit_code == 0 and clean.exit_code == 0 else 1,
+            "exit_code": 0 if restore.exit_code == 0 and unstage_added.exit_code == 0 and clean.exit_code == 0 else 1,
+            "baseline_tree": baseline_tree,
             "tracked_paths": tracked_paths if tracked.exit_code == 0 else [],
+            "index_added_paths": index_added_paths,
             "clean_excludes": excluded,
             "restore": {"exit_code": restore.exit_code, "stdout": restore.stdout, "stderr": restore.stderr},
+            "unstage_added": {
+                "exit_code": unstage_added.exit_code,
+                "stdout": unstage_added.stdout,
+                "stderr": unstage_added.stderr,
+            },
             "clean": {"exit_code": clean.exit_code, "stdout": clean.stdout, "stderr": clean.stderr},
         }
 
@@ -538,6 +595,43 @@ class OpencodeAutoService:
             filtered.append(line)
         return filtered
 
+    def _git_exclude_paths(self) -> list[str]:
+        configured = self.git_options.get("exclude_paths", DEFAULT_GIT_EXCLUDE_PATHS)
+        if configured is None:
+            return []
+        if isinstance(configured, str):
+            configured = [configured]
+        result: list[str] = []
+        for item in configured:
+            text = str(item).strip().replace("\\", "/")
+            if text:
+                result.append(text)
+        return result
+
+    def _git_pathspecs(self, paths: list[str]) -> list[str]:
+        return [*paths, *(f":(exclude){item}" for item in self._git_exclude_paths())]
+
+    def _filter_ignored_status_lines(self, lines: list[str]) -> list[str]:
+        filtered: list[str] = []
+        for line in lines:
+            if self._is_ignored_git_path(self._status_path(line)):
+                continue
+            filtered.append(line)
+        return filtered
+
+    def _status_path(self, line: str) -> str:
+        path = line[3:] if len(line) > 3 else ""
+        return path.strip('"').replace("\\", "/")
+
+    def _is_ignored_git_path(self, path: str) -> bool:
+        normalized = path.replace("\\", "/").strip('"')
+        for pattern in self._git_exclude_paths():
+            if fnmatch.fnmatchcase(normalized, pattern):
+                return True
+            if pattern.startswith("**/") and fnmatch.fnmatchcase(normalized, pattern[3:]):
+                return True
+        return False
+
     def _unstaged_or_untracked_status_lines(self, lines: list[str]) -> list[str]:
         dirty: list[str] = []
         for line in lines:
@@ -555,12 +649,10 @@ class OpencodeAutoService:
         for path in paths:
             if (worktree / path).exists():
                 selected.append(path)
-        tracked = self._git(["ls-files", "--", *paths])
-        if tracked.exit_code == 0:
-            for line in tracked.stdout.splitlines():
-                text = line.strip()
-                if text and text not in selected:
-                    selected.append(text)
+                continue
+            tracked = self._git(["ls-files", "--", *self._git_pathspecs([path])])
+            if tracked.exit_code == 0 and tracked.stdout.strip():
+                selected.append(path)
         return selected
 
     def _finish(self, run_dir: Path, payload: dict[str, Any], tasks: list[dict[str, Any]]) -> dict[str, Any]:
@@ -578,4 +670,6 @@ class OpencodeAutoService:
             f"- tasks: {len(tasks)}",
         ]
         (run_dir / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        if payload.get("status") == "pass" and not payload.get("details", {}).get("dry_run"):
+            self._git_add()
         return payload

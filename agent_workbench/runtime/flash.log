@@ -725,3 +725,90 @@ Warn : Adding extra erase range, 0x08004748 .. 0x080047ff
 ** Resetting Target **
 shutdown command invoked
 [2026-05-17T13:18:16.614+00:00] exit=0
+
+[2026-05-24T14:56:00.903+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.198422
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x080019f0 msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x080048e4 .. 0x08004bff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-24T14:56:02.761+00:00] exit=0
+
+[2026-05-24T15:02:16.795+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.198422
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x080019e4 msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004934 .. 0x08004bff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-24T15:02:18.659+00:00] exit=0
+
+[2026-05-24T15:03:22.747+00:00] $ openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program H:/stm32_RAG/code/serial/build/cmake-debug/serial.elf verify reset exit"
+Open On-Chip Debugger 0.12.0 (2024-09-16) [https://github.com/sysprogs/openocd]
+Licensed under GNU GPL v2
+libusb1 d52e355daa09f17ce64819122cb067b8a2ee0d4b
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+Info : auto-selecting first available session transport "hla_swd". To override use 'transport select <transport>'.
+Info : The selected transport took over low-level target control. The results might differ compared to plain JTAG/SWD
+Info : clock speed 1000 kHz
+Info : STLINK V2J46S7 (API v2) VID:PID 0483:3748
+Info : Target voltage: 3.200000
+Info : [stm32f1x.cpu] Cortex-M3 r1p1 processor detected
+Info : [stm32f1x.cpu] target has 6 breakpoints, 4 watchpoints
+Info : [stm32f1x.cpu] Examination succeed
+Info : [stm32f1x.cpu] starting gdb server on 3333
+Info : Listening on port 3333 for gdb connections
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08001a34 msp: 0x20005000
+** Programming Started **
+Info : device id = 0x20036410
+Info : flash size = 64 KiB
+Warn : Adding extra erase range, 0x08004934 .. 0x08004bff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+shutdown command invoked
+[2026-05-24T15:03:24.609+00:00] exit=0

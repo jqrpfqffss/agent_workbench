@@ -235,6 +235,10 @@ def _defaults() -> dict[str, Any]:
                     "CMakePresets.json",
                     "agent_workbench",
                 ],
+                "exclude_paths": [
+                    "**/__pycache__/**",
+                    "**/*.pyc",
+                ],
                 "require_clean": True,
             },
         },
@@ -297,6 +301,9 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["opencode_auto"]["runtime_dir_path"] = _resolve(raw["opencode_auto"].get("runtime_dir", ""), project_root)
     raw["opencode_auto"]["git"]["worktree_path"] = _resolve(raw["opencode_auto"]["git"].get("worktree", "."), project_root)
     raw["opencode_auto"]["git"]["paths"] = _normalize_str_list(raw["opencode_auto"]["git"].get("paths", [])) or ["."]
+    raw["opencode_auto"]["git"]["exclude_paths"] = _normalize_str_list(
+        raw["opencode_auto"]["git"].get("exclude_paths", [])
+    )
     raw["monitor"]["symbols"]["path"] = str(_resolve(raw["monitor"]["symbols"]["path"], project_root))
     raw["monitor"]["symbols"]["elf_path"] = raw["monitor"]["symbols"]["path"]
     raw["tools"]["cmake"]["toolchain_file_path"] = str(

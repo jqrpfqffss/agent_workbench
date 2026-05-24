@@ -57,6 +57,7 @@ class OpencodeAutoServiceTests(unittest.TestCase):
         )
         self.assertEqual(Path(cfg["opencode_auto"]["git"]["worktree_path"]), self.project_root.resolve())
         self.assertEqual(cfg["opencode_auto"]["git"]["paths"], ["tracked.txt"])
+        self.assertIn("**/*.pyc", cfg["opencode_auto"]["git"]["exclude_paths"])
 
     def test_all_planned_subtasks_pass_and_stage_changes(self) -> None:
         cfg = load_config(self._write_config(paths=["tracked.txt", "created.txt"]))
@@ -85,6 +86,7 @@ class OpencodeAutoServiceTests(unittest.TestCase):
         cached = self._git("diff", "--cached", "--name-only").stdout
         self.assertIn("tracked.txt", cached)
         self.assertIn("runtime/opencode_auto", cached.replace("\\", "/"))
+        self.assertIn("summary.json", cached)
 
     def test_failed_subtask_rolls_back_tracked_and_untracked_changes(self) -> None:
         cfg = load_config(self._write_config(paths=["tracked.txt", "created.txt", "runtime"]))
@@ -142,6 +144,56 @@ class OpencodeAutoServiceTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "blocked")
         self.assertIn("untracked.txt", payload["details"]["dirty"])
+
+    def test_tracked_python_cache_is_ignored_and_not_staged(self) -> None:
+        pycache = self.project_root / "agent_workbench" / "core" / "__pycache__"
+        pycache.mkdir(parents=True)
+        pyc = pycache / "config.cpython-38.pyc"
+        pyc.write_text("cached-before\n", encoding="utf-8")
+        self._git("add", "agent_workbench/core/__pycache__/config.cpython-38.pyc")
+        self._git("-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "track pyc")
+        pyc.write_text("cached-after\n", encoding="utf-8")
+        cfg = load_config(self._write_config(paths=["tracked.txt", "agent_workbench"]))
+        plan = self._write_plan([{"id": "task_001", "title": "PASS", "prompt": "PASS"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
+
+        self.assertEqual(payload["status"], "pass")
+        cached = self._git("diff", "--cached", "--name-only").stdout
+        self.assertIn("tracked.txt", cached)
+        self.assertNotIn(".pyc", cached)
+
+    def test_ignored_untracked_directories_do_not_break_success_staging(self) -> None:
+        (self.project_root / ".gitignore").write_text("agent_workbench/runtime/ignored_validation/\n", encoding="utf-8")
+        ignored_dir = self.project_root / "agent_workbench" / "runtime" / "ignored_validation"
+        ignored_dir.mkdir(parents=True)
+        (ignored_dir / "agent_workbench.yaml").write_text("ignored\n", encoding="utf-8")
+        self._git("add", ".gitignore")
+        self._git("-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-m", "ignore runtime")
+        cfg = load_config(self._write_config(paths=["tracked.txt", "agent_workbench"]))
+        plan = self._write_plan([{"id": "task_001", "title": "PASS", "prompt": "PASS"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["details"]["tasks"][0]["git_add"]["exit_code"], 0)
+        self.assertIn("tracked.txt", self._git("diff", "--cached", "--name-only").stdout)
+
+    def test_failed_attempt_restores_index_to_baseline(self) -> None:
+        cfg = load_config(self._write_config(paths=["tracked.txt", "created.txt"]))
+        (self.project_root / "tracked.txt").write_text("staged baseline\n", encoding="utf-8")
+        self._git("add", "tracked.txt")
+        plan = self._write_plan([{"id": "task_001", "title": "STAGE_AND_FAIL", "prompt": "STAGE_AND_FAIL"}])
+
+        payload = OpencodeAutoService(cfg).run("large task", plan_file=str(plan), max_retries=0)
+
+        self.assertEqual(payload["status"], "fail")
+        self.assertEqual((self.project_root / "tracked.txt").read_text(encoding="utf-8"), "staged baseline\n")
+        cached = self._git("diff", "--cached", "--name-only").stdout
+        self.assertIn("tracked.txt", cached)
+        self.assertNotIn("created.txt", cached)
+        self.assertFalse((self.project_root / "created.txt").exists())
+        self.assertEqual(self._git("diff", "--name-only").stdout.strip(), "")
 
     def test_dispatch_dry_run_returns_json(self) -> None:
         config_path = self._write_config(paths=["tracked.txt"])
@@ -203,6 +255,7 @@ class OpencodeAutoServiceTests(unittest.TestCase):
             textwrap.dedent(
                 f"""
                 import json
+                import subprocess
                 import sys
                 from pathlib import Path
 
@@ -217,6 +270,13 @@ class OpencodeAutoServiceTests(unittest.TestCase):
                     created.write_text("untracked failed\\n", encoding="utf-8")
                     print(json.dumps({{"ok": False}}))
                     raise SystemExit(7)
+
+                if "STAGE_AND_FAIL" in prompt:
+                    tracked.write_text("staged failed attempt\\n", encoding="utf-8")
+                    created.write_text("staged created\\n", encoding="utf-8")
+                    subprocess.run(["git", "add", "tracked.txt", "created.txt"], cwd=str(root), check=False)
+                    print(json.dumps({{"ok": False, "staged": True}}))
+                    raise SystemExit(9)
 
                 if "FLAKY" in prompt and not marker.exists():
                     marker.write_text("seen", encoding="utf-8")

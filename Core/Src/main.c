@@ -53,6 +53,9 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+static uint32_t DWT_GetCycle(void);
+static void DWT_Init(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -75,6 +78,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
   */
 volatile uint32_t g_data = 0;
 volatile float g_data1 = 0;
+volatile uint8_t g_red_led_blink_enabled = 0;
+volatile uint32_t g_red_led_last_toggle_cycles = 0;
 int main(void)
 {
 
@@ -101,6 +106,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+
+  DWT_Init();
+
   /* USER CODE BEGIN 2 */
   {
     size_t command_count = 0U;
@@ -130,6 +138,12 @@ int main(void)
         g_data1 = 0;
       }
       last_data_tick = HAL_GetTick();
+    }
+    if (g_red_led_blink_enabled != 0) {
+      if (DWT_GetCycle() - g_red_led_last_toggle_cycles >= 2000U) {
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+        g_red_led_last_toggle_cycles = DWT_GetCycle();
+      }
     }
     Cli_Process(&cli);
     /* USER CODE END WHILE */
@@ -250,6 +264,18 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+static void DWT_Init(void)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
+
+static uint32_t DWT_GetCycle(void)
+{
+  return DWT->CYCCNT;
+}
 
 /* USER CODE END 4 */
 

@@ -1,30 +1,10 @@
-[2026-05-17T13:20:25.120+00:00] [cli] start port=COM3 baud=115200 format=8N1 expect_ready=1 reset_first=1
-[2026-05-17T13:20:26.143+00:00] [cli] reset-first start
-[2026-05-17T13:20:26.902+00:00] [cli] reset-first exit=0
-[2026-05-17T13:20:26.908+00:00] < STM32 UART CLI ready.
-[2026-05-17T13:20:26.908+00:00] < Console: USART2 @ 115200 8N1, TX=PA2, RX=PA3
-[2026-05-17T13:20:26.908+00:00] < Type 'help' to list commands.
-[2026-05-17T13:20:26.908+00:00] < cli>
-[2026-05-17T13:20:26.908+00:00] > help
-[2026-05-17T13:20:26.949+00:00] < help
-[2026-05-17T13:20:26.949+00:00] < Available commands:
-[2026-05-17T13:20:26.949+00:00] <   help     List commands or show help for one command.
-[2026-05-17T13:20:26.949+00:00] <   status   Show UART and LED status.
-[2026-05-17T13:20:26.949+00:00] <   led      Control one LED or all LEDs.
-[2026-05-17T13:20:26.949+00:00] <   red      Shortcut for 'led red ...'.
-[2026-05-17T13:20:26.949+00:00] <   green    Shortcut for 'led green ...'.
-[2026-05-17T13:20:26.949+00:00] <   blue     Shortcut for 'led blue ...'.
-[2026-05-17T13:20:26.949+00:00] <   all      Shortcut for 'led all ...'.
-[2026-05-17T13:20:26.949+00:00] <   led_status Print the on/off state of all LEDs.
-[2026-05-17T13:20:26.949+00:00] < Use 'help <command>' for details.
-[2026-05-17T13:20:26.949+00:00] < cli>
-[2026-05-17T13:20:26.949+00:00] > status
-[2026-05-17T13:20:26.963+00:00] < status
-[2026-05-17T13:20:26.963+00:00] < System status:
-[2026-05-17T13:20:26.963+00:00] <   UART: USART2 @ 115200 8N1
-[2026-05-17T13:20:26.963+00:00] <   Pins: TX=PA2, RX=PA3
-[2026-05-17T13:20:26.963+00:00] <   LED RED  : off
-[2026-05-17T13:20:26.963+00:00] <   LED GREEN: off
-[2026-05-17T13:20:26.963+00:00] <   LED BLUE : off
-[2026-05-17T13:20:26.963+00:00] < cli>
-[2026-05-17T13:20:26.963+00:00] [cli] stop
+[2026-05-24T15:03:40.037+00:00] [cli] start port=COM3 baud=115200 format=8N1 expect_ready=1 reset_first=0
+[2026-05-24T15:03:46.179+00:00] [cli] prompt-sync send-empty-line
+[2026-05-24T15:03:46.180+00:00] < cli>
+[2026-05-24T15:03:46.180+00:00] [cli] prompt-sync acquired
+[2026-05-24T15:03:46.180+00:00] [cli] ready-missing ignored after prompt-sync expected=STM32 UART CLI ready.
+[2026-05-24T15:03:46.180+00:00] > red_blink off
+[2026-05-24T15:03:46.186+00:00] < red_blink off
+[2026-05-24T15:03:46.186+00:00] < [ok] red LED blink disabled
+[2026-05-24T15:03:46.186+00:00] < cli>
+[2026-05-24T15:03:46.186+00:00] [cli] stop

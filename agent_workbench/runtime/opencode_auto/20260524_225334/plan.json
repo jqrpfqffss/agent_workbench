@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Task 1",
+      "prompt": "请写一个通过主循环来实现红灯闪烁的cli指令，0.5ms闪烁一次",
+      "acceptance": []
+    }
+  ],
+  "raw_plan": null
+}

@@ -502,6 +502,11 @@ opencode_auto:
       - CMakeLists.txt
       - CMakePresets.json
       - agent_workbench
+    # Already-tracked generated Python cache files can become dirty during
+    # workbench startup. Keep them out of clean checks, staging and rollback.
+    exclude_paths:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
     require_clean: true
 checks:
   unit:

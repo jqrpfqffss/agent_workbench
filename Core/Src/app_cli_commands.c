@@ -1,6 +1,9 @@
 #include "app_cli_commands.h"
 
 #include <string.h>
+#include "main.h"
+
+extern volatile uint8_t g_red_led_blink_enabled;
 
 #define APP_LED_ON GPIO_PIN_SET
 #define APP_LED_OFF GPIO_PIN_RESET
@@ -29,7 +32,8 @@ static void AppCli_Red(CliContext *cli, int argc, char **argv);
 static void AppCli_Green(CliContext *cli, int argc, char **argv);
 static void AppCli_Blue(CliContext *cli, int argc, char **argv);
 static void AppCli_All(CliContext *cli, int argc, char **argv);
-static void AppCli_LedStatus(CliContext *cli, int argc, char **argv);  // NEW: led_status handler
+static void AppCli_LedStatus(CliContext *cli, int argc, char **argv);
+static void AppCli_RedBlink(CliContext *cli, int argc, char **argv);
 
 static void AppCli_PrintCommandHelp(CliContext *cli, const CliCommand *command);
 static void AppCli_PrintLedStatus(CliContext *cli, const char *name, GPIO_TypeDef *port, uint16_t pin);
@@ -49,7 +53,8 @@ static const CliCommand app_cli_commands[] =
   { "green", "Shortcut for 'led green ...'.", "green <on|off|toggle>", AppCli_Green },
   { "blue", "Shortcut for 'led blue ...'.", "blue <on|off|toggle>", AppCli_Blue },
   { "all", "Shortcut for 'led all ...'.", "all <on|off|toggle>", AppCli_All },
-  { "led_status", "Print the on/off state of all LEDs.", "led_status", AppCli_LedStatus }
+  { "led_status", "Print the on/off state of all LEDs.", "led_status", AppCli_LedStatus },
+  { "red_blink", "Toggle red LED blink (0.5ms interval).", "red_blink <on|off>", AppCli_RedBlink }
 };
 
 const CliCommand *AppCli_GetCommands(size_t *count)
@@ -306,4 +311,31 @@ static void AppCli_WriteOneLed(GPIO_TypeDef *port, uint16_t pin, AppLedAction ac
 static const char *AppCli_GetLedStateText(GPIO_TypeDef *port, uint16_t pin)
 {
   return (HAL_GPIO_ReadPin(port, pin) == APP_LED_ON) ? "on" : "off";
+}
+
+static void AppCli_RedBlink(CliContext *cli, int argc, char **argv)
+{
+  if (argc != 2)
+  {
+    Cli_RecordCommandError(NULL);
+    Cli_WriteString(cli, "Usage: red_blink <on|off>\r\n");
+    return;
+  }
+
+  if (strcmp(argv[1], "on") == 0)
+  {
+    g_red_led_blink_enabled = 1;
+    Cli_WriteString(cli, "[ok] red LED blink enabled (0.5ms interval)\r\n");
+  }
+  else if (strcmp(argv[1], "off") == 0)
+  {
+    g_red_led_blink_enabled = 0;
+    HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, APP_LED_OFF);
+    Cli_WriteString(cli, "[ok] red LED blink disabled\r\n");
+  }
+  else
+  {
+    Cli_RecordCommandError(NULL);
+    Cli_WriteString(cli, "Usage: red_blink <on|off>\r\n");
+  }
 }
