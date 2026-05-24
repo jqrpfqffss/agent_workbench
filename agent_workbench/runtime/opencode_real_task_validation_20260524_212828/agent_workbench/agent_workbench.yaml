@@ -1,0 +1,33 @@
+﻿project:
+  name: real-opencode-validation
+  root: ../Real OpenCode Project
+  build_dir: build
+  artifact_file: build/demo.elf
+  compile_commands: build/compile_commands.json
+outputs:
+  runtime_root: runtime
+opencode_auto:
+  enabled: true
+  command: opencode
+  args:
+    - run
+    - --format
+    - json
+    - --dangerously-skip-permissions
+  planner_args:
+    - run
+    - --format
+    - json
+    - --dangerously-skip-permissions
+  max_retries: 0
+  timeout_sec: 900
+  planner_timeout_sec: 600
+  runtime_dir: runtime/opencode_auto
+  git:
+    enabled: true
+    worktree: .
+    require_clean: true
+    paths:
+      - validation.txt
+      - result.txt
+      - README.md

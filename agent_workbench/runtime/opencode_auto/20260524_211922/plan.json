@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "dry run",
+      "prompt": "- test task one\n- test task two",
+      "acceptance": []
+    }
+  ],
+  "dry_run": true
+}

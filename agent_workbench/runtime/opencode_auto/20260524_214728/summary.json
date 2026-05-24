@@ -1,0 +1,34 @@
+{
+  "command": "opencode-auto run",
+  "exit_code": 3,
+  "status": "blocked",
+  "summary": "configured git paths are dirty before opencode-auto run",
+  "details": {
+    "git": {
+      "enabled": true,
+      "worktree": "H:\\stm32_RAG\\code\\serial",
+      "paths": [
+        "Core",
+        "Drivers",
+        "cmake",
+        "CMakeLists.txt",
+        "CMakePresets.json",
+        "agent_workbench/workbench.py",
+        "agent_workbench/core",
+        "agent_workbench/tests",
+        "agent_workbench/docs",
+        "agent_workbench/README.md",
+        "agent_workbench/agent_workbench.yaml"
+      ],
+      "require_clean": true
+    },
+    "dirty": "M agent_workbench/README.md\n M agent_workbench/agent_workbench.yaml\n M agent_workbench/core/__pycache__/cli_output.cpython-38.pyc\n M agent_workbench/core/__pycache__/config.cpython-38.pyc\n M agent_workbench/core/config.py\n M agent_workbench/workbench.py\n?? agent_workbench/core/__pycache__/opencode_auto_service.cpython-38.pyc\n?? agent_workbench/core/opencode_auto_service.py\n?? agent_workbench/tests/test_opencode_auto.py\n?? agent_workbench/tests/test_opencode_auto_service.py"
+  },
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_214728",
+    "task": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_214728\\task.md",
+    "summary_json": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_214728\\summary.json",
+    "summary_md": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_214728\\summary.md"
+  },
+  "timestamp": "2026-05-24T13:47:28.383+00:00"
+}

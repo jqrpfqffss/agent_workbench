@@ -215,6 +215,34 @@ def _defaults() -> dict[str, Any]:
                 ],
             },
         },
+        "opencode_auto": {
+            "enabled": True,
+            "command": "opencode",
+            "args": ["run", "--format", "json"],
+            "planner_args": ["run", "--format", "json"],
+            "max_retries": 1,
+            "timeout_sec": 1800,
+            "planner_timeout_sec": 600,
+            "runtime_dir": "agent_workbench/runtime/opencode_auto",
+            "git": {
+                "enabled": True,
+                "worktree": ".",
+                "paths": [
+                    "Core",
+                    "Drivers",
+                    "cmake",
+                    "CMakeLists.txt",
+                    "CMakePresets.json",
+                    "agent_workbench/workbench.py",
+                    "agent_workbench/core",
+                    "agent_workbench/tests",
+                    "agent_workbench/docs",
+                    "agent_workbench/README.md",
+                    "agent_workbench/agent_workbench.yaml",
+                ],
+                "require_clean": True,
+            },
+        },
     }
 
 
@@ -271,6 +299,9 @@ def load_config(config_path: Path) -> dict[str, Any]:
     raw["outputs"]["runtime_root_path"] = _resolve(raw["outputs"]["runtime_root"], project_root)
     raw["outputs"]["evidence_root_path"] = _resolve(raw["outputs"]["evidence_root"], project_root)
     raw["outputs"]["generated_root_path"] = _resolve(raw["outputs"]["generated_root"], project_root)
+    raw["opencode_auto"]["runtime_dir_path"] = _resolve(raw["opencode_auto"].get("runtime_dir", ""), project_root)
+    raw["opencode_auto"]["git"]["worktree_path"] = _resolve(raw["opencode_auto"]["git"].get("worktree", "."), project_root)
+    raw["opencode_auto"]["git"]["paths"] = _normalize_str_list(raw["opencode_auto"]["git"].get("paths", [])) or ["."]
     raw["monitor"]["symbols"]["path"] = str(_resolve(raw["monitor"]["symbols"]["path"], project_root))
     raw["monitor"]["symbols"]["elf_path"] = raw["monitor"]["symbols"]["path"]
     raw["tools"]["cmake"]["toolchain_file_path"] = str(

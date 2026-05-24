@@ -468,6 +468,44 @@ remote_dt:
       - .agent_workbench_remote_dt/logs/dt_*.log
       - .agent_workbench_remote_dt/results/dt_*.json
       - coverage/**
+
+opencode_auto:
+  # Host-side OpenCode orchestration for large tasks:
+  # plan once, execute small tasks in fresh opencode processes, stage on pass,
+  # roll back the failed attempt before retrying.
+  enabled: true
+  command: opencode
+  args:
+    - run
+    - --format
+    - json
+  planner_args:
+    - run
+    - --format
+    - json
+  max_retries: 1
+  timeout_sec: 1800
+  planner_timeout_sec: 600
+  runtime_dir: agent_workbench/runtime/opencode_auto
+  git:
+    enabled: true
+    # Relative paths are resolved against project.root. Git commands run here.
+    worktree: .
+    # Keep runtime artifacts out of the default pathspec so normal doctor/test
+    # logs do not block opencode-auto. Projects can narrow or expand this list.
+    paths:
+      - Core
+      - Drivers
+      - cmake
+      - CMakeLists.txt
+      - CMakePresets.json
+      - agent_workbench/workbench.py
+      - agent_workbench/core
+      - agent_workbench/tests
+      - agent_workbench/docs
+      - agent_workbench/README.md
+      - agent_workbench/agent_workbench.yaml
+    require_clean: true
 checks:
   unit:
     # 是否启用单元测试检查。
