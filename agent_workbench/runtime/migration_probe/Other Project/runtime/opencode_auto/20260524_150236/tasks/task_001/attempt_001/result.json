@@ -1,0 +1,37 @@
+{
+  "attempt": 1,
+  "status": "pass",
+  "reason": "passed",
+  "executor": {
+    "command": "C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe run --pure --format json \"Read attached task and answer exactly OPENCODE_AUTO_E2E_OK. Do not edit files.\" -f \"H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001.md\"",
+    "argv": [
+      "C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe",
+      "run",
+      "--pure",
+      "--format",
+      "json",
+      "Read attached task and answer exactly OPENCODE_AUTO_E2E_OK. Do not edit files.",
+      "-f",
+      "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001.md"
+    ],
+    "exit_code": 0,
+    "timeout": false,
+    "stdout_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\\stdout.log",
+    "stderr_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\\stderr.log"
+  },
+  "review": {
+    "command": "py -3 \"H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto_review_token.py\" \"H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\" OPENCODE_AUTO_E2E_OK",
+    "argv": [
+      "py",
+      "-3",
+      "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto_review_token.py",
+      "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001",
+      "OPENCODE_AUTO_E2E_OK"
+    ],
+    "exit_code": 0,
+    "timeout": false,
+    "stdout_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\\review_stdout.log",
+    "stderr_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\\review_stderr.log"
+  },
+  "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001"
+}

@@ -1,0 +1,21 @@
+{
+  "attempt": 1,
+  "status": "fail",
+  "reason": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe: can't open file 'agent_workbench\\runtime\\opencode_auto_worker.py': [Errno 2] No such file or directory",
+  "executor": {
+    "command": "py -3 agent_workbench\\runtime\\opencode_auto_worker.py H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150041\\tasks\\task_001.md",
+    "argv": [
+      "py",
+      "-3",
+      "agent_workbench\\runtime\\opencode_auto_worker.py",
+      "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other",
+      "Project\\runtime\\opencode_auto\\20260524_150041\\tasks\\task_001.md"
+    ],
+    "exit_code": 2,
+    "timeout": false,
+    "stdout_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150041\\tasks\\task_001\\attempt_001\\stdout.log",
+    "stderr_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150041\\tasks\\task_001\\attempt_001\\stderr.log"
+  },
+  "review": null,
+  "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150041\\tasks\\task_001\\attempt_001"
+}

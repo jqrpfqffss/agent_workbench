@@ -83,6 +83,57 @@ def _cmd_remote_dt(args: argparse.Namespace) -> int:
     return _emit(args, payload, [payload["summary"]])
 
 
+def _cmd_opencode_auto(args: argparse.Namespace) -> int:
+    from core.opencode_auto_service import run_opencode_auto
+
+    cfg = _cfg(args.config)
+    if args.action != "run":
+        raise ValueError(f"unknown opencode-auto action: {args.action}")
+
+    def _template_value(inline: str, file_path: str) -> str:
+        if file_path:
+            return Path(file_path).read_text(encoding="utf-8-sig").strip()
+        return str(inline or "")
+
+    task_text = str(args.task or "")
+    if args.task_file:
+        task_path = Path(args.task_file).resolve()
+        if not task_path.exists():
+            payload = build_result_payload(
+                "opencode-auto run",
+                2,
+                summary=f"task file not found: {task_path}",
+            )
+            return _emit(args, payload, [payload["summary"]])
+        task_text = task_path.read_text(encoding="utf-8")
+    if not task_text.strip():
+        payload = build_result_payload(
+            "opencode-auto run",
+            2,
+            summary="opencode-auto run requires --task or --task-file",
+        )
+        return _emit(args, payload, [payload["summary"]])
+
+    payload = run_opencode_auto(
+        cfg,
+        task_text=task_text,
+        dry_run=bool(args.dry_run),
+        planner_cmd_template=_template_value(args.planner_cmd_template, args.planner_cmd_template_file),
+        opencode_cmd_template=_template_value(args.opencode_cmd_template, args.opencode_cmd_template_file),
+        review_cmd_template=_template_value(args.review_cmd_template, args.review_cmd_template_file),
+        max_retries=int(args.max_retries),
+        timeout_seconds=int(args.timeout_seconds),
+    )
+    lines = [payload["summary"]]
+    details = payload.get("details", {})
+    if details.get("skipped"):
+        lines.append(
+            f"  {details['skipped']} task(s) did not pass "
+            f"(see {payload.get('artifacts', {}).get('summary_path', 'summary.json')})"
+        )
+    return _emit(args, payload, lines)
+
+
 def _cmd_flash(args: argparse.Namespace) -> int:
     from core.flash_service import run_flash
 
@@ -304,7 +355,7 @@ def _cmd_fix_build(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Portable STM32 Agent Workbench")
-    public_commands = "{doctor,build,remote-dt,flash,reset,uart,diag,monitor,fix-build}"
+    public_commands = "{doctor,build,remote-dt,opencode-auto,flash,reset,uart,diag,monitor,fix-build}"
     sub = parser.add_subparsers(dest="command", required=True, metavar=public_commands)
 
     p_doctor = sub.add_parser("doctor", help="run environment and configuration checks")
@@ -322,6 +373,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_remote_dt.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_json_flag(p_remote_dt)
     p_remote_dt.set_defaults(func=_cmd_remote_dt)
+
+    p_opencode_auto = sub.add_parser("opencode-auto", help="split and run large OpenCode tasks")
+    p_opencode_auto.add_argument("action", choices=["run"])
+    p_opencode_auto.add_argument("--config", default=str(DEFAULT_CONFIG))
+    p_opencode_auto.add_argument("--task", default="")
+    p_opencode_auto.add_argument("--task-file", default="")
+    p_opencode_auto.add_argument("--planner-cmd-template", default="")
+    p_opencode_auto.add_argument("--planner-cmd-template-file", default="")
+    p_opencode_auto.add_argument("--opencode-cmd-template", default="")
+    p_opencode_auto.add_argument("--opencode-cmd-template-file", default="")
+    p_opencode_auto.add_argument("--review-cmd-template", default="")
+    p_opencode_auto.add_argument("--review-cmd-template-file", default="")
+    p_opencode_auto.add_argument("--max-retries", type=int, default=3)
+    p_opencode_auto.add_argument("--timeout-seconds", type=int, default=1800)
+    p_opencode_auto.add_argument("--dry-run", action="store_true")
+    _add_json_flag(p_opencode_auto)
+    p_opencode_auto.set_defaults(func=_cmd_opencode_auto)
 
     p_flash = sub.add_parser("flash", help="flash firmware")
     p_flash.add_argument("--config", default=str(DEFAULT_CONFIG))

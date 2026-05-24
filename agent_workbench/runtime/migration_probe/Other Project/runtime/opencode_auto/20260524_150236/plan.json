@@ -1,0 +1,11 @@
+{
+  "source": "fallback",
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Return exactly OPENCODE_AUTO_E2E_OK. Do not edit files.",
+      "body": "Return exactly OPENCODE_AUTO_E2E_OK. Do not edit files."
+    }
+  ],
+  "planner_result": null
+}

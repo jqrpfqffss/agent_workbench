@@ -1,0 +1,7 @@
+﻿project:
+  name: migration_probe
+  root: .
+outputs:
+  runtime_root: runtime
+  evidence_root: evidence
+  generated_root: generated

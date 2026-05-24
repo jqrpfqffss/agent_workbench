@@ -1,0 +1,25 @@
+{
+  "attempt": 1,
+  "status": "fail",
+  "reason": "[WinError 2] 系统找不到指定的文件。",
+  "executor": {
+    "command": "﻿C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe run --pure --format json \"Read attached task and answer exactly OPENCODE_AUTO_E2E_OK. Do not edit files.\" -f \"H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150210\\tasks\\task_001.md\"",
+    "argv": [
+      "﻿C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe",
+      "run",
+      "--pure",
+      "--format",
+      "json",
+      "Read attached task and answer exactly OPENCODE_AUTO_E2E_OK. Do not edit files.",
+      "-f",
+      "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150210\\tasks\\task_001.md"
+    ],
+    "exit_code": 127,
+    "timeout": false,
+    "stdout_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150210\\tasks\\task_001\\attempt_001\\stdout.log",
+    "stderr_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150210\\tasks\\task_001\\attempt_001\\stderr.log",
+    "error": "[WinError 2] 系统找不到指定的文件。"
+  },
+  "review": null,
+  "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150210\\tasks\\task_001\\attempt_001"
+}

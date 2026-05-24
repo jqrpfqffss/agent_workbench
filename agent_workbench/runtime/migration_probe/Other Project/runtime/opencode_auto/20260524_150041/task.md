@@ -1,0 +1,1 @@
+Return exactly OPENCODE_AUTO_E2E_OK. Do not edit files.

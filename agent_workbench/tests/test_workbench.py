@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import json
 import shutil
 import sys
 import tempfile
@@ -47,6 +48,74 @@ class WorkbenchMonitorTests(unittest.TestCase):
         parsed = parser.parse_args(["__monitor-run", "--out-dir", str(self.temp_dir)])
         self.assertEqual(parsed.command, "__monitor-run")
         self.assertEqual(parsed.out_dir, str(self.temp_dir))
+
+    def test_opencode_auto_run_is_registered(self) -> None:
+        parser = workbench.build_parser()
+        parsed = parser.parse_args(["opencode-auto", "run", "--task", "do work", "--dry-run", "--json"])
+        self.assertEqual(parsed.command, "opencode-auto")
+        self.assertEqual(parsed.action, "run")
+        self.assertEqual(parsed.task, "do work")
+        self.assertTrue(parsed.dry_run)
+
+    def test_opencode_auto_template_file_flags(self) -> None:
+        parser = workbench.build_parser()
+        parsed = parser.parse_args(
+            [
+                "opencode-auto",
+                "run",
+                "--task",
+                "do work",
+                "--planner-cmd-template-file",
+                "planner.txt",
+                "--opencode-cmd-template-file",
+                "worker.txt",
+                "--review-cmd-template-file",
+                "review.txt",
+            ]
+        )
+        self.assertEqual(parsed.planner_cmd_template_file, "planner.txt")
+        self.assertEqual(parsed.opencode_cmd_template_file, "worker.txt")
+        self.assertEqual(parsed.review_cmd_template_file, "review.txt")
+
+    def test_opencode_auto_template_file_strips_utf8_bom(self) -> None:
+        config_path = self.temp_dir / "agent_workbench.yaml"
+        config_path.write_text(
+            "\n".join(
+                [
+                    "project:",
+                    "  name: probe",
+                    "  root: .",
+                    "outputs:",
+                    "  runtime_root: runtime",
+                    "  evidence_root: evidence",
+                    "  generated_root: generated",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        template_path = self.temp_dir / "worker-template.txt"
+        template_path.write_bytes(b"\xef\xbb\xbfignored command")
+
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            code = workbench.dispatch_args(
+                [
+                    "opencode-auto",
+                    "run",
+                    "--config",
+                    str(config_path),
+                    "--task",
+                    "hello",
+                    "--dry-run",
+                    "--opencode-cmd-template-file",
+                    str(template_path),
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["exit_code"], 0)
 
 
 if __name__ == "__main__":

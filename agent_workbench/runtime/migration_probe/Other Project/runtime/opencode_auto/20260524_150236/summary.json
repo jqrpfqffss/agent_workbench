@@ -1,0 +1,32 @@
+{
+  "status": "pass",
+  "counts": {
+    "total": 1,
+    "passed": 1,
+    "skipped": 0
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Return exactly OPENCODE_AUTO_E2E_OK. Do not edit files.",
+      "status": "passed",
+      "attempt_count": 1,
+      "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001.md",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "reason": "passed",
+          "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001",
+          "result_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\tasks\\task_001\\attempt_001\\result.json"
+        }
+      ]
+    }
+  ],
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236",
+    "plan_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\plan.json",
+    "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\migration_probe\\Other Project\\runtime\\opencode_auto\\20260524_150236\\task.md"
+  },
+  "updated_at": "2026-05-24T07:02:44.424+00:00"
+}
