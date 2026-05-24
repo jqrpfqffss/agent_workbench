@@ -1,0 +1,21 @@
+{
+  "source": "fallback",
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Task A: do something",
+      "body": "Task A: do something"
+    },
+    {
+      "id": "task_002",
+      "title": "Task B: do another thing",
+      "body": "Task B: do another thing"
+    },
+    {
+      "id": "task_003",
+      "title": "Task C: final cleanup",
+      "body": "Task C: final cleanup"
+    }
+  ],
+  "planner_result": null
+}

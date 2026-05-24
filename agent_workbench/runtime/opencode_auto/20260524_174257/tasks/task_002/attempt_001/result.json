@@ -1,0 +1,15 @@
+{
+  "attempt": 1,
+  "status": "pass",
+  "reason": "passed",
+  "executor": {
+    "command": "dry-run",
+    "argv": [],
+    "exit_code": 0,
+    "timeout": false,
+    "stdout_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002\\attempt_001\\stdout.log",
+    "stderr_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002\\attempt_001\\stderr.log"
+  },
+  "review": null,
+  "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002\\attempt_001"
+}

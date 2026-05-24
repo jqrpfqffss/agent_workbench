@@ -124,6 +124,49 @@ Large task
         result = json.loads(Path(failed_attempt["result_path"]).read_text(encoding="utf-8"))
         self.assertEqual(result["cleanup"]["status"], "pass")
 
+    def test_run_ignored_runtime_does_not_break_git_baseline_cleanup(self) -> None:
+        (self.temp_dir / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        script = self.temp_dir / "run_worker_ignored_runtime.py"
+        script.write_text(
+            "\n".join(
+                [
+                    "from pathlib import Path",
+                    "import sys",
+                    "task = Path(sys.argv[1]).read_text(encoding='utf-8')",
+                    "if 'Successful first' in task:",
+                    "    Path('tracked.txt').write_text('success\\n', encoding='utf-8')",
+                    "    raise SystemExit(0)",
+                    "Path('tracked.txt').write_text('failed\\n', encoding='utf-8')",
+                    "Path('failed_new.txt').write_text('new\\n', encoding='utf-8')",
+                    "raise SystemExit(7)",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self._init_git_repo(self.temp_dir)
+        template = f'"{sys.executable}" "{script}" "{{task_file}}"'
+
+        payload = run_opencode_auto(
+            self.cfg,
+            task_text="- Successful first\n- Failing second",
+            opencode_cmd_template=template,
+            max_retries=0,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 1)
+        self.assertEqual(payload["details"]["passed"], 1)
+        self.assertEqual(payload["details"]["skipped"], 1)
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "success\n")
+        self.assertFalse((self.temp_dir / "failed_new.txt").exists())
+        failed_task = payload["details"]["tasks"][1]
+        self.assertEqual(failed_task["status"], "failed_skipped")
+        self.assertNotIn("ignored", payload["summary"].lower())
+        result = json.loads(Path(failed_task["attempts"][0]["result_path"]).read_text(encoding="utf-8"))
+        self.assertEqual(result["cleanup"]["status"], "pass")
+
     def test_run_failed_subtask_cleanup_preserves_dirty_baseline(self) -> None:
         tracked = self.temp_dir / "tracked.txt"
         tracked.write_text("clean\n", encoding="utf-8")

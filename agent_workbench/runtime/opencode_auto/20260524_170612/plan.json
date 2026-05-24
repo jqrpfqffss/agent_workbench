@@ -1,0 +1,16 @@
+{
+  "source": "fallback",
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Test bullet 1",
+      "body": "Test bullet 1"
+    },
+    {
+      "id": "task_002",
+      "title": "Test bullet 2",
+      "body": "Test bullet 2"
+    }
+  ],
+  "planner_result": null
+}

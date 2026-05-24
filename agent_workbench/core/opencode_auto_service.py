@@ -281,6 +281,15 @@ def _git_pathspec_excluding(project_root: Path, exclude_path: Path) -> list[str]
     return ["--", ".", f":(exclude){rel}", f":(exclude){rel}/**"]
 
 
+def _git_path_is_ignored(project_root: Path, path: Path) -> bool:
+    try:
+        rel = path.resolve().relative_to(project_root.resolve()).as_posix()
+    except ValueError:
+        return False
+    result = _run_git(["git", "check-ignore", "-q", rel], project_root)
+    return int(result.get("exit_code", 1)) == 0
+
+
 def _git_stash_top(cwd: Path) -> str:
     result = _run_git(["git", "rev-parse", "-q", "--verify", "refs/stash"], cwd)
     if int(result.get("exit_code", 1)) != 0:
@@ -325,8 +334,9 @@ def _git_capture_worktree_snapshot(project_root: Path, preserve_path: Path) -> d
         "--include-untracked",
         "--message",
         "agent-workbench opencode-auto run baseline",
-        *_git_pathspec_excluding(project_root, preserve_path),
     ]
+    if not _git_path_is_ignored(project_root, preserve_path):
+        argv.extend(_git_pathspec_excluding(project_root, preserve_path))
     push = _run_git(argv, project_root)
     commands.append(push)
     if int(push.get("exit_code", 1)) != 0:

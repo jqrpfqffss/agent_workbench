@@ -1,0 +1,48 @@
+{
+  "status": "pass",
+  "counts": {
+    "total": 2,
+    "passed": 2,
+    "skipped": 0
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "inspect split",
+      "status": "passed",
+      "attempt_count": 1,
+      "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_001.md",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "reason": "passed",
+          "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_001\\attempt_001",
+          "result_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_001\\attempt_001\\result.json"
+        }
+      ]
+    },
+    {
+      "id": "task_002",
+      "title": "inspect artifacts",
+      "status": "passed",
+      "attempt_count": 1,
+      "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002.md",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "reason": "passed",
+          "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002\\attempt_001",
+          "result_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\tasks\\task_002\\attempt_001\\result.json"
+        }
+      ]
+    }
+  ],
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257",
+    "plan_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\plan.json",
+    "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_174257\\task.md"
+  },
+  "updated_at": "2026-05-24T09:42:57.835+00:00"
+}

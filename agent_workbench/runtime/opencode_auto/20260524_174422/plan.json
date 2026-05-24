@@ -1,0 +1,11 @@
+{
+  "source": "fallback",
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "Implement logging. 1. Add log module 2. Add log tests 3. Integrate",
+      "body": "Implement logging. 1. Add log module 2. Add log tests 3. Integrate"
+    }
+  ],
+  "planner_result": null
+}

@@ -1,0 +1,3 @@
+- Task A: do something
+- Task B: do another thing
+- Task C: final cleanup

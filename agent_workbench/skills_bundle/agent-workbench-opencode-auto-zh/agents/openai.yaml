@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Workbench OpenCode Auto"
+  short_description: "中文说明 opencode-auto run/retry 的真实 OpenCode 自动化用法。"
+  default_prompt: "使用 $agent-workbench-opencode-auto-zh 为当前 Agent Workbench 项目选择 opencode-auto run/retry 命令，执行 dry-run 或真实 OpenCode 模板调用，并报告 JSON 结果与 runtime artifacts。"

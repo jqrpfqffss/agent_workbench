@@ -1,0 +1,16 @@
+{
+  "source": "fallback",
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "inspect split",
+      "body": "inspect split"
+    },
+    {
+      "id": "task_002",
+      "title": "inspect artifacts",
+      "body": "inspect artifacts"
+    }
+  ],
+  "planner_result": null
+}

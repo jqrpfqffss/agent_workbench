@@ -1,0 +1,18 @@
+{
+  "attempt": 1,
+  "status": "pass",
+  "reason": "passed",
+  "executor": {
+    "command": "dry-run",
+    "argv": [],
+    "exit_code": 0,
+    "timeout": false,
+    "stdout_path": "H:/stm32_RAG/code/serial/agent_workbench/runtime/opencode_retry/20260524_170027/attempt_001/stdout.log",
+    "stderr_path": "H:/stm32_RAG/code/serial/agent_workbench/runtime/opencode_retry/20260524_170027/attempt_001/stderr.log"
+  },
+  "review": null,
+  "final_context": "## stdout.log\ndry-run attempt 1",
+  "attempt_dir": "H:/stm32_RAG/code/serial/agent_workbench/runtime/opencode_retry/20260524_170027/attempt_001",
+  "result_json": "H:/stm32_RAG/code/serial/agent_workbench/runtime/opencode_retry/20260524_170027/attempt_001/result.json",
+  "result_md": "H:/stm32_RAG/code/serial/agent_workbench/runtime/opencode_retry/20260524_170027/attempt_001/result.md"
+}
