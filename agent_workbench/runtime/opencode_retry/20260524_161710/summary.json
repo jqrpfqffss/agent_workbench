@@ -1,0 +1,41 @@
+{
+  "status": "fail",
+  "reason": "git worktree is dirty; retry cleanup requires a clean baseline",
+  "counts": {
+    "attempts": 0,
+    "passed_attempt": null,
+    "failed_attempts": 0
+  },
+  "attempts": [],
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_retry\\20260524_161710",
+    "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_retry\\20260524_161710\\task.md",
+    "summary_json": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_retry\\20260524_161710\\summary.json",
+    "summary_md": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_retry\\20260524_161710\\summary.md"
+  },
+  "git_baseline": {
+    "argv": [
+      "git",
+      "status",
+      "--porcelain=v1",
+      "-z"
+    ],
+    "exit_code": 0,
+    "stdout": " M agent_workbench/README.md\u0000 M agent_workbench/core/opencode_auto_service.py\u0000 M agent_workbench/runtime/build.log\u0000 M agent_workbench/runtime/doctor_report.json\u0000 M agent_workbench/runtime/doctor_report.md\u0000 M agent_workbench/tests/test_opencode_auto_service.py\u0000 M agent_workbench/tests/test_workbench.py\u0000 M agent_workbench/workbench.py\u0000?? agent_workbench/core/__pycache__/opencode_auto_service.cpython-38.pyc\u0000?? agent_workbench/runtime/opencode_retry/\u0000?? agent_workbench/runtime/opencode_retry_validation/\u0000",
+    "stderr": "",
+    "dirty": true,
+    "entries": [
+      " M agent_workbench/README.md",
+      " M agent_workbench/core/opencode_auto_service.py",
+      " M agent_workbench/runtime/build.log",
+      " M agent_workbench/runtime/doctor_report.json",
+      " M agent_workbench/runtime/doctor_report.md",
+      " M agent_workbench/tests/test_opencode_auto_service.py",
+      " M agent_workbench/tests/test_workbench.py",
+      " M agent_workbench/workbench.py",
+      "?? agent_workbench/core/__pycache__/opencode_auto_service.cpython-38.pyc",
+      "?? agent_workbench/runtime/opencode_retry_validation/"
+    ]
+  },
+  "updated_at": "2026-05-24T08:17:10.783+00:00"
+}

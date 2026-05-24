@@ -11,6 +11,8 @@ from .utils import ensure_dir, local_now_tag, read_text, split_command, utc_now_
 
 
 MAX_SUMMARY_CHARS = 300
+MAX_CONTEXT_LINES = 80
+MAX_CONTEXT_CHARS = 8000
 
 
 def _short(text: str, limit: int = MAX_SUMMARY_CHARS) -> str:
@@ -198,6 +200,345 @@ def _load_planner_tasks(
 def _write_summary(summary_path: Path, summary: dict[str, Any]) -> None:
     summary["updated_at"] = utc_now_iso()
     write_json(summary_path, summary)
+
+
+def _tail_context(paths: list[Path], *, max_lines: int = MAX_CONTEXT_LINES, max_chars: int = MAX_CONTEXT_CHARS) -> str:
+    sections: list[str] = []
+    for path in paths:
+        text = read_text(path)
+        if not text.strip():
+            continue
+        lines = text.splitlines()[-max_lines:]
+        section = f"## {path.name}\n" + "\n".join(lines)
+        sections.append(section)
+    context = "\n\n".join(sections).strip()
+    if len(context) <= max_chars:
+        return context
+    return context[-max_chars:]
+
+
+def _run_git(argv: list[str], cwd: Path) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "argv": argv,
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "",
+    }
+    try:
+        proc = subprocess.run(
+            argv,
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+            shell=False,
+        )
+    except Exception as exc:
+        result["error"] = str(exc)
+        return result
+    result["exit_code"] = int(proc.returncode)
+    result["stdout"] = proc.stdout or ""
+    result["stderr"] = proc.stderr or ""
+    return result
+
+
+def _git_status_porcelain(cwd: Path, *, ignore_path: Path | None = None) -> dict[str, Any]:
+    result = _run_git(["git", "status", "--porcelain=v1", "-z"], cwd)
+    stdout = str(result.get("stdout") or "")
+    entries = [item for item in stdout.split("\0") if item]
+    filtered = entries
+    if ignore_path is not None:
+        try:
+            rel = ignore_path.resolve().relative_to(cwd.resolve()).as_posix().rstrip("/")
+            filtered = []
+            for entry in entries:
+                path_text = entry[3:] if len(entry) > 3 else entry
+                normalized = path_text.rstrip("/")
+                if normalized == rel or normalized.startswith(rel + "/") or rel.startswith(normalized + "/"):
+                    continue
+                filtered.append(entry)
+        except ValueError:
+            filtered = entries
+    result["dirty"] = bool(filtered)
+    result["entries"] = filtered
+    return result
+
+
+def _git_cleanup_failed_attempt(project_root: Path, preserve_path: Path) -> dict[str, Any]:
+    rel = preserve_path.resolve().relative_to(project_root.resolve()).as_posix()
+    parts = rel.split("/")
+    excludes: list[str] = []
+    for index in range(1, len(parts) + 1):
+        prefix = "/".join(parts[:index])
+        excludes.extend(["-e", prefix, "-e", f"{prefix}/"])
+    commands = [
+        ["git", "reset", "--hard", "HEAD"],
+        ["git", "clean", "-fd", *excludes, "--", "."],
+    ]
+    results = []
+    for argv in commands:
+        item = _run_git(argv, project_root)
+        results.append(item)
+        if int(item.get("exit_code", 1)) != 0:
+            return {"status": "fail", "commands": results, "reason": item.get("stderr") or item.get("error") or "git cleanup failed"}
+    return {"status": "pass", "commands": results, "reason": "cleaned failed attempt changes"}
+
+
+def _render_attempt_md(attempt: dict[str, Any]) -> str:
+    executor = attempt.get("executor") or {}
+    review = attempt.get("review") or {}
+    lines = [
+        f"# OpenCode Retry Attempt {attempt.get('attempt')}",
+        "",
+        f"- status: {attempt.get('status')}",
+        f"- reason: {attempt.get('reason', '')}",
+        f"- executor_exit_code: {executor.get('exit_code')}",
+        f"- executor_timeout: {executor.get('timeout')}",
+    ]
+    if review:
+        lines.extend(
+            [
+                f"- reviewer_exit_code: {review.get('exit_code')}",
+                f"- reviewer_timeout: {review.get('timeout')}",
+            ]
+        )
+    lines.extend(
+        [
+            f"- stdout: {executor.get('stdout_path', '')}",
+            f"- stderr: {executor.get('stderr_path', '')}",
+        ]
+    )
+    if review:
+        lines.extend(
+            [
+                f"- review_stdout: {review.get('stdout_path', '')}",
+                f"- review_stderr: {review.get('stderr_path', '')}",
+            ]
+        )
+    cleanup = attempt.get("cleanup")
+    if cleanup:
+        lines.extend(["", "## Cleanup", "", f"- status: {cleanup.get('status')}", f"- reason: {cleanup.get('reason', '')}"])
+        for item in cleanup.get("commands", []):
+            lines.append(f"- command: {' '.join(item.get('argv', []))} exit={item.get('exit_code')}")
+    context = attempt.get("final_context") or ""
+    if context:
+        lines.extend(["", "## Final Context", "", "```text", context, "```"])
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_retry_summary_md(summary: dict[str, Any]) -> str:
+    lines = [
+        "# OpenCode Retry Summary",
+        "",
+        f"- status: {summary.get('status')}",
+        f"- reason: {summary.get('reason', '')}",
+        f"- attempts: {summary.get('counts', {}).get('attempts', 0)}",
+        f"- passed_attempt: {summary.get('counts', {}).get('passed_attempt')}",
+        f"- run_dir: {summary.get('artifacts', {}).get('run_dir', '')}",
+        "",
+        "## Attempts",
+        "",
+    ]
+    for attempt in summary.get("attempts", []):
+        lines.append(
+            f"- attempt {attempt.get('attempt')}: {attempt.get('status')} - {attempt.get('reason', '')} "
+            f"({attempt.get('result_md', '')})"
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def run_opencode_retry(
+    cfg: dict[str, Any],
+    *,
+    task_text: str,
+    dry_run: bool = False,
+    opencode_cmd_template: str = "",
+    review_cmd_template: str = "",
+    max_attempts: int = 3,
+    timeout_seconds: int = 1800,
+    git_cleanup: bool = True,
+) -> dict[str, Any]:
+    runtime_root = Path(cfg["outputs"]["runtime_root_path"])
+    project_root = Path(cfg["project_root_path"])
+    base_run_dir = runtime_root / "opencode_retry" / local_now_tag()
+    run_dir = base_run_dir
+    suffix = 2
+    while run_dir.exists():
+        run_dir = Path(f"{base_run_dir}_{suffix}")
+        suffix += 1
+    ensure_dir(run_dir)
+    task_file = run_dir / "task.md"
+    summary_json = run_dir / "summary.json"
+    summary_md = run_dir / "summary.md"
+    task_file.write_text(task_text, encoding="utf-8")
+
+    attempts: list[dict[str, Any]] = []
+    summary: dict[str, Any] = {
+        "status": "running",
+        "reason": "",
+        "counts": {"attempts": 0, "passed_attempt": None, "failed_attempts": 0},
+        "attempts": attempts,
+        "artifacts": {"run_dir": str(run_dir), "task_file": str(task_file), "summary_json": str(summary_json), "summary_md": str(summary_md)},
+    }
+
+    def save_summary() -> None:
+        _write_summary(summary_json, summary)
+        summary_md.write_text(_render_retry_summary_md(summary), encoding="utf-8")
+
+    if not dry_run and not opencode_cmd_template.strip():
+        summary["status"] = "fail"
+        summary["reason"] = "missing opencode command template; pass --opencode-cmd-template or --dry-run"
+        save_summary()
+        return build_result_payload(
+            "opencode-auto retry",
+            2,
+            summary=summary["reason"],
+            details={**summary["counts"], "final_reason": summary["reason"]},
+            artifacts=summary["artifacts"],
+        )
+
+    baseline_status = None
+    if not dry_run and git_cleanup:
+        baseline_status = _git_status_porcelain(project_root, ignore_path=run_dir)
+        if int(baseline_status.get("exit_code", 1)) != 0:
+            summary["status"] = "fail"
+            summary["reason"] = _short(baseline_status.get("stderr") or baseline_status.get("error") or "git status failed")
+            summary["git_baseline"] = baseline_status
+            save_summary()
+            return build_result_payload(
+                "opencode-auto retry",
+                2,
+                summary=summary["reason"],
+                details={**summary["counts"], "final_reason": summary["reason"]},
+                artifacts=summary["artifacts"],
+            )
+        if baseline_status.get("dirty"):
+            summary["status"] = "fail"
+            summary["reason"] = "git worktree is dirty; retry cleanup requires a clean baseline"
+            summary["git_baseline"] = baseline_status
+            save_summary()
+            return build_result_payload(
+                "opencode-auto retry",
+                2,
+                summary=summary["reason"],
+                details={**summary["counts"], "final_reason": summary["reason"]},
+                artifacts=summary["artifacts"],
+            )
+        summary["git_baseline"] = {"status": "clean", "exit_code": baseline_status.get("exit_code")}
+        save_summary()
+
+    max_attempts = max(1, int(max_attempts))
+    for attempt_index in range(1, max_attempts + 1):
+        attempt_dir = ensure_dir(run_dir / f"attempt_{attempt_index:03d}")
+        attempt_task_file = attempt_dir / "task.md"
+        attempt_task_file.write_text(task_text, encoding="utf-8")
+        values = {
+            "task_file": attempt_task_file,
+            "attempt_dir": attempt_dir,
+            "run_dir": run_dir,
+            "attempt": attempt_index,
+        }
+        if dry_run:
+            stdout_path = attempt_dir / "stdout.log"
+            stderr_path = attempt_dir / "stderr.log"
+            stdout_path.write_text(f"dry-run attempt {attempt_index}\n", encoding="utf-8")
+            stderr_path.write_text("", encoding="utf-8")
+            exec_result = {"command": "dry-run", "argv": [], "exit_code": 0, "timeout": False, "stdout_path": str(stdout_path), "stderr_path": str(stderr_path)}
+        else:
+            exec_result = _run_template(
+                opencode_cmd_template,
+                values,
+                project_root,
+                attempt_dir / "stdout.log",
+                attempt_dir / "stderr.log",
+                timeout_seconds=timeout_seconds,
+            )
+        review_result = None
+        passed = int(exec_result.get("exit_code", 1)) == 0 and not exec_result.get("timeout")
+        if passed and review_cmd_template.strip():
+            review_result = _run_template(
+                review_cmd_template,
+                values,
+                project_root,
+                attempt_dir / "review_stdout.log",
+                attempt_dir / "review_stderr.log",
+                timeout_seconds=timeout_seconds,
+            )
+            passed = int(review_result.get("exit_code", 1)) == 0 and not review_result.get("timeout")
+
+        final_context_paths = [attempt_dir / "stdout.log", attempt_dir / "stderr.log"]
+        if review_result:
+            final_context_paths.extend([attempt_dir / "review_stdout.log", attempt_dir / "review_stderr.log"])
+        final_context = _tail_context(final_context_paths)
+        reason = "passed" if passed else _short(
+            str(exec_result.get("error") or "")
+            or read_text(attempt_dir / "stderr.log")
+            or f"executor exit={exec_result.get('exit_code')}"
+        )
+        attempt_result = {
+            "attempt": attempt_index,
+            "status": "pass" if passed else "fail",
+            "reason": reason,
+            "executor": exec_result,
+            "review": review_result,
+            "final_context": final_context,
+            "attempt_dir": str(attempt_dir),
+            "result_json": str(attempt_dir / "result.json"),
+            "result_md": str(attempt_dir / "result.md"),
+        }
+        if not passed and git_cleanup and not dry_run:
+            cleanup = _git_cleanup_failed_attempt(project_root, run_dir)
+            attempt_result["cleanup"] = cleanup
+            if cleanup.get("status") != "pass":
+                reason = _short(cleanup.get("reason", "git cleanup failed"))
+                attempt_result["reason"] = reason
+                write_json(attempt_dir / "result.json", attempt_result)
+                (attempt_dir / "result.md").write_text(_render_attempt_md(attempt_result), encoding="utf-8")
+                attempts.append({k: attempt_result[k] for k in ["attempt", "status", "reason", "attempt_dir", "result_json", "result_md"]})
+                summary["counts"]["attempts"] = attempt_index
+                summary["counts"]["failed_attempts"] = attempt_index
+                summary["status"] = "fail"
+                summary["reason"] = reason
+                save_summary()
+                return build_result_payload(
+                    "opencode-auto retry",
+                    1,
+                    summary=f"opencode-auto retry attempts={attempt_index} passed=none reason={reason}",
+                    details={**summary["counts"], "final_reason": reason},
+                    artifacts=summary["artifacts"],
+                )
+
+        write_json(attempt_dir / "result.json", attempt_result)
+        (attempt_dir / "result.md").write_text(_render_attempt_md(attempt_result), encoding="utf-8")
+        attempts.append({k: attempt_result[k] for k in ["attempt", "status", "reason", "attempt_dir", "result_json", "result_md"]})
+        summary["counts"]["attempts"] = attempt_index
+        summary["counts"]["failed_attempts"] = len([item for item in attempts if item["status"] != "pass"])
+        summary["reason"] = reason
+        if passed:
+            summary["status"] = "pass"
+            summary["counts"]["passed_attempt"] = attempt_index
+            save_summary()
+            return build_result_payload(
+                "opencode-auto retry",
+                0,
+                summary=f"opencode-auto retry attempts={attempt_index} passed={attempt_index}",
+                details={**summary["counts"], "final_reason": reason},
+                artifacts=summary["artifacts"],
+            )
+        save_summary()
+
+    summary["status"] = "fail"
+    summary["reason"] = summary.get("reason") or "max attempts exceeded"
+    save_summary()
+    return build_result_payload(
+        "opencode-auto retry",
+        1,
+        summary=f"opencode-auto retry attempts={summary['counts']['attempts']} passed=none reason={summary['reason']}",
+        details={**summary["counts"], "final_reason": summary["reason"]},
+        artifacts=summary["artifacts"],
+    )
 
 
 def run_opencode_auto(

@@ -39,4 +39,4 @@ def build_result_payload(
 
 
 def print_result_payload(payload: dict[str, Any]) -> None:
-    print(json.dumps(payload, ensure_ascii=False))
+    print(json.dumps(payload, ensure_ascii=True))

@@ -3,7 +3,7 @@
     {
       "name": "python",
       "level": "ok",
-      "detail": "D:\\Anaconda1\\python.exe"
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python38\\python.exe"
     },
     {
       "name": "yaml",
@@ -87,8 +87,8 @@
     },
     {
       "name": "uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell UART fallback is available for CLI exec and logging, but interactive console still prefers pyserial."
+      "level": "ok",
+      "detail": "pyserial available"
     },
     {
       "name": "uart_port",
@@ -102,8 +102,8 @@
     },
     {
       "name": "diag_uart_backend",
-      "level": "warn",
-      "detail": "pyserial unavailable: No module named 'serial'. PowerShell fallback is available for diag exec."
+      "level": "ok",
+      "detail": "pyserial available"
     },
     {
       "name": "diag_uart_port",
@@ -117,5 +117,5 @@
     }
   ],
   "fail_count": 0,
-  "warn_count": 2
+  "warn_count": 0
 }

@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from core.opencode_auto_service import fallback_split_task, run_opencode_auto  # type: ignore  # noqa: E402
+from core.opencode_auto_service import fallback_split_task, run_opencode_auto, run_opencode_retry  # type: ignore  # noqa: E402
 
 
 class OpencodeAutoServiceTests(unittest.TestCase):
@@ -92,6 +93,115 @@ Large task
 
         self.assertEqual(payload["exit_code"], 2)
         self.assertIn("missing opencode command template", payload["summary"])
+
+    def test_retry_dry_run_writes_markdown_artifacts(self) -> None:
+        payload = run_opencode_retry(
+            self.cfg,
+            task_text="Do the large thing",
+            dry_run=True,
+            max_attempts=3,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 0)
+        self.assertEqual(payload["details"]["attempts"], 1)
+        run_dir = Path(payload["artifacts"]["run_dir"])
+        self.assertTrue((run_dir / "summary.json").exists())
+        self.assertTrue((run_dir / "summary.md").exists())
+        self.assertTrue((run_dir / "attempt_001" / "result.json").exists())
+        self.assertTrue((run_dir / "attempt_001" / "result.md").exists())
+
+    def test_retry_missing_executor_requires_dry_run(self) -> None:
+        payload = run_opencode_retry(
+            self.cfg,
+            task_text="Needs executor",
+            max_attempts=1,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 2)
+        self.assertIn("missing opencode command template", payload["summary"])
+        self.assertTrue(Path(payload["artifacts"]["summary_md"]).exists())
+
+    def test_retry_stops_after_first_pass(self) -> None:
+        script = self.temp_dir / "pass_task.py"
+        script.write_text("print('done')\n", encoding="utf-8")
+        self._init_git_repo(self.temp_dir)
+        template = f'"{sys.executable}" "{script}"'
+
+        payload = run_opencode_retry(
+            self.cfg,
+            task_text="Pass once",
+            opencode_cmd_template=template,
+            max_attempts=3,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 0)
+        self.assertEqual(payload["details"]["attempts"], 1)
+        self.assertEqual(payload["details"]["passed_attempt"], 1)
+
+    def test_retry_cleans_failed_attempt_from_clean_git_baseline(self) -> None:
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        script = self.temp_dir / "fail_and_modify.py"
+        script.write_text(
+            "\n".join(
+                [
+                    "from pathlib import Path",
+                    "Path('tracked.txt').write_text('dirty\\n', encoding='utf-8')",
+                    "Path('new_file.txt').write_text('new\\n', encoding='utf-8')",
+                    "raise SystemExit(7)",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self._init_git_repo(self.temp_dir)
+        template = f'"{sys.executable}" "{script}"'
+
+        payload = run_opencode_retry(
+            self.cfg,
+            task_text="Fail and clean",
+            opencode_cmd_template=template,
+            max_attempts=1,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 1)
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "clean\n")
+        self.assertFalse((self.temp_dir / "new_file.txt").exists())
+        run_dir = Path(payload["artifacts"]["run_dir"])
+        result = json.loads((run_dir / "attempt_001" / "result.json").read_text(encoding="utf-8"))
+        self.assertEqual(result["cleanup"]["status"], "pass")
+
+    def test_retry_dirty_baseline_fails_before_executor(self) -> None:
+        tracked = self.temp_dir / "tracked.txt"
+        tracked.write_text("clean\n", encoding="utf-8")
+        self._init_git_repo(self.temp_dir)
+        tracked.write_text("user change\n", encoding="utf-8")
+        script = self.temp_dir / "would_modify.py"
+        script.write_text("from pathlib import Path\nPath('ran.txt').write_text('bad', encoding='utf-8')\n", encoding="utf-8")
+        template = f'"{sys.executable}" "{script}"'
+
+        payload = run_opencode_retry(
+            self.cfg,
+            task_text="Should not run",
+            opencode_cmd_template=template,
+            max_attempts=1,
+            timeout_seconds=5,
+        )
+
+        self.assertEqual(payload["exit_code"], 2)
+        self.assertIn("dirty", payload["summary"])
+        self.assertEqual(tracked.read_text(encoding="utf-8"), "user change\n")
+        self.assertFalse((self.temp_dir / "ran.txt").exists())
+
+    def _init_git_repo(self, cwd: Path) -> None:
+        subprocess.run(["git", "init"], cwd=str(cwd), check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["git", "config", "user.email", "agent@example.invalid"], cwd=str(cwd), check=True)
+        subprocess.run(["git", "config", "user.name", "Agent Workbench Test"], cwd=str(cwd), check=True)
+        subprocess.run(["git", "add", "."], cwd=str(cwd), check=True)
+        subprocess.run(["git", "commit", "-m", "baseline"], cwd=str(cwd), check=True, stdout=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":

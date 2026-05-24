@@ -57,6 +57,17 @@ class WorkbenchMonitorTests(unittest.TestCase):
         self.assertEqual(parsed.task, "do work")
         self.assertTrue(parsed.dry_run)
 
+    def test_opencode_auto_retry_is_registered(self) -> None:
+        parser = workbench.build_parser()
+        parsed = parser.parse_args(
+            ["opencode-auto", "retry", "--task", "do work", "--max-attempts", "5", "--dry-run", "--json"]
+        )
+        self.assertEqual(parsed.command, "opencode-auto")
+        self.assertEqual(parsed.action, "retry")
+        self.assertEqual(parsed.task, "do work")
+        self.assertEqual(parsed.max_attempts, 5)
+        self.assertTrue(parsed.dry_run)
+
     def test_opencode_auto_template_file_flags(self) -> None:
         parser = workbench.build_parser()
         parsed = parser.parse_args(
@@ -116,6 +127,46 @@ class WorkbenchMonitorTests(unittest.TestCase):
         payload = json.loads(stdout.getvalue())
         self.assertEqual(code, 0)
         self.assertEqual(payload["exit_code"], 0)
+
+    def test_opencode_auto_task_file_strips_utf8_bom(self) -> None:
+        config_path = self.temp_dir / "agent_workbench.yaml"
+        config_path.write_text(
+            "\n".join(
+                [
+                    "project:",
+                    "  name: probe",
+                    "  root: .",
+                    "outputs:",
+                    "  runtime_root: runtime",
+                    "  evidence_root: evidence",
+                    "  generated_root: generated",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        task_path = self.temp_dir / "task.md"
+        task_path.write_bytes(b"\xef\xbb\xbfhello")
+
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            code = workbench.dispatch_args(
+                [
+                    "opencode-auto",
+                    "run",
+                    "--config",
+                    str(config_path),
+                    "--task-file",
+                    str(task_path),
+                    "--dry-run",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(stdout.getvalue())
+        run_dir = Path(payload["artifacts"]["run_dir"])
+        written_task = (run_dir / "task.md").read_text(encoding="utf-8")
+        self.assertEqual(code, 0)
+        self.assertFalse(written_task.startswith("\ufeff"))
 
 
 if __name__ == "__main__":

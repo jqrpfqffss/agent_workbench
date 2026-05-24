@@ -1,0 +1,1 @@
+﻿"C:\Users\Administrator\AppData\Local\Programs\Python\Python38\python.exe" "H:\stm32_RAG\code\serial\agent_workbench\runtime\opencode_retry_validation\review_token.py" "{attempt_dir}" OPENCODE_RETRY_OK

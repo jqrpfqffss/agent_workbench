@@ -1,0 +1,32 @@
+{
+  "status": "pass",
+  "counts": {
+    "total": 1,
+    "passed": 1,
+    "skipped": 0
+  },
+  "tasks": [
+    {
+      "id": "task_001",
+      "title": "compat dry run",
+      "status": "passed",
+      "attempt_count": 1,
+      "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922\\tasks\\task_001.md",
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "pass",
+          "reason": "passed",
+          "attempt_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922\\tasks\\task_001\\attempt_001",
+          "result_path": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922\\tasks\\task_001\\attempt_001\\result.json"
+        }
+      ]
+    }
+  ],
+  "artifacts": {
+    "run_dir": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922",
+    "plan_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922\\plan.json",
+    "task_file": "H:\\stm32_RAG\\code\\serial\\agent_workbench\\runtime\\opencode_auto\\20260524_161922\\task.md"
+  },
+  "updated_at": "2026-05-24T08:19:22.611+00:00"
+}

@@ -84,10 +84,10 @@ def _cmd_remote_dt(args: argparse.Namespace) -> int:
 
 
 def _cmd_opencode_auto(args: argparse.Namespace) -> int:
-    from core.opencode_auto_service import run_opencode_auto
+    from core.opencode_auto_service import run_opencode_auto, run_opencode_retry
 
     cfg = _cfg(args.config)
-    if args.action != "run":
+    if args.action not in {"run", "retry"}:
         raise ValueError(f"unknown opencode-auto action: {args.action}")
 
     def _template_value(inline: str, file_path: str) -> str:
@@ -95,35 +95,48 @@ def _cmd_opencode_auto(args: argparse.Namespace) -> int:
             return Path(file_path).read_text(encoding="utf-8-sig").strip()
         return str(inline or "")
 
+    command_name = f"opencode-auto {args.action}"
     task_text = str(args.task or "")
     if args.task_file:
         task_path = Path(args.task_file).resolve()
         if not task_path.exists():
             payload = build_result_payload(
-                "opencode-auto run",
+                command_name,
                 2,
                 summary=f"task file not found: {task_path}",
             )
             return _emit(args, payload, [payload["summary"]])
-        task_text = task_path.read_text(encoding="utf-8")
+        task_text = task_path.read_text(encoding="utf-8-sig")
     if not task_text.strip():
         payload = build_result_payload(
-            "opencode-auto run",
+            command_name,
             2,
-            summary="opencode-auto run requires --task or --task-file",
+            summary=f"opencode-auto {args.action} requires --task or --task-file",
         )
         return _emit(args, payload, [payload["summary"]])
 
-    payload = run_opencode_auto(
-        cfg,
-        task_text=task_text,
-        dry_run=bool(args.dry_run),
-        planner_cmd_template=_template_value(args.planner_cmd_template, args.planner_cmd_template_file),
-        opencode_cmd_template=_template_value(args.opencode_cmd_template, args.opencode_cmd_template_file),
-        review_cmd_template=_template_value(args.review_cmd_template, args.review_cmd_template_file),
-        max_retries=int(args.max_retries),
-        timeout_seconds=int(args.timeout_seconds),
-    )
+    if args.action == "retry":
+        payload = run_opencode_retry(
+            cfg,
+            task_text=task_text,
+            dry_run=bool(args.dry_run),
+            opencode_cmd_template=_template_value(args.opencode_cmd_template, args.opencode_cmd_template_file),
+            review_cmd_template=_template_value(args.review_cmd_template, args.review_cmd_template_file),
+            max_attempts=int(args.max_attempts),
+            timeout_seconds=int(args.timeout_seconds),
+            git_cleanup=not bool(args.no_git_cleanup),
+        )
+    else:
+        payload = run_opencode_auto(
+            cfg,
+            task_text=task_text,
+            dry_run=bool(args.dry_run),
+            planner_cmd_template=_template_value(args.planner_cmd_template, args.planner_cmd_template_file),
+            opencode_cmd_template=_template_value(args.opencode_cmd_template, args.opencode_cmd_template_file),
+            review_cmd_template=_template_value(args.review_cmd_template, args.review_cmd_template_file),
+            max_retries=int(args.max_retries),
+            timeout_seconds=int(args.timeout_seconds),
+        )
     lines = [payload["summary"]]
     details = payload.get("details", {})
     if details.get("skipped"):
@@ -375,7 +388,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_remote_dt.set_defaults(func=_cmd_remote_dt)
 
     p_opencode_auto = sub.add_parser("opencode-auto", help="split and run large OpenCode tasks")
-    p_opencode_auto.add_argument("action", choices=["run"])
+    p_opencode_auto.add_argument("action", choices=["run", "retry"])
     p_opencode_auto.add_argument("--config", default=str(DEFAULT_CONFIG))
     p_opencode_auto.add_argument("--task", default="")
     p_opencode_auto.add_argument("--task-file", default="")
@@ -386,7 +399,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_opencode_auto.add_argument("--review-cmd-template", default="")
     p_opencode_auto.add_argument("--review-cmd-template-file", default="")
     p_opencode_auto.add_argument("--max-retries", type=int, default=3)
+    p_opencode_auto.add_argument("--max-attempts", type=int, default=3)
     p_opencode_auto.add_argument("--timeout-seconds", type=int, default=1800)
+    p_opencode_auto.add_argument("--no-git-cleanup", action="store_true")
     p_opencode_auto.add_argument("--dry-run", action="store_true")
     _add_json_flag(p_opencode_auto)
     p_opencode_auto.set_defaults(func=_cmd_opencode_auto)
