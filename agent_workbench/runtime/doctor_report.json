@@ -92,8 +92,8 @@
     },
     {
       "name": "uart_port",
-      "level": "ok",
-      "detail": "COM3"
+      "level": "warn",
+      "detail": "could not open port 'COM3': FileNotFoundError(2, '系统找不到指定的文件。', None, 2)"
     },
     {
       "name": "diag_uart_requests",
@@ -107,8 +107,8 @@
     },
     {
       "name": "diag_uart_port",
-      "level": "ok",
-      "detail": "COM3"
+      "level": "warn",
+      "detail": "could not open port 'COM3': FileNotFoundError(2, '系统找不到指定的文件。', None, 2)"
     },
     {
       "name": "uart_markers",
@@ -117,5 +117,5 @@
     }
   ],
   "fail_count": 0,
-  "warn_count": 0
+  "warn_count": 2
 }

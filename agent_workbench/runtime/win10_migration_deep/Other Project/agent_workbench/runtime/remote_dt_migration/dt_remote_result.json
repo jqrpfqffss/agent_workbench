@@ -1,0 +1,116 @@
+{
+  "command": "remote-dt",
+  "action": "push-files",
+  "status": "pass",
+  "exit_code": 0,
+  "summary": "remote DT push-files: 2 files, 35 bytes to /srv/migrated project",
+  "steps": [
+    {
+      "name": "prepare-staging",
+      "status": "pass",
+      "exit_code": 0,
+      "file_count": 2,
+      "dir_count": 1,
+      "excluded_count": 0,
+      "shell_scripts_detected": 1,
+      "shell_scripts_normalized_lf": 1
+    },
+    {
+      "name": "mkdir",
+      "status": "pass",
+      "command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"mkdir -p '/srv/migrated project'\"",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "scp",
+      "status": "pass",
+      "command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_scp.py -r -P 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no \"H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/remote_dt_migration/push_staging/.\" \"dtuser@127.0.0.1:'/srv/migrated project/'\"",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "chmod-shell-scripts",
+      "status": "pass",
+      "command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project' && chmod +x build.sh\"",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "verify-shell-scripts",
+      "status": "pass",
+      "command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project'\nif [ -f build.sh ]; then if head -c 512 build.sh | grep -q $'\\r'; then printf \\\"REMOTE_DT_SCRIPT_CRLF:%s\\n\\\" build.sh; exit 21; fi; bash -n build.sh || exit $?; fi\"",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "details": {
+    "enabled": true,
+    "local_dir": "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/dt_upload",
+    "remote_dir": "/srv/migrated project",
+    "dry_run": false,
+    "timeout_sec": 600,
+    "normalize_lf_for_shell_scripts": true,
+    "chmod_executable_for_shell_scripts": true,
+    "verify_shell_scripts_after_upload": true,
+    "file_count": 2,
+    "dir_count": 1,
+    "total_bytes": 35,
+    "excluded_count": 0,
+    "shell_scripts_detected": 1,
+    "shell_scripts_normalized_lf": 1,
+    "shell_scripts_chmod": 1,
+    "normalized_files": [
+      "build.sh"
+    ],
+    "shell_script_files": [
+      "build.sh"
+    ],
+    "chmod_files": [
+      "build.sh"
+    ],
+    "verify": {
+      "enabled": true,
+      "executed": true,
+      "build_sh_exists": true,
+      "build_sh_has_crlf": false,
+      "build_sh_bash_n": true
+    },
+    "diagnostics": [
+      "REMOTE_DT_PUSH_FILES_START",
+      "REMOTE_DT_PUSH_FILES_PREPARE_STAGING",
+      "REMOTE_DT_SHELL_SCRIPT_DETECTED: build.sh",
+      "REMOTE_DT_NORMALIZED_LF: build.sh",
+      "REMOTE_DT_UPLOAD_DONE",
+      "REMOTE_DT_CHMOD_EXECUTABLE: build.sh",
+      "REMOTE_DT_VERIFY_BUILD_SH_OK"
+    ],
+    "mkdir_command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"mkdir -p '/srv/migrated project'\"",
+    "scp_command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_scp.py -r -P 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no \"H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/remote_dt_migration/push_staging/.\" \"dtuser@127.0.0.1:'/srv/migrated project/'\"",
+    "chmod_command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project' && chmod +x build.sh\"",
+    "verify_command": "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project'\nif [ -f build.sh ]; then if head -c 512 build.sh | grep -q $'\\r'; then printf \\\"REMOTE_DT_SCRIPT_CRLF:%s\\n\\\" build.sh; exit 21; fi; bash -n build.sh || exit $?; fi\"",
+    "display_commands": [
+      "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"mkdir -p '/srv/migrated project'\"",
+      "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_scp.py -r -P 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no \"H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/remote_dt_migration/push_staging/.\" \"dtuser@127.0.0.1:'/srv/migrated project/'\"",
+      "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project' && chmod +x build.sh\"",
+      "D:/msys2/mingw64/bin/python.exe H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py -p 2200 -o ConnectTimeout=5 -o StrictHostKeyChecking=no dtuser@127.0.0.1 bash -lc \"cd '/srv/migrated project'\nif [ -f build.sh ]; then if head -c 512 build.sh | grep -q $'\\r'; then printf \\\"REMOTE_DT_SCRIPT_CRLF:%s\\n\\\" build.sh; exit 21; fi; bash -n build.sh || exit $?; fi\""
+    ]
+  },
+  "artifacts": {
+    "result_json": "agent_workbench/runtime/remote_dt_migration/dt_remote_result.json",
+    "summary_md": "agent_workbench/runtime/remote_dt_migration/dt_remote_summary.md",
+    "log_dir": "agent_workbench/runtime/remote_dt_migration/logs",
+    "build_log": "agent_workbench/runtime/remote_dt_migration/logs/dt_build.log",
+    "execute_log": "agent_workbench/runtime/remote_dt_migration/logs/dt_execute.log",
+    "coverage_log": "agent_workbench/runtime/remote_dt_migration/logs/dt_coverage.log",
+    "coverage_dir": "agent_workbench/runtime/remote_dt_migration/coverage"
+  },
+  "errors": [],
+  "warnings": [],
+  "test_failures": [],
+  "timestamp": "2026-06-05T14:24:18.230+00:00"
+}

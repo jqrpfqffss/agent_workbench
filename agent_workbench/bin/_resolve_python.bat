@@ -64,7 +64,7 @@ call "%CANDIDATE%" -c "import yaml" >nul 2>nul
 if not errorlevel 1 set "SCORE=2"
 call "%CANDIDATE%" -c "import yaml, serial" >nul 2>nul
 if not errorlevel 1 set "SCORE=3"
-call :update_choice "\"%CANDIDATE%\"" "%KIND%" %SCORE%
+call :update_choice "%CANDIDATE%" "%KIND%" %SCORE%
 goto :eof
 
 :update_choice

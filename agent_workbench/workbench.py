@@ -80,7 +80,21 @@ def _cmd_remote_dt(args: argparse.Namespace) -> int:
 
     cfg = _cfg(args.config)
     payload = RemoteDtService(cfg).run(args.action)
+    if args.action == "push-files":
+        return _emit(args, payload, _remote_dt_push_files_text_lines(payload))
     return _emit(args, payload, [payload["summary"]])
+
+
+def _remote_dt_push_files_text_lines(payload: dict) -> list[str]:
+    details = payload.get("details", {}) if isinstance(payload.get("details", {}), dict) else {}
+    lines = [payload.get("summary", "")]
+    lines.extend(str(item) for item in details.get("diagnostics", []) if item)
+    if payload.get("status") == "fail":
+        for error in payload.get("errors", []):
+            message = error.get("message") if isinstance(error, dict) else str(error)
+            if message:
+                lines.append(f"REMOTE_DT_PUSH_FILES_ERROR: {message}")
+    return lines
 
 
 def _cmd_opencode_auto(args: argparse.Namespace) -> int:
@@ -332,7 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_build.set_defaults(func=_cmd_build)
 
     p_remote_dt = sub.add_parser("remote-dt", help="run remote DT build, execute, coverage, and artifact pull")
-    p_remote_dt.add_argument("action", choices=["build", "execute", "coverage", "pipeline", "pull-logs"])
+    p_remote_dt.add_argument("action", choices=["build", "execute", "coverage", "pipeline", "pull-logs", "push-files"])
     p_remote_dt.add_argument("--config", default=str(DEFAULT_CONFIG))
     _add_json_flag(p_remote_dt)
     p_remote_dt.set_defaults(func=_cmd_remote_dt)
