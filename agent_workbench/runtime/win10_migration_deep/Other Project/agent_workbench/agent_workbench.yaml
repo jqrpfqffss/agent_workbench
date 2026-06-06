@@ -1,0 +1,31 @@
+﻿project:
+  root: ..
+outputs:
+  runtime_root: agent_workbench/runtime
+  evidence_root: agent_workbench/evidence/sessions
+  generated_root: agent_workbench/generated
+remote_dt:
+  enabled: true
+  host: 127.0.0.1
+  user: dtuser
+  port: 2200
+  remote_project_dir: /srv/migrated project
+  local_artifact_dir: H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/remote_dt_migration
+  ssh:
+    identity_file: ""
+    connect_timeout_sec: 5
+    strict_host_key_checking: false
+    ssh_command: '"D:/msys2/mingw64/bin/python.exe" "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py"'
+    scp_command: '"D:/msys2/mingw64/bin/python.exe" "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_scp.py"'
+  push_files:
+    enabled: true
+    local_dir: ".\\agent_workbench\\runtime\\dt_upload"
+    remote_dir: ""
+    timeout_sec: 600
+    dry_run: false
+    exclude:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
+    normalize_lf_for_shell_scripts: true
+    chmod_executable_for_shell_scripts: true
+    verify_shell_scripts_after_upload: true

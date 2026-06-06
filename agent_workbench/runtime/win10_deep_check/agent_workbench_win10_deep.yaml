@@ -1,0 +1,45 @@
+﻿project:
+  root: ../../..
+outputs:
+  runtime_root: agent_workbench/runtime
+  evidence_root: agent_workbench/evidence/sessions
+  generated_root: agent_workbench/generated
+remote_dt:
+  enabled: true
+  host: 127.0.0.1
+  user: dtuser
+  port: 2200
+  remote_project_dir: /srv/deep project
+  local_artifact_dir: H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/artifacts
+  ssh:
+    identity_file: ""
+    connect_timeout_sec: 5
+    strict_host_key_checking: false
+    ssh_command: '"D:/msys2/mingw64/bin/python.exe" "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_ssh.py"'
+    scp_command: '"D:/msys2/mingw64/bin/python.exe" "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/fake_bin/fake_scp.py"'
+  scripts:
+    build: ./build.sh
+    execute: ./scripts/run.sh
+    coverage: ./scripts/run.sh
+  timeouts:
+    build_sec: 600
+    execute_sec: 600
+    coverage_sec: 600
+    pull_sec: 300
+  artifacts:
+    remote_work_dir: .agent_workbench_remote_dt
+    remote_log_dir: .agent_workbench_remote_dt/logs
+    remote_result_dir: .agent_workbench_remote_dt/results
+    remote_coverage_dir: coverage
+  push_files:
+    enabled: true
+    local_dir: "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_deep_check/local upload"
+    remote_dir: ""
+    timeout_sec: 600
+    dry_run: false
+    exclude:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
+    normalize_lf_for_shell_scripts: true
+    chmod_executable_for_shell_scripts: true
+    verify_shell_scripts_after_upload: true

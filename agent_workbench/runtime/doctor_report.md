@@ -20,8 +20,8 @@
 | monitor_target_selection | ok | not required by current config |
 | uart_protocol | ok | ready_banner=STM32 UART CLI ready. prompt=cli> format=8N1 |
 | uart_backend | ok | pyserial available |
-| uart_port | ok | COM3 |
+| uart_port | warn | could not open port 'COM3': FileNotFoundError(2, '系统找不到指定的文件。', None, 2) |
 | diag_uart_requests | ok | count=2 port=COM3 format=8N1 |
 | diag_uart_backend | ok | pyserial available |
-| diag_uart_port | ok | COM3 |
+| diag_uart_port | warn | could not open port 'COM3': FileNotFoundError(2, '系统找不到指定的文件。', None, 2) |
 | uart_markers | ok | ready=STM32 UART CLI ready. prompt=cli> probe_count=6 |

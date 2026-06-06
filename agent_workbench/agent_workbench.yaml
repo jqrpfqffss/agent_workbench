@@ -469,6 +469,52 @@ remote_dt:
       - .agent_workbench_remote_dt/results/dt_*.json
       - coverage/**
 
+  # 远端文件推送配置（push-files 子命令）。
+  # 用于将本地项目文件（DT 用例、脚本、固件代码等）批量推送到远端 Linux 服务器。
+  push_files:
+    # 是否启用 push-files 功能。
+    # true: 启用 push-files 子命令
+    # false: 关闭该功能
+    enabled: true
+
+    # 本地需推送的目录，路径相对 project.root。
+    # 推送时会递归包含该目录下所有文件（exclude 中的除外）。
+    local_dir: ".\\agent_workbench\\runtime\\dt_upload"
+
+    # 远端目标目录。
+    # 绝对路径直接使用；相对路径拼接到 remote_project_dir 之后。
+    # 留空表示使用 remote_project_dir 本身作为目标目录。
+    remote_dir: "/home/dtuser/project/upload"
+
+    # push-files 操作最大允许耗时，单位秒。
+    timeout_sec: 600
+
+    # 是否为演练模式。
+    # true: 只验证本地配置、统计文件、展示将要推送的文件列表，不实际调用 SSH/SCP。
+    # false: 真正执行推送。
+    dry_run: false
+
+    # 需要排除的文件/目录 glob 模式列表。
+    # 匹配模式基于 relative local_dir 路径。
+    exclude:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
+      - "**/.pytest_cache/**"
+      - "**/.git/**"
+
+    # 是否对检测到的 shell 脚本执行 LF 换行符规范化。
+    # true: 分阶段拷贝中检测到的 shell 脚本会统一转换为 LF。
+    # 不会修改 local_dir 下的源文件。
+    normalize_lf_for_shell_scripts: true
+
+    # 是否在远端对 shell 脚本执行 chmod +x。
+    # true: 上传完成后通过 SSH 执行 chmod +x。
+    chmod_executable_for_shell_scripts: true
+
+    # 是否在远端对 shell 脚本执行上传后校验。
+    # true: 上传并 chmod 后，通过 SSH 执行校验脚本，检查 CRLF 残留并运行 bash -n。
+    verify_shell_scripts_after_upload: true
+
 opencode_auto:
   # 是否启用 opencode_auto 自动化编排功能。
   # 启用后，大型任务会先由 planner 生成计划，然后拆分成小任务，
