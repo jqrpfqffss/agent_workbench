@@ -1,0 +1,4 @@
+{"tool": "ssh", "cmd": "mkdir -p '/srv/migrated project'"}
+{"tool": "scp", "src": "H:/stm32_RAG/code/serial/agent_workbench/runtime/win10_migration_deep/Other Project/agent_workbench/runtime/remote_dt_migration/push_staging/.", "dst": "dtuser@127.0.0.1:'/srv/migrated project/'"}
+{"tool": "ssh", "cmd": "cd '/srv/migrated project' && chmod +x build.sh"}
+{"tool": "ssh", "cmd": "cd '/srv/migrated project'\nif [ -f build.sh ]; then if head -c 512 build.sh | grep -q $'\\r'; then printf \"REMOTE_DT_SCRIPT_CRLF:%s\\n\" build.sh; exit 21; fi; bash -n build.sh || exit $?; fi"}

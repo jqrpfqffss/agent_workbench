@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import fnmatch
+import os
 import re
 import shlex
+import shutil
 import subprocess
 import time
 from dataclasses import dataclass
@@ -72,6 +75,32 @@ TEST_FAILURE_PATTERNS = [
     "test failed",
 ]
 
+_SHELL_SUFFIXES = {".sh", ".bash", ".zsh", ".ksh"}
+_SHELL_NAMES = {"build", "build.sh", "execute", "execute.sh", "coverage", "coverage.sh", "run", "run.sh", "test", "test.sh"}
+_SHEBANG_PATTERNS = {
+    b"/bin/sh", b"/bin/bash", b"/usr/bin/sh", b"/usr/bin/bash",
+    b"/usr/bin/env sh", b"/usr/bin/env bash", b"/usr/bin/env zsh", b"/usr/bin/env ksh",
+}
+
+
+def _is_shell_script(path: Path) -> bool:
+    name = path.name
+    if name in _SHELL_NAMES:
+        return True
+    suffix = path.suffix.lower()
+    if suffix in _SHELL_SUFFIXES:
+        return True
+    try:
+        with open(str(path), "rb") as f:
+            head = f.read(512)
+        if head.startswith(b"#!"):
+            for pattern in _SHEBANG_PATTERNS:
+                if pattern in head[:128]:
+                    return True
+    except Exception:
+        pass
+    return False
+
 
 @dataclass
 class CommandResult:
@@ -94,12 +123,17 @@ class RemoteDtService:
 
     def run(self, action: str) -> dict[str, Any]:
         try:
-            self._validate_config()
-            if action == "pipeline":
+            if action == "push-files":
+                self._validate_push_files()
+                payload = self._push_files_action()
+            elif action == "pipeline":
+                self._validate_config()
                 payload = self._run_pipeline()
             elif action == "pull-logs":
+                self._validate_config()
                 payload = self._pull_logs_action()
             elif action in STEP_SCRIPTS:
+                self._validate_config()
                 payload = self._run_single_step(action)
             else:
                 raise RemoteDtConfigError(f"unsupported remote-dt action: {action}")
@@ -124,6 +158,13 @@ class RemoteDtService:
         ]
         if missing:
             raise RemoteDtConfigError("remote_dt missing required fields: " + ", ".join(missing))
+
+    def _validate_push_files(self) -> None:
+        if not bool(self.remote_cfg.get("enabled", False)):
+            raise RemoteDtConfigError("remote_dt is not enabled")
+        push_cfg = self.remote_cfg.get("push_files", {}) if isinstance(self.remote_cfg.get("push_files", {}), dict) else {}
+        if not bool(push_cfg.get("enabled", False)):
+            raise RemoteDtConfigError("remote_dt.push_files is not enabled")
 
     def _run_single_step(self, step: str) -> dict[str, Any]:
         step_result = self._run_remote_step(step)
@@ -192,6 +233,329 @@ class RemoteDtService:
         self._merge_logs_findings(payload)
         self._write_outputs(payload)
         return payload
+
+    def _push_files_action(self) -> dict[str, Any]:
+        push_cfg = self.remote_cfg.get("push_files", {}) if isinstance(self.remote_cfg.get("push_files", {}), dict) else {}
+
+        local_dir_str = str(push_cfg.get("local_dir", "")).strip()
+        if not local_dir_str:
+            raise RemoteDtConfigError("remote_dt.push_files.local_dir is empty")
+
+        local_dir = Path(local_dir_str)
+        if not local_dir.is_absolute():
+            local_dir = (self.project_root / local_dir_str).resolve()
+        else:
+            local_dir = local_dir.resolve()
+
+        if not local_dir.exists():
+            raise RemoteDtConfigError(f"local_dir does not exist: {local_dir}")
+        if not local_dir.is_dir():
+            raise RemoteDtConfigError(f"local_dir is not a directory: {local_dir}")
+
+        remote_dir_str = str(push_cfg.get("remote_dir", "")).strip()
+        remote_project = str(self.remote_cfg.get("remote_project_dir", "")).rstrip("/")
+        if not remote_dir_str:
+            if not remote_project:
+                raise RemoteDtConfigError("remote_dt.remote_project_dir is empty, cannot resolve remote_dir")
+            remote_dir = remote_project
+        elif remote_dir_str.startswith("/"):
+            remote_dir = remote_dir_str
+        else:
+            if not remote_project:
+                raise RemoteDtConfigError("remote_dt.remote_project_dir is empty, cannot resolve relative remote_dir")
+            remote_dir = remote_project + "/" + remote_dir_str
+
+        timeout_sec = int(push_cfg.get("timeout_sec", 600))
+        dry_run = bool(push_cfg.get("dry_run", False))
+        exclude_patterns = list(push_cfg.get("exclude", []))
+        normalize_lf = bool(push_cfg.get("normalize_lf_for_shell_scripts", True))
+        chmod_exec = bool(push_cfg.get("chmod_executable_for_shell_scripts", True))
+        verify_scripts = bool(push_cfg.get("verify_shell_scripts_after_upload", True))
+        diagnostics = ["REMOTE_DT_PUSH_FILES_START"]
+
+        if not dry_run:
+            host = str(self.remote_cfg.get("host", "")).strip()
+            user = str(self.remote_cfg.get("user", "")).strip()
+            if not host or not user:
+                raise RemoteDtConfigError("remote_dt.host and remote_dt.user are required for non-dry-run push-files")
+
+        all_files = sorted(p for p in local_dir.rglob("*") if p.is_file())
+
+        excluded_count = 0
+        included: list[Path] = []
+        for f in all_files:
+            rel = str(f.relative_to(local_dir)).replace("\\", "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in exclude_patterns):
+                excluded_count += 1
+            else:
+                included.append(f)
+
+        file_count = len(included)
+        dir_count = len({f.relative_to(local_dir).parent for f in included})
+        total_bytes = sum(f.stat().st_size for f in included)
+
+        staging_dir = ensure_dir(self._local_artifact_dir() / "push_staging")
+        diagnostics.append("REMOTE_DT_PUSH_FILES_PREPARE_STAGING")
+        for item in list(staging_dir.iterdir()):
+            try:
+                if item.is_dir():
+                    shutil.rmtree(str(item), ignore_errors=True)
+                else:
+                    item.unlink()
+            except Exception:
+                pass
+
+        for f in included:
+            rel = f.relative_to(local_dir)
+            dest = staging_dir / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(str(f), str(dest))
+
+        shell_script_files: list[str] = []
+        shell_script_paths: list[Path] = []
+        for f in included:
+            rel = f.relative_to(local_dir)
+            dest = staging_dir / rel
+            if _is_shell_script(dest):
+                rel_str = str(rel).replace("\\", "/")
+                shell_script_files.append(rel_str)
+                shell_script_paths.append(dest)
+                diagnostics.append(f"REMOTE_DT_SHELL_SCRIPT_DETECTED: {rel_str}")
+
+        normalized_files: list[str] = []
+        if normalize_lf:
+            for sp in shell_script_paths:
+                data = sp.read_bytes()
+                original = data
+                data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+                if data != original:
+                    sp.write_bytes(data)
+                    rel_normalized = str(sp.relative_to(staging_dir)).replace("\\", "/")
+                    normalized_files.append(rel_normalized)
+                    diagnostics.append(f"REMOTE_DT_NORMALIZED_LF: {rel_normalized}")
+
+        chmod_files = list(shell_script_files) if chmod_exec else []
+        verify_files = list(shell_script_files)
+
+        warnings: list[dict[str, Any]] = []
+        verify_details: dict[str, Any] = {
+            "enabled": verify_scripts,
+            "executed": False,
+            "build_sh_exists": "build.sh" in shell_script_files,
+            "build_sh_has_crlf": None,
+            "build_sh_bash_n": None,
+        }
+        mkdir_command = ""
+        scp_command = ""
+        chmod_command = ""
+        verify_command = ""
+
+        steps: list[dict[str, Any]] = [{
+            "name": "prepare-staging",
+            "status": "pass",
+            "exit_code": 0,
+            "file_count": file_count,
+            "dir_count": dir_count,
+            "excluded_count": excluded_count,
+            "shell_scripts_detected": len(shell_script_files),
+            "shell_scripts_normalized_lf": len(normalized_files),
+        }]
+        errors: list[dict[str, Any]] = []
+        status = "pass"
+        exit_code = 0
+
+        if not dry_run:
+            mkdir_cmd = f"mkdir -p {shlex.quote(remote_dir)}"
+            mkdir_argv = self._ssh_argv(mkdir_cmd)
+            mkdir_command = self._display_command(mkdir_argv)
+            mkdir_result = self.runner(mkdir_argv, timeout_sec)
+            steps.append({
+                "name": "mkdir",
+                "status": "pass" if mkdir_result.returncode == 0 else "fail",
+                "command": mkdir_command,
+                "exit_code": int(mkdir_result.returncode),
+                "stdout": mkdir_result.stdout,
+                "stderr": mkdir_result.stderr,
+            })
+            if mkdir_result.returncode != 0:
+                status = "fail"
+                exit_code = 1
+                errors.append({
+                    "step": "push-files",
+                    "message": f"mkdir failed: {mkdir_result.stderr or mkdir_result.stdout}",
+                    "raw": mkdir_result.stderr or mkdir_result.stdout,
+                })
+            else:
+                scp_argv = self._push_files_scp_argv(str(staging_dir), remote_dir)
+                scp_command = self._display_command(scp_argv)
+                scp_result = self.runner(scp_argv, timeout_sec)
+                steps.append({
+                    "name": "scp",
+                    "status": "pass" if scp_result.returncode == 0 else "fail",
+                    "command": scp_command,
+                    "exit_code": int(scp_result.returncode),
+                    "stdout": scp_result.stdout,
+                    "stderr": scp_result.stderr,
+                })
+                if scp_result.returncode != 0:
+                    status = "fail"
+                    exit_code = 1
+                    errors.append({
+                        "step": "push-files",
+                        "message": f"scp failed: {scp_result.stderr or scp_result.stdout}",
+                        "raw": scp_result.stderr or scp_result.stdout,
+                    })
+                else:
+                    diagnostics.append("REMOTE_DT_UPLOAD_DONE")
+                    if chmod_files:
+                        quoted_files = " ".join(shlex.quote(f) for f in chmod_files)
+                        chmod_cmd = f"cd {shlex.quote(remote_dir)} && chmod +x {quoted_files}"
+                        chmod_argv = self._ssh_argv(chmod_cmd)
+                        chmod_command = self._display_command(chmod_argv)
+                        chmod_result = self.runner(chmod_argv, timeout_sec)
+                        steps.append({
+                            "name": "chmod-shell-scripts",
+                            "status": "pass" if chmod_result.returncode == 0 else "fail",
+                            "command": chmod_command,
+                            "exit_code": int(chmod_result.returncode),
+                            "stdout": chmod_result.stdout,
+                            "stderr": chmod_result.stderr,
+                        })
+                        if chmod_result.returncode == 0:
+                            diagnostics.extend(f"REMOTE_DT_CHMOD_EXECUTABLE: {item}" for item in chmod_files)
+                        if chmod_result.returncode != 0:
+                            status = "fail"
+                            exit_code = 1
+                            errors.append({
+                                "step": "push-files",
+                                "message": f"chmod failed: {chmod_result.stderr or chmod_result.stdout}",
+                                "raw": chmod_result.stderr or chmod_result.stdout,
+                            })
+
+                    if verify_scripts and verify_files and status == "pass":
+                        verify_lines = [f"cd {shlex.quote(remote_dir)}"]
+                        for name in verify_files:
+                            qname = shlex.quote(name)
+                            verify_lines.append(
+                                f"if [ -f {qname} ]; then "
+                                f"if head -c 512 {qname} | grep -q $'\\r'; then "
+                                f'printf "REMOTE_DT_SCRIPT_CRLF:%s\\n" {qname}; exit 21; '
+                                f"fi; "
+                                f"bash -n {qname} || exit $?; "
+                                f"fi"
+                            )
+                        verify_cmd = "\n".join(verify_lines)
+                        verify_argv = self._ssh_argv(verify_cmd)
+                        verify_command = self._display_command(verify_argv)
+                        verify_result = self.runner(verify_argv, timeout_sec)
+                        verify_details["executed"] = True
+                        steps.append({
+                            "name": "verify-shell-scripts",
+                            "status": "pass" if verify_result.returncode == 0 else "fail",
+                            "command": verify_command,
+                            "exit_code": int(verify_result.returncode),
+                            "stdout": verify_result.stdout,
+                            "stderr": verify_result.stderr,
+                        })
+                        if verify_result.returncode != 0:
+                            status = "fail"
+                            exit_code = 1
+                            combined = verify_result.stdout + verify_result.stderr
+                            if "REMOTE_DT_SCRIPT_CRLF" in combined:
+                                msg = "REMOTE_DT_SCRIPT_CRLF: CRLF detected in remote shell script"
+                                verify_details["build_sh_has_crlf"] = "build.sh" in combined
+                                verify_details["build_sh_bash_n"] = False
+                            else:
+                                msg = f"verify failed (exit {verify_result.returncode})"
+                                verify_details["build_sh_has_crlf"] = False
+                                verify_details["build_sh_bash_n"] = False
+                            errors.append({
+                                "step": "push-files",
+                                "message": msg,
+                                "raw": verify_result.stderr or verify_result.stdout,
+                            })
+                        else:
+                            verify_details["build_sh_has_crlf"] = False if verify_details["build_sh_exists"] else None
+                            verify_details["build_sh_bash_n"] = True if verify_details["build_sh_exists"] else None
+                            if verify_details["build_sh_exists"]:
+                                diagnostics.append("REMOTE_DT_VERIFY_BUILD_SH_OK")
+
+        try:
+            shutil.rmtree(str(staging_dir))
+        except Exception as exc:
+            warnings.append({
+                "step": "push-files",
+                "message": f"failed to clean staging directory: {exc}",
+                "path": str(staging_dir).replace("\\", "/"),
+            })
+
+        details: dict[str, Any] = {
+            "enabled": True,
+            "local_dir": str(local_dir).replace("\\", "/"),
+            "remote_dir": remote_dir,
+            "dry_run": dry_run,
+            "timeout_sec": timeout_sec,
+            "normalize_lf_for_shell_scripts": normalize_lf,
+            "chmod_executable_for_shell_scripts": chmod_exec,
+            "verify_shell_scripts_after_upload": verify_scripts,
+            "file_count": file_count,
+            "dir_count": dir_count,
+            "total_bytes": total_bytes,
+            "excluded_count": excluded_count,
+            "shell_scripts_detected": len(shell_script_files),
+            "shell_scripts_normalized_lf": len(normalized_files),
+            "shell_scripts_chmod": len(chmod_files),
+            "normalized_files": normalized_files,
+            "shell_script_files": shell_script_files,
+            "chmod_files": chmod_files,
+            "verify": verify_details,
+            "diagnostics": diagnostics,
+            "mkdir_command": mkdir_command,
+            "scp_command": scp_command,
+            "chmod_command": chmod_command,
+            "verify_command": verify_command,
+        }
+        if not dry_run:
+            details["display_commands"] = [step["command"] for step in steps if "command" in step]
+
+        summary = f"remote DT push-files: {file_count} files, {total_bytes} bytes to {remote_dir}"
+        if dry_run:
+            summary += " (dry run)"
+        if status == "fail":
+            summary = f"remote DT push-files failed: {len(errors)} error(s)"
+
+        payload = self._base_payload(
+            action="push-files",
+            status=status,
+            exit_code=exit_code,
+            summary=summary,
+            steps=steps,
+            details=details,
+            errors=errors,
+            warnings=warnings,
+        )
+        self._write_outputs(payload)
+        return payload
+
+    def _push_files_scp_argv(self, staging_dir: str, remote_dir: str) -> list[str]:
+        ssh = self.remote_cfg.get("ssh", {}) if isinstance(self.remote_cfg.get("ssh", {}), dict) else {}
+        argv = self._command_prefix("scp_command", "scp")
+        argv.append("-r")
+        argv.extend(["-P", str(int(self.remote_cfg.get("port", 22)))])
+        argv.extend(["-o", f"ConnectTimeout={int(ssh.get('connect_timeout_sec', 10))}"])
+        if ssh.get("strict_host_key_checking", False) is False:
+            argv.extend(["-o", "StrictHostKeyChecking=no"])
+        identity = str(ssh.get("identity_file", "")).strip()
+        if identity:
+            argv.extend(["-i", identity])
+        source = staging_dir.replace("\\", "/")
+        if not source.endswith("/"):
+            source += "/"
+        source += "."
+        argv.append(source)
+        dest = remote_dir.rstrip("/") + "/"
+        argv.append(f"{self._remote_login()}:{shlex.quote(dest)}")
+        return argv
 
     def _run_remote_step(self, step: str) -> dict[str, Any]:
         remote_command = self._remote_step_script(step)
